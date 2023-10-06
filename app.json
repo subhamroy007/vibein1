@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "https",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -25,6 +26,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d3931ee9-4987-404b-8b55-b6537577f0ab"
+      }
+    },
+    "owner": "officialarjuntrivedi",
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
