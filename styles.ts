@@ -186,6 +186,12 @@ export const paddingStyle = StyleSheet.create({
   padding_bottom_24: {
     paddingBottom: SIZE_24,
   },
+  padding_bottom_18: {
+    paddingBottom: SIZE_18,
+  },
+  padding_bottom_12: {
+    paddingBottom: SIZE_12,
+  },
 });
 
 export const marginStyle = StyleSheet.create({

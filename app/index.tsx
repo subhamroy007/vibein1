@@ -1,10 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { borderStyle, layoutStyle, marginStyle, paddingStyle } from "../styles";
-import AppText from "../components/AppText";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { borderStyle, layoutStyle, paddingStyle } from "../styles";
 import { Tabs } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import {
@@ -20,17 +16,26 @@ import { useAppSelector } from "../hooks/storeHooks";
 import { selectClientAccountParams } from "../store/client/client.selector";
 import Animated from "react-native-reanimated";
 import { Image } from "expo-image";
+import useHomeFeed from "../hooks/homeFeedHook";
+import ClassicPostList from "../components/ClassisPostList";
+import { useEffect } from "react";
 
 export default function Home() {
   const clientAccount = useAppSelector(selectClientAccountParams);
+
+  const { fetch, homeFeedParams } = useHomeFeed();
 
   if (!clientAccount) {
     return null;
   }
   const insets = useSafeAreaInsets();
 
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
   return (
-    <SafeAreaView
+    <View
       style={[
         layoutStyle.flex_1,
         layoutStyle.align_item_center,
@@ -67,8 +72,8 @@ export default function Home() {
           ),
         }}
       />
-      <AppText>Home Feed</AppText>
-    </SafeAreaView>
+      <ClassicPostList data={homeFeedParams.data.feed} />
+    </View>
   );
 }
 

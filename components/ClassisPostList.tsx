@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import ClassicPost from "./ClassicPost";
 import Animated, { Layout } from "react-native-reanimated";
 import { FeedItemParams } from "../types";
+import { paddingStyle } from "../styles";
 
 export type ClassicPostListProps = {
   data: FeedItemParams[];
@@ -30,8 +31,8 @@ export default function ClassicPostList({ data }: ClassicPostListProps) {
       keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
       overScrollMode="never"
-      layout={Layout.duration(300)}
       itemLayoutAnimation={Layout.duration(300)}
+      contentContainerStyle={paddingStyle.padding_vertical_12}
     />
   );
 }

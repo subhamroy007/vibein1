@@ -28,7 +28,7 @@ export default function RoundIcon({
   const containerSize = size ? size : SIZE_48;
   const iconSize = PixelRatio.roundToNearestPixel((containerSize * 2) / 3);
   const outlineWidth = Math.max(
-    StyleSheet.hairlineWidth,
+    4 * StyleSheet.hairlineWidth,
     PixelRatio.roundToNearestPixel(containerSize / 48)
   );
 

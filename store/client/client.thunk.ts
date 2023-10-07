@@ -8,7 +8,7 @@ import { createAppAsyncThunk } from "../../utility";
 export const getHomeFeedData = createAppAsyncThunk(
   "client/homefeed",
   async () => {
-    const posts = generatePostObjects(2);
+    const posts = generatePostObjects(10);
 
     const result: HomeFeedResponseParams = { posts };
 

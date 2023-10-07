@@ -12,7 +12,15 @@ import appDataStore from "../store";
 import { addManyAccountToStore } from "../store/account/account.slice";
 import { generateAccountObject } from "../mocks/accounts";
 import Toast from "../components/Toast";
-import { SIZE_20, SIZE_24, SIZE_27, SIZE_30, SIZE_48 } from "../constants";
+import {
+  HEIGHT_SCALE_4,
+  SIZE_20,
+  SIZE_24,
+  SIZE_27,
+  SIZE_30,
+  SIZE_42,
+  SIZE_48,
+} from "../constants";
 import {
   backgroundStyle,
   borderStyle,
@@ -83,7 +91,7 @@ export default function AppLayout() {
                   return (
                     <View
                       style={[
-                        { height: SIZE_48 },
+                        { height: HEIGHT_SCALE_4 },
                         layoutStyle.align_item_center,
                         layoutStyle.justify_content_space_around,
                         layoutStyle.flex_direction_row,

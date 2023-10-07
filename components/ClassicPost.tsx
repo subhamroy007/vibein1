@@ -22,6 +22,8 @@ import {
   SIZE_24,
   SIZE_30,
   COLOR_9,
+  SIZE_20,
+  SIZE_36,
 } from "../constants";
 import SwipeUpPortal from "./SwipeUpPortal";
 import { PostTag } from "./PostTag";
@@ -180,11 +182,11 @@ export default function ClassicPost({ id }: PostProps) {
           <Pressable
             onPress={toggleTagPortalOpen}
             style={[styles.tag_icon, layoutStyle.position_absolute]}
-            hitSlop={SIZE_24}
+            hitSlop={SIZE_36}
           >
             <CircleSolidIcon
               iconName="tag-solid"
-              size={SIZE_24}
+              size={SIZE_20}
               color={COLOR_9}
             />
           </Pressable>
@@ -221,7 +223,7 @@ export default function ClassicPost({ id }: PostProps) {
       <View
         style={[
           paddingStyle.padding_horizontal_12,
-          paddingStyle.padding_bottom_24,
+          paddingStyle.padding_bottom_12,
         ]}
       >
         {(engagementSummary.noOfLikes > 0 || engagementSummary.noOfViews > 0) &&

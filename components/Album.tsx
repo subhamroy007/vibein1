@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Pressable,
   ScrollView,
   StyleSheet,
   View,
@@ -12,22 +11,20 @@ import {
   BaseButton,
   Gesture,
   GestureDetector,
-  TouchableWithoutFeedback,
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import {
   COLOR_2,
-  COLOR_4,
   COLOR_8,
   PHOTO_MAX_BLUR_RADIUS,
   SIZE_24,
   SIZE_4,
   SIZE_18,
   SIZE_90,
+  COLOR_7,
 } from "../constants";
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
 import { Image } from "expo-image";
-import Icon from "./Icon";
 import { FetchState, PostPhotoParams } from "../types";
 import RoundIcon from "./RoundIcon";
 
@@ -181,7 +178,7 @@ export function Albumphoto({
             style={[
               layoutStyle.position_absolute,
               styles.loadingIndicator,
-              borderStyle.border_color_2,
+              { borderColor: COLOR_7 },
             ]}
           />
         )}
@@ -212,7 +209,9 @@ export default function Album({ photos, onDoubleTap }: AlbumProps) {
     ({
       nativeEvent: { contentOffset },
     }: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const newPhotoIndex = Math.floor(contentOffset.x / screenWidth);
+      const newPhotoIndex = Math.floor(
+        Math.floor(contentOffset.x) / Math.floor(screenWidth)
+      );
       setphotoIndex(newPhotoIndex);
     },
     [setphotoIndex]
@@ -283,6 +282,6 @@ const styles = StyleSheet.create({
     width: SIZE_90,
     height: SIZE_90,
     borderRadius: SIZE_90 * 0.5,
-    borderWidth: 5 * StyleSheet.hairlineWidth,
+    borderWidth: 4 * StyleSheet.hairlineWidth,
   },
 });

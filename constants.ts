@@ -58,7 +58,8 @@ export const SIZE_90 = sizeRelativeToWidth(25);
 
 export const HEIGHT_SCALE_1 = sizeRelativeToHeight(60);
 export const HEIGHT_SCALE_2 = sizeRelativeToHeight(50);
-export const HEIGHT_SCALE_3 = sizeRelativeToHeight(12.5);
+export const HEIGHT_SCALE_3 = sizeRelativeToHeight(11);
+export const HEIGHT_SCALE_4 = sizeRelativeToHeight(7.03);
 
 export const COLOR_1 = "#FFFFFF";
 export const COLOR_2 = "#AAAAAA";
