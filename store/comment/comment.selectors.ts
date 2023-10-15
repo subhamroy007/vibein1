@@ -39,15 +39,16 @@ export const selectCommentParams = createSelector(
 
 export const selectReplSectionParams = createSelector(
   [(state: RootState) => state, (state: RootState, id: string) => id],
-  (state, commentId): ReplySectionSelectorParams | undefined => {
+  (state, commentId) => {
     const comment = selectCommentById(state.comment, commentId);
 
     if (!comment) {
       return undefined;
     }
 
-    const result: ReplySectionSelectorParams = {
-      ...comment.replySection,
+    const result = {
+      replies: comment.replies,
+      replySectionThunkInfo: comment.replySectionThunkInfo,
       noOfReplies: comment.noOfReplies,
     };
 

@@ -1,11 +1,13 @@
 import { StyleSheet } from "react-native";
 import {
   COLOR_1,
+  COLOR_13,
   COLOR_2,
   COLOR_3,
   COLOR_4,
   COLOR_5,
   COLOR_6,
+  COLOR_7,
   COLOR_9,
   SIZE_1,
   SIZE_12,
@@ -21,6 +23,7 @@ import {
   SIZE_6,
   SIZE_8,
   SIZE_9,
+  SIZE_90,
 } from "./constants";
 
 export const layoutStyle = StyleSheet.create({
@@ -69,6 +72,9 @@ export const layoutStyle = StyleSheet.create({
   align_self_start: {
     alignSelf: "flex-start",
   },
+  align_self_stretch: {
+    alignSelf: "stretch",
+  },
   position_absolute: {
     position: "absolute",
   },
@@ -86,6 +92,9 @@ export const borderStyle = StyleSheet.create({
   },
   border_width_1: {
     borderWidth: SIZE_1,
+  },
+  border_width_hairline: {
+    borderWidth: StyleSheet.hairlineWidth,
   },
   border_top_width_hairline: {
     borderTopWidth: StyleSheet.hairlineWidth,
@@ -138,8 +147,14 @@ export const backgroundStyle = StyleSheet.create({
   background_color_6: {
     backgroundColor: COLOR_6,
   },
+  background_color_7: {
+    backgroundColor: COLOR_7,
+  },
   background_color_9: {
     backgroundColor: COLOR_9,
+  },
+  background_color_13: {
+    backgroundColor: COLOR_13,
   },
 });
 
@@ -183,6 +198,9 @@ export const paddingStyle = StyleSheet.create({
   padding_vertical_3: {
     paddingVertical: SIZE_3,
   },
+  padding_bottom_90: {
+    paddingBottom: SIZE_90,
+  },
   padding_bottom_24: {
     paddingBottom: SIZE_24,
   },
@@ -191,6 +209,21 @@ export const paddingStyle = StyleSheet.create({
   },
   padding_bottom_12: {
     paddingBottom: SIZE_12,
+  },
+  padding_bottom_9: {
+    paddingBottom: SIZE_9,
+  },
+  padding_bottom_6: {
+    paddingBottom: SIZE_6,
+  },
+  padding_top_12: {
+    paddingTop: SIZE_12,
+  },
+  padding_top_9: {
+    paddingTop: SIZE_9,
+  },
+  padding_top_6: {
+    paddingTop: SIZE_6,
   },
 });
 

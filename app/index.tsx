@@ -4,28 +4,33 @@ import { borderStyle, layoutStyle, paddingStyle } from "../styles";
 import { Tabs } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import {
+  COLOR_2,
   HEIGHT_SCALE_3,
   SIZE_24,
   SIZE_27,
   SIZE_30,
   SIZE_36,
+  SIZE_60,
+  SIZE_70,
 } from "../constants";
-import Icon from "../components/Icon";
-import Avatar from "../components/Avatar";
 import { useAppSelector } from "../hooks/storeHooks";
 import { selectClientAccountParams } from "../store/client/client.selector";
-import Animated from "react-native-reanimated";
-import { Image } from "expo-image";
 import useHomeFeed from "../hooks/homeFeedHook";
-import ClassicPostList from "../components/ClassisPostList";
 import { useEffect } from "react";
+import Animated from "react-native-reanimated";
+import Avatar from "../components/Avatar";
+import { Image } from "expo-image";
+import Icon from "../components/Icon";
+import ClassicPostList from "../components/ClassisPostList";
+import AnimatedLaodingIndicator from "../components/AnimatedLaodingIndicator";
+import CircleIcon from "../components/CircleIcon";
 
 export default function Home() {
   const clientAccount = useAppSelector(selectClientAccountParams);
 
   const { fetch, homeFeedParams } = useHomeFeed();
 
-  if (!clientAccount) {
+  if (!clientAccount || !homeFeedParams) {
     return null;
   }
   const insets = useSafeAreaInsets();
@@ -39,7 +44,7 @@ export default function Home() {
       style={[
         layoutStyle.flex_1,
         layoutStyle.align_item_center,
-        layoutStyle.justify_content_space_around,
+        layoutStyle.justify_content_center,
       ]}
     >
       <StatusBar translucent={true} hidden={false} />
@@ -51,8 +56,6 @@ export default function Home() {
                 layoutStyle.align_item_center,
                 layoutStyle.justify_content_space_between,
                 layoutStyle.flex_direction_row,
-                borderStyle.border_bottom_width_hairline,
-                borderStyle.border_bottom_color_2,
                 paddingStyle.padding_horizontal_12,
                 { paddingTop: insets.top },
                 styles.header,
@@ -72,7 +75,12 @@ export default function Home() {
           ),
         }}
       />
-      <ClassicPostList data={homeFeedParams.data.feed} />
+
+      <ClassicPostList
+        data={homeFeedParams.posts}
+        state={homeFeedParams.thunkInfo.state}
+        onRetry={fetch}
+      />
     </View>
   );
 }
@@ -80,6 +88,6 @@ export default function Home() {
 const styles = StyleSheet.create({
   logo: { width: SIZE_36, height: SIZE_36 },
   header: {
-    height: HEIGHT_SCALE_3,
+    height: SIZE_70,
   },
 });

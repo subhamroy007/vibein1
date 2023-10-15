@@ -3,31 +3,21 @@ import {
   CommentTemplateParams,
   PostTemplateParams,
   ReplyTemplateParams,
+  ThunkError,
 } from "./utility.types";
 
 /**
  * represents different states of thunk processing
  */
-export type ThunkState = "idle" | "loading" | "failed" | "success";
+export type ThunkState = "loading" | "failed" | "success" | "idle";
 
-/**
- * represents the error object returned by the thunk in case of the promise is rejected
- */
-export type ThunkError = {
-  errorCode: number;
-  message: string;
-};
-
-/**
- * represents the type of a general thunk data structure
- */
-export type ThunkData<T = undefined> = {
+export type ThunkInfo = {
   state: ThunkState;
-  data: T;
+  lastRequestError: ThunkError | null;
   meta: {
-    requestTimestamp: string | null;
-  };
-  lastError: ThunkError | null;
+    lastRequestStatusCode: number;
+    lastRequestTimestamp: string;
+  } | null;
 };
 
 /**
@@ -38,30 +28,30 @@ export type ReplyAdapterParams = ReplyTemplateParams<string>;
 /**
  * represents the reply section of a comment
  */
-export type ReplySectionStoreParams = ThunkData<{
+export type ReplySectionStoreParams = {
   replies: string[];
-}>;
+  replySectionThunkInfo: ThunkInfo | null;
+};
 
 /**
  * represents a comment of a post
  */
-export type CommentAdapterParams = CommentTemplateParams<string> & {
-  replySection: ReplySectionStoreParams;
-};
+export type CommentAdapterParams = CommentTemplateParams<string> &
+  ReplySectionStoreParams;
 
 /**
  * represents the comment section of a post
  */
-export type CommentSectionStoreParams = ThunkData<{
+export type CommentSectionStoreParams = {
   comments: string[];
-}>;
+  commentSectionThunkInfo: ThunkInfo | null;
+};
 
 /**
  * represents a post and all the associated parameters
  */
-export type PostAdapterParams = {
-  commentSection?: CommentSectionStoreParams;
-} & PostTemplateParams<string>;
+export type PostAdapterParams = PostTemplateParams<string> &
+  CommentSectionStoreParams;
 
 /**
  * represents an account and all the associated parameters
@@ -74,7 +64,7 @@ export type AccountAdapterParams = AccountResponseParams;
 export type ChatItemIdentifierParams =
   | {
       type: "one-to-one";
-      accountId: string;
+      username: string;
     }
   | {
       type: "group";
@@ -84,14 +74,10 @@ export type ChatItemIdentifierParams =
 /**
  * represents the data of the inbox page
  */
-export type InboxStoreDataParams = {
+export type InboxStoreParams = {
   chats: ChatItemIdentifierParams[];
+  thunkInfo: ThunkInfo | null;
 };
-
-/**
- * represents the inbox page store params
- */
-export type InboxStoreParams = ThunkData<InboxStoreDataParams>;
 
 /**
  * represents the union of different kinds of post feed item identifiers
@@ -104,20 +90,19 @@ export type PostFeedItemIdentfierParams = {
 /**
  * represents the data params of the home feed
  */
-export type HomeFeedStoreDataParams = {
-  feed: PostFeedItemIdentfierParams[];
+export type HomeFeedStoreParams = {
+  memoryAuthors: string[];
+  posts: PostFeedItemIdentfierParams[];
+  thunkInfo: ThunkInfo;
 };
-
-/**
- * represents the store params of the home feed
- */
-export type HomeFeedStoreParams = ThunkData<HomeFeedStoreDataParams>;
 
 /**
  * represents the logged in account informations
  */
 export type LoggedInAccountStoreParams = {
-  id: string;
+  _id: string;
+  username: string;
+  profilePictureUrl: string;
   noOfUnseenNotifications: number;
 };
 
@@ -125,9 +110,9 @@ export type LoggedInAccountStoreParams = {
  * represents the entire client store params
  */
 export type ClientStoreParams = {
-  loggedInAccount: LoggedInAccountStoreParams;
-  theme: "light" | "dark" | "system";
-  toasterMsg: { text: string; timestamp: number } | null;
-  homeFeed: HomeFeedStoreParams;
-  inbox: InboxStoreParams;
+  loggedInAccount?: LoggedInAccountStoreParams;
+  theme?: "light" | "dark" | "system";
+  toasterMsg?: { text: string; timestamp: number };
+  homeFeed?: HomeFeedStoreParams;
+  inbox?: InboxStoreParams;
 };

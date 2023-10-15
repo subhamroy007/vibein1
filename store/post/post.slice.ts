@@ -18,10 +18,12 @@ function tranformToPostAdapterParams(
 ): PostAdapterParams {
   return {
     ...post,
-    createdBy: post.createdBy._id,
+    createdBy: post.createdBy.username,
     taggedAccounts: post.taggedAccounts
-      ? post.taggedAccounts.map((account) => account._id)
+      ? post.taggedAccounts.map((account) => account.username)
       : undefined,
+    comments: [],
+    commentSectionThunkInfo: null,
   };
 }
 
@@ -74,22 +76,6 @@ const postSlice = createSlice({
         targetPost.isSaved = !targetPost.isSaved; //toggle the flag state
       }
     },
-
-    initCommentSection: (state, action: PayloadAction<string>) => {
-      const targetPostId = action.payload; //fetch the target post id
-
-      const targetPost = state.entities[targetPostId]; //retrieve the target post adapter object from the target post id
-
-      //check if the post exists
-      if (targetPost && !targetPost.commentSection) {
-        targetPost.commentSection = {
-          data: { comments: [] },
-          lastError: null,
-          meta: { requestTimestamp: null },
-          state: "idle",
-        };
-      }
-    },
   },
   extraReducers: (builder) => {
     builder.addCase(
@@ -103,26 +89,28 @@ const postSlice = createSlice({
     );
     builder.addCase(fetchComments.pending, (state, action) => {
       const targetPostId = action.meta.arg; //fetch the target post id;
-
-      const targetPost = state.entities[targetPostId]; //fetch the target post from the post id;
-
-      //check if the target post exists
-      if (targetPost && targetPost.commentSection) {
-        targetPost.commentSection.state = "loading";
+      const targetPost = state.entities[targetPostId]; //fetch the target post from the store;
+      if (targetPost) {
+        targetPost.commentSectionThunkInfo = {
+          lastRequestError: null,
+          meta: null,
+          state: "loading",
+        };
       }
     });
 
     builder.addCase(fetchComments.rejected, (state, action) => {
       const targetPostId = action.meta.arg; //fetch the target post id;
-
-      const targetPost = state.entities[targetPostId]; //fetch the target post from the post id;
-
-      //check if the target post exists
-      if (targetPost && targetPost.commentSection) {
-        targetPost.commentSection.state = "failed";
-        targetPost.commentSection.lastError = action.payload
-          ? action.payload
-          : null;
+      const targetPost = state.entities[targetPostId]; //fetch the target post from the store;
+      if (targetPost) {
+        targetPost.commentSectionThunkInfo = {
+          lastRequestError: action.payload!,
+          meta: {
+            lastRequestStatusCode: action.meta.statusCode!,
+            lastRequestTimestamp: action.meta.requestTimestamp!,
+          },
+          state: "failed",
+        };
       }
     });
 
@@ -132,14 +120,19 @@ const postSlice = createSlice({
       const targetPost = state.entities[targetPostId]; //fetch the target post from the post id;
 
       //check if the target post exists
-      if (targetPost && targetPost.commentSection) {
-        targetPost.commentSection.state = "success";
-        targetPost.commentSection.meta.requestTimestamp =
-          new Date().toUTCString();
-        targetPost.commentSection.data.comments = [
+      if (targetPost) {
+        targetPost.comments = [
           ...action.payload.comments.map((comment) => comment._id),
-          ...targetPost.commentSection.data.comments,
+          ...targetPost.comments,
         ];
+        targetPost.commentSectionThunkInfo = {
+          lastRequestError: null,
+          meta: {
+            lastRequestStatusCode: action.meta.statusCode!,
+            lastRequestTimestamp: action.meta.requestTimestamp!,
+          },
+          state: "success",
+        };
       }
     });
   },
@@ -150,10 +143,5 @@ const postReducer = postSlice.reducer;
 export default postReducer;
 
 export const {
-  actions: {
-    addManyPostToStore,
-    togglePostLikeState,
-    togglePostSaveState,
-    initCommentSection,
-  },
+  actions: { addManyPostToStore, togglePostLikeState, togglePostSaveState },
 } = postSlice;

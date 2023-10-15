@@ -1,11 +1,12 @@
-import { FlatList, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import { layoutStyle } from "../styles";
-import useCommentSection from "../hooks/postCommentSectionHook";
+import useCommentSection from "../hooks/post.hooks";
 import CommentListItem from "./CommentListItem";
+import CommentBox from "./CommentBox";
 
 export default function CommentSection({ id }: { id: string }) {
-  const { commentSectionParams, fetch } = useCommentSection(id);
+  const { storeParams, fetch } = useCommentSection(id);
 
   useEffect(() => {
     fetch();
@@ -16,8 +17,8 @@ export default function CommentSection({ id }: { id: string }) {
     commentId: string;
   } | null>(null);
 
-  const onReplyCallback = useCallback(
-    (replyTo: string, commentId: string) =>
+  const replyCallback = useCallback(
+    (commentId: string, replyTo: string) =>
       setReplyParams({ commentId, replyTo }),
     [setReplyParams]
   );
@@ -27,24 +28,47 @@ export default function CommentSection({ id }: { id: string }) {
     [setReplyParams]
   );
 
-  const sendCallback = useCallback(() => {}, []);
+  const [comment, setComment] = useState("");
 
-  if (!commentSectionParams) {
+  const sendCallback = useCallback(() => {
+    setReplyParams(null);
+    setComment("");
+  }, [comment]);
+
+  if (!storeParams) {
     return null;
   }
+
+  const { isClientAuthorOfPost, author, commentSectionThunkInfo, comments } =
+    storeParams;
 
   return (
     <View style={[layoutStyle.flex_1]}>
       <FlatList
-        data={commentSectionParams.data.comments}
+        data={comments}
         renderItem={({ item }) => {
-          return <CommentListItem id={item} onReply={onReplyCallback} />;
+          return <CommentListItem id={item} onReply={replyCallback} />;
         }}
         keyboardShouldPersistTaps="always"
         overScrollMode="never"
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item}
+        contentContainerStyle={styles.content_container}
+      />
+      <CommentBox
+        onSend={sendCallback}
+        comment={comment}
+        setComment={setComment}
+        replyTo={replyParams?.replyTo}
+        resetReplyTo={replyResetCallback}
+        postAuthor={author}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  content_container: {
+    paddingBottom: 120,
+  },
+});

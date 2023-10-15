@@ -1,5 +1,8 @@
 import { AccountResponseParams } from "./response.types";
-import { ReplySectionStoreParams } from "./store.types";
+import {
+  CommentSectionStoreParams,
+  ReplySectionStoreParams,
+} from "./store.types";
 import { CommentTemplateParams, ReplyTemplateParams } from "./utility.types";
 
 /**
@@ -20,3 +23,9 @@ export type ReplySelectorParams = ReplyTemplateParams<AccountResponseParams> & {
 export type ReplySectionSelectorParams = {
   noOfReplies: number;
 } & ReplySectionStoreParams;
+
+export type CommentSectionSelectorParams = {
+  isClientAuthorOfPost: boolean;
+  postAuthor: string;
+  commentSection: CommentSectionStoreParams;
+};

@@ -2,7 +2,7 @@ import { createEntityAdapter } from "@reduxjs/toolkit";
 import { AccountAdapterParams } from "../../types/store.types";
 
 const accountAdapter = createEntityAdapter<AccountAdapterParams>({
-  selectId: (model) => model._id,
+  selectId: (model) => model.username,
   sortComparer: (account1, account2) =>
     account1._id.localeCompare(account2._id),
 });

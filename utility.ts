@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AsyncThunkConfig } from "./types";
+import { AsyncThunkConfig } from "./types/utility.types";
 
 export function formatTimeDifference(utcDateString: string): string {
   const utcDate = new Date(utcDateString);
@@ -51,3 +51,9 @@ export function formatNumber(n: number): string {
 
 export const createAppAsyncThunk =
   createAsyncThunk.withTypes<AsyncThunkConfig>();
+
+export function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

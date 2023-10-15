@@ -24,6 +24,7 @@ import {
   COLOR_9,
   SIZE_20,
   SIZE_36,
+  SIZE_27,
 } from "../constants";
 import SwipeUpPortal from "./SwipeUpPortal";
 import { PostTag } from "./PostTag";
@@ -197,26 +198,28 @@ export default function ClassicPost({ id }: PostProps) {
           layoutStyle.align_item_center,
           layoutStyle.justify_content_space_around,
           layoutStyle.flex_direction_row,
-          paddingStyle.padding_vertical_12,
+          paddingStyle.padding_top_9,
+          paddingStyle.padding_bottom_6,
+          paddingStyle.padding_horizontal_12,
         ]}
       >
         <AppPressable onPress={togglePostLikeStateCallback} hitSlop={SIZE_24}>
           <Icon
             name={isLiked ? "heart-solid" : "heart-outline"}
-            size={SIZE_24}
+            size={SIZE_27}
             color={isLiked ? COLOR_6 : undefined}
           />
         </AppPressable>
         <Pressable hitSlop={SIZE_24}>
-          <Icon name="comment" size={SIZE_24} />
+          <Icon name="comment" size={SIZE_27} />
         </Pressable>
         <Pressable hitSlop={SIZE_24}>
-          <Icon name="send-outline" size={SIZE_24} />
+          <Icon name="send-outline" size={SIZE_27} />
         </Pressable>
         <AppPressable onPress={togglePostSaveStateCallback} hitSlop={SIZE_24}>
           <Icon
             name={isSaved ? "bookmark-solid" : "bookmark-outline"}
-            size={SIZE_24}
+            size={SIZE_27}
           />
         </AppPressable>
       </View>

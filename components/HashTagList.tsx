@@ -10,7 +10,7 @@ import AppText from "./AppText";
 import { formatNumber } from "../utility";
 import { COLOR_7, SIZE_11 } from "../constants";
 import RoundIcon from "./RoundIcon";
-import { HashtagResponseParams } from "../types";
+import { HashtagResponseParams } from "../types/component.types";
 
 export type HashTagListProps = {
   hashtags: HashtagResponseParams[];

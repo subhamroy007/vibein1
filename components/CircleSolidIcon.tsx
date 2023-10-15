@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import Icon from "./Icon";
-import { IconName } from "../types";
+import { IconName } from "../types/component.types";
 import { COLOR_1, COLOR_4, COLOR_5, SIZE_36 } from "../constants";
 import { layoutStyle } from "../styles";
 

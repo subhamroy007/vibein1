@@ -1,8 +1,7 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { selectPostCommentSection } from "../store/post/post.selector";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
 import { RootState } from "../store";
-import { initCommentSection } from "../store/post/post.slice";
 import { fetchComments } from "../store/post/post.thunk";
 
 export default function useCommentSection(postId: string) {
@@ -13,18 +12,14 @@ export default function useCommentSection(postId: string) {
     [postId]
   );
 
-  const commentSectionParams = useAppSelector(commentSectionSelectorCallback);
-
-  useEffect(() => {
-    dispatch(initCommentSection(postId));
-  }, [postId]);
+  const storeParams = useAppSelector(commentSectionSelectorCallback);
 
   const fetch = useCallback(() => {
     dispatch(fetchComments(postId));
   }, [postId]);
 
   return {
-    commentSectionParams,
+    storeParams,
     fetch,
   };
 }

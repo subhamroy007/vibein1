@@ -1,79 +1,68 @@
 import {
   NativeSyntheticEvent,
   Pressable,
-  TextInput,
+  StyleSheet,
   TextInputSelectionChangeEventData,
   View,
 } from "react-native";
 import {
   backgroundStyle,
-  borderStyle,
   layoutStyle,
   marginStyle,
   paddingStyle,
 } from "../styles";
-import { SIZE_18, SIZE_24, SIZE_54 } from "../constants";
+import {
+  SIZE_12,
+  SIZE_18,
+  SIZE_24,
+  SIZE_36,
+  SIZE_42,
+  SIZE_54,
+} from "../constants";
 import Avatar from "./Avatar";
 import { selectClientAccountParams } from "../store/client/client.selector";
 import { useAppSelector } from "../hooks/storeHooks";
-import Icon from "./Icon";
-import { useKeyboard } from "@react-native-community/hooks";
-import { useCallback, useEffect, useRef, useState } from "react";
-import AppText from "./AppText";
-import Animated from "react-native-reanimated";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import ReactionBox from "./ReactionBox";
+import AppTextInput from "./AppTextInput";
+import CircleSolidIcon from "./CircleSolidIcon";
+import Animated, {
+  SlideInDown,
+  SlideInLeft,
+  SlideOutDown,
+  SlideOutLeft,
+} from "react-native-reanimated";
+import AppText from "./AppText";
+import Icon from "./Icon";
+import { useAccountAdapterParams } from "../hooks/account.hooks";
 
 export type CommentBoxProps = {
+  onSend: () => void;
+  comment: string;
+  setComment: Dispatch<SetStateAction<string>>;
   replyTo?: string;
-  resetReplyState: () => void;
-  onSend: (text: string) => void;
+  resetReplyTo?: () => void;
+  postAuthor: string;
 };
 
 export default function CommentBox({
-  replyTo,
   onSend,
-  resetReplyState,
+  comment,
+  setComment,
+  replyTo,
+  resetReplyTo,
+  postAuthor,
 }: CommentBoxProps) {
-  const [inputText, setInputText] = useState(""); //state used as the controlled input of the comment box
-
   const [cursorPosition, setCursorPosition] = useState<{
     start: number;
     end: number;
   }>({ end: 0, start: 0 }); //state used to track the cursor position of the input
 
-  const processedText = inputText.trim(); //trim the text for frther calculation (i.e whether or not to hide the send icon)
+  const processedText = comment.trim(); //trim the text for frther calculation (i.e whether or not to hide the send icon)
 
   const clientAccountParams = useAppSelector(selectClientAccountParams);
 
-  const textInputRef = useRef<TextInput>(null);
-
-  const { keyboardShown } = useKeyboard();
-
   const [searchToken, setSearchToken] = useState<string | null>(null);
-
-  /**
-   * hook that is invoked when the keyboard is not visible anymore
-   * it resets the search token if there was any and also blurs the text input
-   */
-  useEffect(() => {
-    if (!keyboardShown) {
-      setSearchToken(null);
-      textInputRef.current?.blur();
-    }
-  }, [keyboardShown, setSearchToken]);
-
-  /**
-   * hook that is invoked when the client is replying to someone
-   * it resets the input text with the username of the account the client is replying to
-   */
-  useEffect(() => {
-    if (replyTo) {
-      setInputText("@" + replyTo + " ");
-      textInputRef.current?.focus();
-    } else {
-      setInputText("");
-    }
-  }, [replyTo, setInputText]);
 
   /**
    * callback that is invoked every time the position of the cursor changes
@@ -89,20 +78,20 @@ export default function CommentBox({
       //if the start and end of the selection is same then set it to the cursor position state
       if (selection.start === selection.end) {
         setCursorPosition(selection);
-        const slicedText = inputText.substring(0, selection.start); //slice the text upto the current position of the cursor
-        const tokens = slicedText.match(
-          /(#[A-Za-z0-9]+|@[A-Za-z_\.][\w\.]{2,})/g
-        ); //collect the tokens based on the regular expression
-        const lastToken = tokens ? tokens[tokens.length - 1] : null; //get the last token
-        //if the sliced text ends with the last token then set that as the search token state or set it back to null
-        if (lastToken && slicedText.endsWith(lastToken)) {
-          setSearchToken(lastToken);
-        } else {
-          setSearchToken(null);
-        }
+        // const slicedText = inputText.substring(0, selection.start); //slice the text upto the current position of the cursor
+        // const tokens = slicedText.match(
+        //   /(#[A-Za-z0-9]+|@[A-Za-z_\.][\w\.]{2,})/g
+        // ); //collect the tokens based on the regular expression
+        // const lastToken = tokens ? tokens[tokens.length - 1] : null; //get the last token
+        // //if the sliced text ends with the last token then set that as the search token state or set it back to null
+        // if (lastToken && slicedText.endsWith(lastToken)) {
+        //   setSearchToken(lastToken);
+        // } else {
+        //   setSearchToken(null);
+        // }
       }
     },
-    [inputText, setSearchToken, setCursorPosition]
+    []
   );
 
   /**
@@ -111,12 +100,10 @@ export default function CommentBox({
    * the search token if there was any
    * finally it blurs the text input
    */
-  const sendCallback = useCallback(() => {
-    onSend(processedText);
-    setInputText("");
-    setSearchToken(null);
-    textInputRef.current?.blur();
-  }, [onSend, setInputText, setSearchToken]);
+  // const sendCallback = useCallback(() => {
+  //   onSend();
+  //   setComment("");
+  // }, [onSend]);
 
   /**
    * callback function that is invoked when an emoji is pressed from the reaction box
@@ -124,72 +111,97 @@ export default function CommentBox({
    */
   const emojiSelectCallback = useCallback(
     (emoji: string) => {
-      setInputText((prevText) => {
+      setComment((prevText) => {
         const prefixText = prevText.substring(0, cursorPosition.start);
         const suffixText = prevText.substring(cursorPosition.end);
         return prefixText + emoji + suffixText;
       });
     },
-    [cursorPosition, setInputText]
+    [cursorPosition]
   );
 
+  if (!clientAccountParams) {
+    return null;
+  }
+
+  const replyToAccountParams = useAccountAdapterParams(replyTo);
+
   return (
-    <View style={{ position: "absolute", width: "100%", bottom: 0 }}>
-      {replyTo && (
+    <View style={styles.root_container}>
+      {replyToAccountParams && (
         <Animated.View
-          style={[
-            layoutStyle.align_item_center,
-            layoutStyle.flex_direction_row,
-            borderStyle.border_color_2,
-            borderStyle.border_top_width_hairline,
-            layoutStyle.justify_content_space_between,
-            paddingStyle.padding_vertical_12,
-            paddingStyle.padding_horizontal_12,
-          ]}
+          style={styles.reply_box}
+          entering={SlideInLeft.duration(200)}
+          exiting={SlideOutLeft.duration(200)}
         >
-          <AppText color="grey" weight="regular">
-            Replying to @{replyTo}
+          <Avatar url={replyToAccountParams.profilePictureUrl} size={SIZE_24} />
+          <AppText
+            color="grey"
+            weight="regular"
+            size={SIZE_12}
+            style={styles.reply_box_text}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            Replying to @{replyToAccountParams.username}
           </AppText>
-          <Pressable onPress={resetReplyState} hitSlop={SIZE_24}>
+          <Pressable hitSlop={SIZE_36} onPress={resetReplyTo}>
             <Icon name="close" color="grey" size={SIZE_18} />
           </Pressable>
         </Animated.View>
       )}
       <ReactionBox onSelect={emojiSelectCallback} />
-      <View
-        style={[
-          layoutStyle.flex_direction_row,
-          layoutStyle.align_item_center,
-          paddingStyle.padding_horizontal_12,
-          backgroundStyle.background_color_1,
-          {
-            height: SIZE_54,
-          },
-        ]}
-      >
+      <View style={[styles.comment_box]}>
         <Avatar url={clientAccountParams.profilePictureUrl} />
-
-        <TextInput
-          style={[layoutStyle.flex_1, marginStyle.margin_horizontal_9]}
-          placeholder="write a comment..."
-          value={inputText}
-          ref={textInputRef}
+        <AppTextInput
+          style={styles.text_input}
+          placeholder={`write a comment to ${postAuthor}`}
+          value={comment}
           textAlignVertical="center"
           multiline
-          numberOfLines={1}
-          onChangeText={setInputText}
+          onChangeText={setComment}
           onSelectionChange={selectionChangeCallback}
         />
         {processedText != "" && (
-          <Pressable
-            style={[layoutStyle.align_self_center]}
-            hitSlop={SIZE_24}
-            onPress={sendCallback}
-          >
-            <Icon name="send-outline" size={SIZE_24} />
+          <Pressable hitSlop={SIZE_24} onPress={onSend}>
+            <CircleSolidIcon iconName="send-outline" size={SIZE_36} />
           </Pressable>
         )}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  comment_box: {
+    minHeight: SIZE_54,
+    ...layoutStyle.flex_direction_row,
+    ...layoutStyle.align_item_center,
+    ...paddingStyle.padding_horizontal_12,
+    ...backgroundStyle.background_color_1,
+    zIndex: 3,
+  },
+  text_input: {
+    minHeight: SIZE_54,
+    ...layoutStyle.flex_1,
+    ...paddingStyle.padding_horizontal_9,
+  },
+  reply_box: {
+    height: SIZE_42,
+    ...layoutStyle.align_item_center,
+    ...layoutStyle.flex_direction_row,
+    ...paddingStyle.padding_horizontal_12,
+    ...backgroundStyle.background_color_13,
+    zIndex: 1,
+  },
+  root_container: {
+    ...layoutStyle.position_absolute,
+    ...layoutStyle.width_100_percent,
+    ...layoutStyle.justify_content_flex_end,
+    bottom: 0,
+  },
+  reply_box_text: {
+    ...layoutStyle.flex_1,
+    ...marginStyle.margin_horizontal_6,
+  },
+});

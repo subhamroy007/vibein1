@@ -1,24 +1,15 @@
-import { useKeyboard } from "@react-native-community/hooks";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
-  TextInput,
   TextInputContentSizeChangeEventData,
   TextInputProps,
 } from "react-native";
+import { TextInput } from "react-native-gesture-handler";
 
 export default function AppTextInput(props: TextInputProps) {
-  const { keyboardShown } = useKeyboard();
-
   const [inputContentHeight, setInputContentHeight] = useState(0);
 
   const inputRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    if (!keyboardShown && inputRef.current && inputRef.current.isFocused()) {
-      inputRef.current.blur();
-    }
-  }, [keyboardShown]);
 
   const contentSizeChangeCallback = useCallback(
     ({
@@ -36,6 +27,7 @@ export default function AppTextInput(props: TextInputProps) {
       {...props}
       ref={inputRef}
       onContentSizeChange={contentSizeChangeCallback}
+      numberOfLines={props.multiline ? 1 : undefined}
       style={[
         props.style,
         {

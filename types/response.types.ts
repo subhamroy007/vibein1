@@ -2,7 +2,18 @@ import {
   CommentTemplateParams,
   PostTemplateParams,
   ReplyTemplateParams,
+  ThunkError,
+  ThunkMeta,
 } from "./utility.types";
+
+/**
+ * reprsents the abstract type of response params from a thnuk
+ */
+export type ThunkResponseParams<T = undefined> = {
+  data: T;
+  error?: ThunkError;
+  meta: ThunkMeta;
+};
 
 /**
  * represents the account response data structure
@@ -53,8 +64,11 @@ export type HomeFeedResponseParams = {
 };
 
 /**
- * reprsents the fields of the comment section of a post sent by the server
+ * reprsents the data params of the intial request of a post comment section
  */
-export type CommentSectionResponseParams = {
+export type CommentSectionResponseDataParams = {
   comments: CommentResponseParams[];
 };
+
+export type CommentSectionResponseParams =
+  ThunkResponseParams<CommentSectionResponseDataParams>;

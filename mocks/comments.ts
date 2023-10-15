@@ -22,8 +22,8 @@ export const generateCommentObject = (): CommentResponseParams => {
     content: comment_contents[getRandom(comment_contents.length - 1)],
     isPinned: Math.random() < 0.5 ? false : true,
     replies:
-      noOfReplies > 0
-        ? generateReplyObjects(Math.min(noOfReplies, 5))
+      noOfReplies > 0 && Math.random() > 0.5
+        ? generateReplyObjects(Math.min(noOfReplies, 3))
         : undefined,
   };
 };

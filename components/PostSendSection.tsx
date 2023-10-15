@@ -1,10 +1,4 @@
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import {
   backgroundStyle,
   borderStyle,
@@ -13,43 +7,42 @@ import {
   paddingStyle,
 } from "../styles";
 import SolidButton from "./SolidButton";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/storeHooks";
+import { useCallback, useState } from "react";
+import { useAppSelector } from "../hooks/storeHooks";
 import { selectInboxParams } from "../store/client/client.selector";
-import useAccountParams from "../hooks/accountHook";
 import Avatar from "./Avatar";
 import AppText from "./AppText";
-import { COLOR_1, COLOR_2, COLOR_5 } from "../constants";
-import { getAccounts } from "../mocks/accounts";
-import { addManyAccountToStore } from "../store/account/account.slice";
-import { addChatsToInbox } from "../store/client/client.slice";
+import { COLOR_2, COLOR_5, SIZE_11, SIZE_24, SIZE_48 } from "../constants";
 import Icon from "./Icon";
 import AppTextInput from "./AppTextInput";
+import AppTouchableHighlight from "./AppTouchableHighlight";
+import { ChatItemIdentifierParams } from "../types/store.types";
+import { useAccountAdapterParams } from "../hooks/account.hooks";
 
 export type ChatListItemProps = {
-  accountId: string;
-  onSelect: (accountId: string, username: string) => void;
+  username: string;
+  onSelect: (username: string) => void;
   selected: boolean;
 };
 
 export function ChatListItem({
-  accountId,
+  username,
   onSelect,
   selected,
 }: ChatListItemProps) {
-  const { accountParams } = useAccountParams(accountId, ["fullname"]);
+  const accountParams = useAccountAdapterParams(username, ["fullname"]);
 
   if (!accountParams) {
     return null;
   }
 
   const pressCallback = useCallback(
-    () => onSelect(accountId, accountParams.username),
-    [onSelect, accountId, accountParams.username]
+    () => onSelect(username),
+    [onSelect, username]
   );
 
   return (
-    <Pressable
+    <AppTouchableHighlight
       style={[
         paddingStyle.padding_horizontal_12,
         paddingStyle.padding_vertical_6,
@@ -58,131 +51,99 @@ export function ChatListItem({
       ]}
       onPress={pressCallback}
     >
-      <Avatar url={accountParams.profilePictureUrl} size={48} />
+      <Avatar url={accountParams.profilePictureUrl} size={SIZE_48} />
       <View style={[marginStyle.margin_left_6, layoutStyle.flex_1]}>
         <AppText>{accountParams.username}</AppText>
-        <AppText size={11} color={COLOR_2}>
+        <AppText size={SIZE_11} color={COLOR_2}>
           {accountParams.fullname}
         </AppText>
       </View>
       {!selected ? (
-        <Icon name="radio-unchecked" size={24} color={COLOR_2} />
+        <Icon name="radio-unchecked" size={SIZE_24} color={COLOR_2} />
       ) : (
-        <Icon name="tick-circle-solid" size={24} color={COLOR_5} />
+        <Icon name="tick-circle-solid" size={SIZE_24} color={COLOR_5} />
       )}
-    </Pressable>
+    </AppTouchableHighlight>
   );
 }
-
-export function SelectedItem({ id, name }: SelectedChatItemParams) {
-  return (
-    <View
-      style={[
-        paddingStyle.padding_horizontal_12,
-        paddingStyle.padding_vertical_9,
-        layoutStyle.align_item_center,
-        layoutStyle.flex_direction_row,
-        { borderRadius: 18, backgroundColor: COLOR_5 },
-        marginStyle.margin_horizontal_3,
-      ]}
-    >
-      <AppText color={COLOR_1}>{name}</AppText>
-    </View>
-  );
-}
-
-export type SelectedChatItemParams = {
-  id: string;
-  name: string;
-};
 
 export default function PostSendSection() {
-  const captionTextInputRef = useRef<TextInput>(null);
+  const [caption, setCaption] = useState("");
 
-  const [captionInputHeight, setCaptionInputHeight] = useState(0);
-
-  const [selectedChats, setSelectedChats] = useState<SelectedChatItemParams[]>(
-    []
-  );
+  const [selectedChats, setSelectedChats] = useState<
+    ChatItemIdentifierParams[]
+  >([]);
 
   const inbox = useAppSelector(selectInboxParams);
 
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    if (inbox.state === "success") {
-      return;
-    }
-    const accounts = getAccounts(20, ["fullname"]);
-
-    dispatch(addManyAccountToStore(accounts));
-
-    dispatch(
-      addChatsToInbox({
-        accounts: accounts.map((account) => account._id),
-      })
-    );
-  }, [dispatch, inbox.state]);
-
   const selectCallback = useCallback(
-    (id: string, name: string) => {
+    (username: string) => {
       setSelectedChats((prevChats) => {
-        const selected = prevChats.find((item) => item.id === id);
+        const selected = prevChats.find(
+          (item) => item.type === "one-to-one" && item.username === username
+        );
         if (selected) {
-          return prevChats.filter((item) => item.id !== id);
+          return prevChats.filter(
+            (item) => item.type === "one-to-one" && item.username !== username
+          );
         }
-        return [{ id, name }, ...prevChats];
+        return [{ username, type: "one-to-one" }, ...prevChats];
       });
     },
     [setSelectedChats]
   );
 
+  const sendButtonPressCallback = useCallback(() => {
+    console.log(
+      `going to send a msg to the chats ${selectedChats} with the caption '${caption}'`
+    );
+  }, [caption, selectedChats]);
+
   return (
-    <View style={layoutStyle.flex_1}>
-      <View
-        style={[
-          paddingStyle.padding_vertical_12,
-          borderStyle.border_bottom_width_hairline,
-          borderStyle.border_color_2,
-          backgroundStyle.background_color_1,
-        ]}
-      >
+    <View style={[layoutStyle.flex_1, backgroundStyle.background_color_1]}>
+      <View style={[paddingStyle.padding_12, borderStyle.border_color_2]}>
         <AppTextInput
           placeholder="Send to..."
-          style={marginStyle.margin_horizontal_12}
+          style={[
+            borderStyle.border_color_2,
+            borderStyle.border_width_hairline,
+            borderStyle.border_radius_18,
+            paddingStyle.padding_horizontal_12,
+            paddingStyle.padding_vertical_9,
+            backgroundStyle.background_color_13,
+          ]}
         />
-        {selectedChats.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            overScrollMode="never"
-            style={marginStyle.margin_top_9}
-            contentContainerStyle={paddingStyle.padding_horizontal_9}
-          >
-            {selectedChats.map((item) => (
-              <SelectedItem {...item} key={item.id} />
-            ))}
-          </ScrollView>
-        )}
       </View>
       <ScrollView
-        style={[layoutStyle.flex_1, backgroundStyle.background_color_1]}
+        style={[layoutStyle.flex_1]}
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
-        contentContainerStyle={paddingStyle.padding_vertical_12}
+        contentContainerStyle={[
+          paddingStyle.padding_top_12,
+          paddingStyle.padding_bottom_90,
+        ]}
         nestedScrollEnabled
       >
-        {inbox.data.chats.map((chat) => (
-          <ChatListItem
-            accountId={chat.accountId}
-            key={chat.accountId}
-            onSelect={selectCallback}
-            selected={
-              selectedChats.find((item) => item.id === chat.accountId) !==
-              undefined
-            }
-          />
-        ))}
+        {inbox.data.chats.map((chat) => {
+          if (chat.type === "one-to-one") {
+            return (
+              <ChatListItem
+                username={chat.username}
+                key={chat.username}
+                onSelect={selectCallback}
+                selected={
+                  selectedChats.find(
+                    (item) =>
+                      item.type === "one-to-one" &&
+                      item.username === chat.username
+                  ) !== undefined
+                }
+              />
+            );
+          } else {
+            return null;
+          }
+        })}
       </ScrollView>
       {selectedChats.length > 0 && (
         <View
@@ -190,26 +151,30 @@ export default function PostSendSection() {
             borderStyle.border_color_2,
             borderStyle.border_top_width_hairline,
             paddingStyle.padding_12,
+            layoutStyle.position_absolute,
             backgroundStyle.background_color_1,
+            styles.footer,
           ]}
         >
           <AppTextInput
             placeholder="write a caption..."
             multiline
-            style={[marginStyle.margin_bottom_12]}
-            onContentSizeChange={({
-              nativeEvent: {
-                contentSize: { height },
-              },
-            }) => {
-              setCaptionInputHeight(height);
-            }}
+            style={[
+              marginStyle.margin_bottom_12,
+              paddingStyle.padding_vertical_6,
+            ]}
+            onChangeText={setCaption}
           />
-          <SolidButton onPress={() => {}} title="send post" />
+          <SolidButton onPress={sendButtonPressCallback} title="send post" />
         </View>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  footer: {
+    bottom: 0,
+    width: "100%",
+  },
+});

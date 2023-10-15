@@ -17,7 +17,7 @@ function tranformToReplyAdapterParams(
 ): ReplyAdapterParams {
   return {
     ...reply,
-    createdBy: reply.createdBy._id,
+    createdBy: reply.createdBy.username,
   };
 }
 

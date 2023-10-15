@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import AppText from "./AppText";
 import { StyleProp, TextStyle } from "react-native";
 import Animated, { Layout } from "react-native-reanimated";
-import { COLOR_5 } from "../constants";
+import { COLOR_5, SIZE_20 } from "../constants";
 
 export type HighlightedTextProps = {
   children: string;
@@ -25,7 +25,7 @@ export default function HighlightedText({
 
   return (
     <AppText
-      style={style}
+      style={[style, { lineHeight: SIZE_20 }]}
       ellipsizeMode="tail"
       numberOfLines={isExpanded ? undefined : 2}
       onPress={onPressCallback}

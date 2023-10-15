@@ -10,6 +10,8 @@ const sizeRelativeToHeight = (value: number) =>
 
 export const SIZE_1 = sizeRelativeToWidth(0.27);
 
+export const SIZE_2 = sizeRelativeToWidth(0.55);
+
 export const SIZE_3 = sizeRelativeToWidth(0.83);
 
 export const SIZE_4 = sizeRelativeToWidth(1.11);
@@ -54,6 +56,8 @@ export const SIZE_54 = sizeRelativeToWidth(15);
 
 export const SIZE_60 = sizeRelativeToWidth(16.66);
 
+export const SIZE_70 = sizeRelativeToWidth(20);
+
 export const SIZE_90 = sizeRelativeToWidth(25);
 
 export const HEIGHT_SCALE_1 = sizeRelativeToHeight(60);
@@ -62,7 +66,7 @@ export const HEIGHT_SCALE_3 = sizeRelativeToHeight(11);
 export const HEIGHT_SCALE_4 = sizeRelativeToHeight(7.03);
 
 export const COLOR_1 = "#FFFFFF";
-export const COLOR_2 = "#AAAAAA";
+export const COLOR_2 = "#BFBFBF";
 export const COLOR_3 = "rgba(0, 0, 0, 0.5)";
 export const COLOR_4 = "#000000";
 export const COLOR_5 = "#3F71F2";
@@ -73,7 +77,11 @@ export const COLOR_9 = "rgba(0, 0, 0, 0.7)";
 export const COLOR_10 = "red";
 export const COLOR_11 = "#2EF642";
 export const COLOR_12 = "#1E6ADC";
+export const COLOR_13 = "#F2F2F2";
 
 export const PRESSABLE_ANIMATION_DURATION = 150;
 export const PRESSABLE_ANIMATION_RESET_DURATION = 25;
 export const PHOTO_MAX_BLUR_RADIUS = 12;
+
+export const LOADING_INDICATOR_ANIMATION_1_DURATION = 1500;
+export const LOADING_INDICATOR_ANIMATION_2_DURATION = 750;

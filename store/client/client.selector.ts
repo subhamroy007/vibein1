@@ -1,25 +1,16 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
 
-import { selectAccountParams } from "../account/account.selectors";
-import { AccountField } from "../../types/utility.types";
-import {
-  AccountAdapterParams,
-  HomeFeedStoreParams,
-  InboxStoreParams,
-} from "../../types/store.types";
+import { AccountAdapterParams } from "../../types/store.types";
 
 export const selectClientAccountParams = createSelector(
-  [
-    (state: RootState) => state,
-    (_: RootState, includeFields?: AccountField[]) => includeFields,
-  ],
-  (state, includeFields): AccountAdapterParams | undefined => {
-    const accountParams = selectAccountParams(
-      state,
-      state.client.loggedInAccount.id,
-      includeFields
-    );
+  [(state: RootState) => state],
+  (state): AccountAdapterParams | undefined => {
+    const accountParams = state.client.loggedInAccount;
+
+    if (!accountParams) {
+      return undefined;
+    }
 
     return accountParams;
   }
@@ -27,14 +18,14 @@ export const selectClientAccountParams = createSelector(
 
 export const selectHomeFeedParams = createSelector(
   [(state: RootState) => state.client.homeFeed],
-  (homeFeed): HomeFeedStoreParams => {
+  (homeFeed) => {
     return homeFeed;
   }
 );
 
 export const selectInboxParams = createSelector(
   [(state: RootState) => state.client.inbox],
-  (inbox): InboxStoreParams => {
+  (inbox) => {
     return inbox;
   }
 );

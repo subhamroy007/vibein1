@@ -2,7 +2,8 @@ import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { selectPostById } from "./post.adapter";
 import { selectAccountParams } from "../account/account.selectors";
-import { PostSelectorParams } from "../../types";
+import { selectClientAccountParams } from "../client/client.selector";
+import { CommentSectionSelectorParams } from "../../types/selector.types";
 
 export const selectPostParams = createSelector(
   [(state: RootState) => state, (state: RootState, id: string) => id],
@@ -22,7 +23,7 @@ export const selectPostParams = createSelector(
       return undefined;
     }
 
-    const postOutput: PostSelectorParams = {
+    const postOutput = {
       ...post,
       createdBy: author,
     };
@@ -40,6 +41,19 @@ export const selectPostCommentSection = createSelector(
       return undefined;
     }
 
-    return post.commentSection;
+    const client = selectClientAccountParams(state);
+
+    if (!client) {
+      return undefined;
+    }
+
+    const output = {
+      author: post.createdBy,
+      isClientAuthorOfPost: client.username === post.createdBy,
+      comments: post.comments,
+      commentSectionThunkInfo: post.commentSectionThunkInfo,
+    };
+
+    return output;
   }
 );

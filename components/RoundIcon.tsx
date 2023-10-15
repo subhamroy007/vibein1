@@ -6,7 +6,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { SIZE_48 } from "../constants";
-import { IconName } from "../types";
+import { IconName } from "../types/component.types";
 import Icon from "./Icon";
 import { borderStyle, layoutStyle } from "../styles";
 

@@ -25,8 +25,10 @@ import {
 } from "../constants";
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
 import { Image } from "expo-image";
-import { FetchState, PostPhotoParams } from "../types";
 import RoundIcon from "./RoundIcon";
+import { PostPhotoParams } from "../types/utility.types";
+import { ThunkState } from "../types/store.types";
+import { LinearGradient } from "expo-linear-gradient";
 
 function findAspectRatio(photos: PostPhotoParams[]) {
   let aspectRatio = photos[0].aspectRatio;
@@ -60,10 +62,10 @@ export function Albumphoto({
 }: AlbumphotoProps) {
   const { width: screenWidth } = useWindowDimensions();
 
-  const [loadingState, setLoadingState] = useState<FetchState>("loading");
+  const [loadingState, setLoadingState] = useState<ThunkState>("loading");
 
   const [previewLoadingState, setPreviewLoadingState] =
-    useState<FetchState>("loading");
+    useState<ThunkState>("loading");
 
   const [previewBlurRadius, setPreviewBlurRadius] = useState(
     PHOTO_MAX_BLUR_RADIUS
@@ -133,11 +135,7 @@ export function Albumphoto({
               { opacity: loadingState === "success" ? 1 : 0 },
             ]}
             source={url}
-            contentFit={
-              aspectRatio === containerAspectRatio || aspectRatio === "9/16"
-                ? "cover"
-                : "contain"
-            }
+            contentFit={"cover"}
             onLoadStart={imageLoadStartCallback}
             onError={imageLoadErrorCallback}
             onLoad={imageLoadCallback}
@@ -162,15 +160,20 @@ export function Albumphoto({
               },
             ]}
             source={previewUrl}
-            contentFit={
-              aspectRatio === containerAspectRatio || aspectRatio === "9/16"
-                ? "cover"
-                : "contain"
-            }
+            contentFit={"cover"}
             onLoadStart={previewLoadStartCallback}
             onError={previewLoadErrorCallback}
             onLoad={previewLoadCallback}
             blurRadius={previewBlurRadius}
+          />
+        )}
+        {loadingState === "success" && (
+          <LinearGradient
+            style={[StyleSheet.absoluteFill]}
+            colors={["transparent", "rgba(0, 0, 0, 0.5)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            locations={[0.7, 1.0]}
           />
         )}
         {loadingState === "loading" && (
@@ -258,7 +261,7 @@ export default function Album({ photos, onDoubleTap }: AlbumProps) {
               styles.carosol_dot,
               index === photoIndex
                 ? backgroundStyle.background_color_5
-                : backgroundStyle.background_color_2,
+                : backgroundStyle.background_color_1,
             ]}
             key={photo.url + index}
           />

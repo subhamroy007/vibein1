@@ -7,12 +7,12 @@ import { AccountAdapterParams } from "../../types/store.types";
 export const selectAccountParams = createSelector(
   [
     (state: RootState) => state.account,
-    (state: RootState, id: string) => id,
-    (state: RootState, id: string, includeFields?: AccountField[]) =>
+    (state: RootState, username: string) => username,
+    (state: RootState, username: string, includeFields?: AccountField[]) =>
       includeFields,
   ],
-  (state, id, includeFields): AccountAdapterParams | undefined => {
-    const account = selectAccountById(state, id);
+  (state, username, includeFields): AccountAdapterParams | undefined => {
+    const account = selectAccountById(state, username);
 
     if (!account) {
       return undefined;

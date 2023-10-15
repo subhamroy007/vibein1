@@ -1,4 +1,4 @@
-import { IconName } from "../types";
+import { IconName } from "../types/component.types";
 import { layoutStyle, marginStyle, paddingStyle } from "../styles";
 import Icon from "./Icon";
 import AppText from "./AppText";

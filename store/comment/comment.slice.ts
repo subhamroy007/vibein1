@@ -17,17 +17,9 @@ function tranformToCommentAdapterParams(
 ): CommentAdapterParams {
   return {
     ...comment,
-    createdBy: comment.createdBy._id,
-    replySection: {
-      data: {
-        replies: comment.replies
-          ? comment.replies.map((reply) => reply._id)
-          : [],
-      },
-      lastError: null,
-      meta: { requestTimestamp: null },
-      state: "idle",
-    },
+    createdBy: comment.createdBy.username,
+    replies: comment.replies ? comment.replies.map((reply) => reply._id) : [],
+    replySectionThunkInfo: null,
   };
 }
 

@@ -11,6 +11,7 @@ import {
   SIZE_12,
   SIZE_20,
   SIZE_24,
+  SIZE_30,
 } from "../constants";
 import AppPressable from "./AppPressable";
 import { useCallback, useState } from "react";
@@ -18,19 +19,15 @@ import { formatTimeDifference } from "../utility";
 import Avatar from "./Avatar";
 import SwipeUpPortal from "./SwipeUpPortal";
 import Option from "./Option";
-import { AccountAdapterParams } from "../types/store.types";
+import useReply from "../hooks/replyHook";
 
-export type CommentProps = {
+export type ReplyProps = {
   id: string;
   onReply: (commentId: string, replyTo: string) => void;
 };
 
-export default function Comment({ id, onReply }: CommentProps) {
-  const {
-    commentParams,
-    toggleCommentLikeStateCallback,
-    toggleCommentPinStateCallback,
-  } = useComment(id);
+export default function Reply({ id, onReply }: ReplyProps) {
+  const { replyParams, toggleReplyLikeStateCallback } = useReply(id);
 
   const [isMoreOptionPortalOpen, setMoreOptionPortalState] = useState(false);
 
@@ -40,22 +37,20 @@ export default function Comment({ id, onReply }: CommentProps) {
   );
 
   const replyPressCallback = useCallback(() => {
-    if (commentParams?.createdBy) {
-      onReply(id, commentParams.createdBy.username);
+    if (replyParams?.createdBy) {
+      onReply(id, replyParams.createdBy.username);
     }
-  }, [commentParams?.createdBy, onReply]);
+  }, [replyParams?.createdBy, onReply]);
 
   const reportPressCallback = useCallback(() => {}, []);
   const deletePressCallback = useCallback(() => {}, []);
-  const pinPressCallback = useCallback(() => {}, []);
   const blockPressCallback = useCallback(() => {}, []);
 
-  if (!commentParams) {
+  if (!replyParams) {
     return null;
   }
 
-  const { content, createdAt, createdBy, isLiked, noOfLikes, isPinned } =
-    commentParams;
+  const { content, createdAt, createdBy, isLiked, noOfLikes } = replyParams;
 
   return (
     <Pressable
@@ -66,7 +61,11 @@ export default function Comment({ id, onReply }: CommentProps) {
       ]}
       onLongPress={toggleMoreOptionPortal}
     >
-      <Avatar url={createdBy.profilePictureUrl} />
+      <Avatar
+        url={createdBy.profilePictureUrl}
+        style={{ marginLeft: 36 }}
+        size={SIZE_30}
+      />
       <View style={[layoutStyle.flex_1, marginStyle.margin_horizontal_6]}>
         <AppText>{createdBy.username}</AppText>
         <HighlightedText>{content}</HighlightedText>
@@ -88,14 +87,6 @@ export default function Comment({ id, onReply }: CommentProps) {
           >
             {formatTimeDifference(createdAt)}
           </AppText>
-          {isPinned && (
-            <Icon
-              color="grey"
-              name="pin-solid"
-              style={[marginStyle.margin_left_12]}
-              size={SIZE_12}
-            />
-          )}
         </View>
       </View>
       <View
@@ -106,7 +97,7 @@ export default function Comment({ id, onReply }: CommentProps) {
         ]}
       >
         <AppPressable
-          onPress={toggleCommentLikeStateCallback}
+          onPress={toggleReplyLikeStateCallback}
           hitSlop={SIZE_24}
           pressRetentionOffset={SIZE_24}
         >
@@ -130,11 +121,6 @@ export default function Comment({ id, onReply }: CommentProps) {
       {isMoreOptionPortalOpen && (
         <SwipeUpPortal onDismiss={toggleMoreOptionPortal} title="Options">
           <View>
-            <Option
-              icon={isPinned ? "pin-solid" : "pin-outline"}
-              text={isPinned ? "Unpin Comment" : "Pin Comment"}
-              onPress={pinPressCallback}
-            />
             <Option
               icon="explore"
               text="Block Account"

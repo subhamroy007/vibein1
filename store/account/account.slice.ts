@@ -85,12 +85,7 @@ const accountSlice = createSlice({
             );
           }
         });
-        upsertManyAccount(
-          state,
-          comments.map((comment) =>
-            tranformToAccountAdapterParams(comment.createdBy)
-          )
-        );
+        upsertManyAccount(state, accounts);
       }
     );
   },
