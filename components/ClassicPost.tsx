@@ -34,6 +34,7 @@ import { selectClientAccountParams } from "../store/client/client.selector";
 import Option from "./Option";
 import Avatar from "./Avatar";
 import CircleSolidIcon from "./CircleSolidIcon";
+import CommentSection from "./CommentSection";
 
 export type PostProps = {
   id: string;
@@ -95,6 +96,14 @@ export default function ClassicPost({ id }: PostProps) {
   const toggleMoreOptionPortalCallback = useCallback(
     () => setMoreOptionPortalState((prevState) => !prevState),
     [setMoreOptionPortalState]
+  );
+
+  const [isCommentSectionPortalOpen, setCommentSectionPortalState] =
+    useState(false);
+
+  const toggleCommentSectionPortalCallback = useCallback(
+    () => setCommentSectionPortalState((prevState) => !prevState),
+    [setCommentSectionPortalState]
   );
 
   const clientAccountParams = useAppSelector((state) =>
@@ -322,6 +331,14 @@ export default function ClassicPost({ id }: PostProps) {
               />
             )}
           </View>
+        </SwipeUpPortal>
+      )}
+      {isCommentSectionPortalOpen && (
+        <SwipeUpPortal
+          onDismiss={toggleCommentSectionPortalCallback}
+          title="Comments"
+        >
+          <CommentSection id={id} />
         </SwipeUpPortal>
       )}
     </Animated.View>

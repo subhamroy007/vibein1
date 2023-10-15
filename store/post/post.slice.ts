@@ -23,7 +23,11 @@ function tranformToPostAdapterParams(
       ? post.taggedAccounts.map((account) => account.username)
       : undefined,
     comments: [],
-    commentSectionThunkInfo: null,
+    commentSectionThunkInfo: {
+      state: "idle",
+      meta: null,
+      lastRequestError: null,
+    },
   };
 }
 

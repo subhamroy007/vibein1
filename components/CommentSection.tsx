@@ -1,14 +1,18 @@
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import { layoutStyle } from "../styles";
 import useCommentSection from "../hooks/post.hooks";
 import CommentListItem from "./CommentListItem";
 import CommentBox from "./CommentBox";
+import AnimatedLaodingIndicator from "./AnimatedLaodingIndicator";
+import CircleIcon from "./CircleIcon";
+import { SIZE_24 } from "../constants";
 
 export default function CommentSection({ id }: { id: string }) {
   const { storeParams, fetch } = useCommentSection(id);
 
   useEffect(() => {
+    console.log("fetching comments...");
     fetch();
   }, [fetch]);
 
@@ -53,16 +57,25 @@ export default function CommentSection({ id }: { id: string }) {
         overScrollMode="never"
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item}
-        contentContainerStyle={styles.content_container}
+        ListEmptyComponent={
+          commentSectionThunkInfo.state === "loading" ? (
+            <AnimatedLaodingIndicator />
+          ) : (
+            <Pressable onPress={fetch} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          )
+        }
+        // contentContainerStyle={styles.content_container}
       />
-      <CommentBox
+      {/* <CommentBox
         onSend={sendCallback}
         comment={comment}
         setComment={setComment}
         replyTo={replyParams?.replyTo}
         resetReplyTo={replyResetCallback}
         postAuthor={author}
-      />
+      /> */}
     </View>
   );
 }

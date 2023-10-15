@@ -8,11 +8,11 @@ import { createAppAsyncThunk, delay } from "../../utility";
 export const getHomeFeedData = createAppAsyncThunk(
   "client/homefeed",
   async (_, thunkApi) => {
-    const posts = generatePostObjects(10);
+    const posts = generatePostObjects(1);
 
     const data: HomeFeedResponseParams = { posts };
     await delay(10_000);
-    if (Math.random() > 0.2) {
+    if (Math.random() > 0.8) {
       return thunkApi.rejectWithValue(
         { errorCode: 1000, message: "something went wrong" },
         {

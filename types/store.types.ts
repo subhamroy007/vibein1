@@ -44,7 +44,7 @@ export type CommentAdapterParams = CommentTemplateParams<string> &
  */
 export type CommentSectionStoreParams = {
   comments: string[];
-  commentSectionThunkInfo: ThunkInfo | null;
+  commentSectionThunkInfo: ThunkInfo;
 };
 
 /**
