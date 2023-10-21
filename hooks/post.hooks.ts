@@ -2,10 +2,12 @@ import { useCallback } from "react";
 import {
   selectGridPostParams,
   selectPostCommentSection,
+  selectPostPreviewParams,
 } from "../store/post/post.selector";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
 import { RootState } from "../store";
 import { fetchComments } from "../store/post/post.thunk";
+import { togglePostLikeState } from "../store/post/post.slice";
 
 export function useCommentSection(postId: string) {
   const dispatch = useAppDispatch();
@@ -37,5 +39,24 @@ export function useGridPost(id: string) {
 
   return {
     postParams,
+  };
+}
+
+export function usePostPreview(id: string) {
+  const postSelectotCallback = useCallback(
+    (state: RootState) => selectPostPreviewParams(state, id),
+    [id]
+  );
+
+  const storeDispatch = useAppDispatch();
+  const postParams = useAppSelector(postSelectotCallback);
+
+  const togglePostLikeStateCallback = useCallback(() => {
+    storeDispatch(togglePostLikeState(id));
+  }, [id]);
+
+  return {
+    postParams,
+    togglePostLikeStateCallback,
   };
 }

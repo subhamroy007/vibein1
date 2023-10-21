@@ -118,6 +118,9 @@ export const borderStyle = StyleSheet.create({
   border_color_2: {
     borderColor: COLOR_2,
   },
+  border_color_7: {
+    borderColor: COLOR_7,
+  },
   border_radius_18: {
     borderRadius: SIZE_18,
   },

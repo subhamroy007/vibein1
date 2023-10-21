@@ -8,10 +8,11 @@ import {
   SIZE_15,
 } from "../../constants";
 import { Image } from "expo-image";
-import { layoutStyle } from "../../styles";
+import { backgroundStyle, layoutStyle } from "../../styles";
 import Icon from "../Icon";
 import AppText from "../AppText";
 import { formatNumber } from "../../utility";
+import { usePhotoFetch } from "../../hooks/utility.hooks";
 
 export type GridPostProps = {
   id: string;
@@ -30,6 +31,13 @@ export function GridPost({
 }: GridPostProps) {
   const { postParams } = useGridPost(id);
 
+  const {
+    photoLoadCallback,
+    photoLoadErrorCallback,
+    photoLoadStartCallback,
+    photoLoadingState,
+  } = usePhotoFetch(true);
+
   if (!postParams) {
     return null;
   }
@@ -38,47 +46,62 @@ export function GridPost({
 
   return (
     <View
-      style={{
-        aspectRatio: portrait ? "9/16" : "1/1",
-        width: POST_GRID_WIDTH,
-        marginLeft: first ? 0 : 3 * StyleSheet.hairlineWidth,
-      }}
+      style={[
+        {
+          aspectRatio: portrait ? "9/16" : "1/1",
+          width: POST_GRID_WIDTH,
+          marginLeft: first ? 0 : 3 * StyleSheet.hairlineWidth,
+        },
+        backgroundStyle.background_color_7,
+      ]}
     >
-      <Image
-        contentFit="cover"
-        source={previewUrl}
-        style={[layoutStyle.width_100_percent, layoutStyle.height_100_percent]}
-      />
-      {isAlbum && (
-        <Icon
-          name="album"
-          size={SIZE_15}
-          color={COLOR_1}
-          style={[layoutStyle.position_absolute, { top: 6, left: 6 }]}
-        />
-      )}
-      {isPinned && showPin && (
-        <Icon
-          name="pin-solid"
-          size={SIZE_15}
-          color={COLOR_1}
-          style={[layoutStyle.position_absolute, { top: 6, right: 6 }]}
-        />
-      )}
-      {noOfViews > 0 && showViews && (
-        <View
+      {photoLoadingState !== "failed" && (
+        <Image
+          contentFit="cover"
+          source={previewUrl}
           style={[
-            layoutStyle.flex_direction_row,
-            layoutStyle.align_item_center,
-            layoutStyle.position_absolute,
-            { bottom: 6, right: 6 },
+            layoutStyle.width_100_percent,
+            layoutStyle.height_100_percent,
           ]}
-        >
-          <AppText size={SIZE_11} color={COLOR_1} weight="regular">
-            {formatNumber(noOfViews)}
-          </AppText>
-          <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
-        </View>
+          onLoad={photoLoadCallback}
+          onLoadStart={photoLoadStartCallback}
+          onError={photoLoadErrorCallback}
+        />
+      )}
+      {photoLoadingState === "success" && (
+        <>
+          {isAlbum && (
+            <Icon
+              name="album"
+              size={SIZE_15}
+              color={COLOR_1}
+              style={[layoutStyle.position_absolute, { top: 6, left: 6 }]}
+            />
+          )}
+          {isPinned && showPin && (
+            <Icon
+              name="pin-solid"
+              size={SIZE_15}
+              color={COLOR_1}
+              style={[layoutStyle.position_absolute, { top: 6, right: 6 }]}
+            />
+          )}
+          {noOfViews > 0 && showViews && (
+            <View
+              style={[
+                layoutStyle.flex_direction_row,
+                layoutStyle.align_item_center,
+                layoutStyle.position_absolute,
+                { bottom: 6, right: 6 },
+              ]}
+            >
+              <AppText size={SIZE_11} color={COLOR_1} weight="regular">
+                {formatNumber(noOfViews)}
+              </AppText>
+              <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
+            </View>
+          )}
+        </>
       )}
     </View>
   );

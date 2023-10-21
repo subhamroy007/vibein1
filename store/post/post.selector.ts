@@ -83,3 +83,31 @@ export const selectGridPostParams = createSelector(
     return postOutput;
   }
 );
+
+export const selectPostPreviewParams = createSelector(
+  [(state: RootState) => state, (_: RootState, id: string) => id],
+  (state, postId) => {
+    const post = selectPostById(state.post, postId);
+
+    if (!post) {
+      return undefined;
+    }
+
+    const { photos, isLiked, createdBy } = post;
+
+    const author = selectAccountParams(state, createdBy);
+
+    if (!author) {
+      return undefined;
+    }
+
+    const postOutput = {
+      previewUrl: photos[0].previewUrl,
+      originalUrl: photos[0].url,
+      createdBy: author,
+      isLiked,
+    };
+
+    return postOutput;
+  }
+);

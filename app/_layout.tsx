@@ -65,10 +65,12 @@ export default function AppLayout() {
     appDataStore.dispatch(initHomeFeed({ posts: [] }));
     appDataStore.dispatch(initInbox(oneToOneChatAccounts));
 
-    const discoverFeedPosts = generatePostObjects(23);
+    const discoverFeedPosts = generatePostObjects(10);
 
     appDataStore.dispatch(addManyPostToStore(discoverFeedPosts));
-
+    appDataStore.dispatch(
+      addManyAccountToStore(discoverFeedPosts.map((post) => post.createdBy))
+    );
     appDataStore.dispatch(initDiscoverFeed({ posts: discoverFeedPosts }));
   }, []);
 
