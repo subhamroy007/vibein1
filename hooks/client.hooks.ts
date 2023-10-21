@@ -1,9 +1,12 @@
-import { selectHomeFeedParams } from "../store/client/client.selector";
+import {
+  selectDiscoverFeedParams,
+  selectHomeFeedParams,
+} from "../store/client/client.selector";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
 import { getHomeFeedData } from "../store/client/client.thunk";
 
-export default function useHomeFeed() {
+export function useHomeFeed() {
   const homeFeedParams = useAppSelector(selectHomeFeedParams);
 
   const dispatch = useAppDispatch();
@@ -15,5 +18,17 @@ export default function useHomeFeed() {
   return {
     homeFeedParams,
     fetch,
+  };
+}
+
+export function useDiscoverFeed() {
+  const discoverFeedParams = useAppSelector(selectDiscoverFeedParams);
+
+  const dispatch = useAppDispatch();
+
+  const fetch = useCallback(() => {}, []);
+
+  return {
+    discoverFeedParams,
   };
 }

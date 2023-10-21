@@ -1,29 +1,38 @@
 import { StatusBar } from "expo-status-bar";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { borderStyle, layoutStyle, paddingStyle } from "../styles";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import {
+  backgroundStyle,
+  layoutStyle,
+  marginStyle,
+  paddingStyle,
+} from "../styles";
 import { Tabs } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 import {
-  COLOR_2,
-  HEIGHT_SCALE_3,
+  COLOR_1,
+  SIZE_18,
+  SIZE_20,
   SIZE_24,
   SIZE_27,
   SIZE_30,
   SIZE_36,
-  SIZE_60,
   SIZE_70,
 } from "../constants";
 import { useAppSelector } from "../hooks/storeHooks";
 import { selectClientAccountParams } from "../store/client/client.selector";
-import useHomeFeed from "../hooks/homeFeedHook";
 import { useEffect } from "react";
 import Animated from "react-native-reanimated";
 import Avatar from "../components/Avatar";
 import { Image } from "expo-image";
 import Icon from "../components/Icon";
 import ClassicPostList from "../components/ClassisPostList";
-import AnimatedLaodingIndicator from "../components/AnimatedLaodingIndicator";
-import CircleIcon from "../components/CircleIcon";
+import FullScreenPostList from "../components/FullScreenPostList";
+import AppButton from "../components/AppButton";
+import AppText from "../components/AppText";
+import { useHomeFeed } from "../hooks/client.hooks";
 
 export default function Home() {
   const clientAccount = useAppSelector(selectClientAccountParams);
@@ -35,19 +44,18 @@ export default function Home() {
   }
   const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
+  // useEffect(() => {
+  //   fetch();
+  // }, [fetch]);
 
   return (
-    <View
+    <SafeAreaView
       style={[
         layoutStyle.flex_1,
         layoutStyle.align_item_center,
         layoutStyle.justify_content_center,
       ]}
     >
-      <StatusBar translucent={true} hidden={false} />
       <Tabs.Screen
         options={{
           header: () => (
@@ -76,12 +84,12 @@ export default function Home() {
         }}
       />
 
-      <ClassicPostList
+      {/* <FullScreenPostList
         data={homeFeedParams.posts}
         state={homeFeedParams.thunkInfo.state}
         onRetry={fetch}
-      />
-    </View>
+      /> */}
+    </SafeAreaView>
   );
 }
 
@@ -91,3 +99,29 @@ const styles = StyleSheet.create({
     height: SIZE_70,
   },
 });
+// header: () => {
+//   return (
+//     <View
+//       style={[
+//         layoutStyle.position_absolute,
+//         layoutStyle.width_100_percent,
+//         { height: SIZE_70 },
+//         backgroundStyle.background_color_3,
+//         layoutStyle.flex_direction_row,
+//         layoutStyle.align_item_center,
+//         paddingStyle.padding_horizontal_12,
+//       ]}
+//     >
+//       <Icon name="arrow-left" color={COLOR_1} />
+//       <AppText
+//         color={COLOR_1}
+//         weight="bold"
+//         size={SIZE_18}
+//         style={marginStyle.margin_left_12}
+//       >
+//         Posts
+//       </AppText>
+//     </View>
+//   );
+// },
+// headerShown: false,

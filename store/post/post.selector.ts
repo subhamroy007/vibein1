@@ -57,3 +57,29 @@ export const selectPostCommentSection = createSelector(
     return output;
   }
 );
+
+export const selectGridPostParams = createSelector(
+  [(state: RootState) => state, (_: RootState, id: string) => id],
+  (state, postId) => {
+    const post = selectPostById(state.post, postId);
+
+    if (!post) {
+      return undefined;
+    }
+
+    const {
+      photos,
+      isPinned,
+      engagementSummary: { noOfViews },
+    } = post;
+
+    const postOutput = {
+      previewUrl: photos[0].previewUrl,
+      isPinned,
+      noOfViews,
+      isAlbum: photos.length > 1,
+    };
+
+    return postOutput;
+  }
+);

@@ -14,6 +14,7 @@ import {
   SIZE_15,
   SIZE_16,
   SIZE_18,
+  SIZE_20,
   SIZE_24,
   SIZE_3,
   SIZE_36,
@@ -110,6 +111,9 @@ export const borderStyle = StyleSheet.create({
   },
   border_bottom_color_2: {
     borderBottomColor: COLOR_2,
+  },
+  border_color_1: {
+    borderColor: COLOR_1,
   },
   border_color_2: {
     borderColor: COLOR_2,
@@ -281,6 +285,15 @@ export const marginStyle = StyleSheet.create({
   },
   margin_horizontal_12: {
     marginHorizontal: SIZE_12,
+  },
+  margin_top_24: {
+    marginTop: SIZE_24,
+  },
+  margin_top_20: {
+    marginTop: SIZE_20,
+  },
+  margin_top_18: {
+    marginTop: SIZE_18,
   },
   margin_top_12: {
     marginTop: SIZE_12,

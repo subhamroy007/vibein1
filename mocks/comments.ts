@@ -13,7 +13,7 @@ const comment_contents = [
 ];
 
 export const generateCommentObject = (): CommentResponseParams => {
-  const noOfReplies = Math.random() > 0.5 ? getRandom(100) : 0;
+  const noOfReplies = Math.random() > 0.5 ? getRandom(100, 10) : 0;
 
   return {
     ...generateReplyObject(),

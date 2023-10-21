@@ -12,7 +12,7 @@ import {
   Gesture,
   GestureDetector,
 } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import Animated, { withTiming } from "react-native-reanimated";
 import {
   COLOR_2,
   COLOR_8,

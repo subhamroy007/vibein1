@@ -19,6 +19,7 @@ import {
   LOADING_INDICATOR_ANIMATION_2_DURATION,
   SIZE_2,
   SIZE_36,
+  SIZE_48,
 } from "../constants";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -63,7 +64,7 @@ export default function AnimatedLaodingIndicator({
   }, []);
 
   const indicatorColor = color ? color : COLOR_2;
-  const indicatorSize = size ? size : SIZE_36; //intialize the avavtar size
+  const indicatorSize = size ? size : SIZE_48; //intialize the avavtar size
   const strokeWidth = 4 * StyleSheet.hairlineWidth; //intialize stroke width of the svg
   const noOfSection = 8; //intialize the number of outlined sections in the svg
   const portion = 0.5; //initialize the amount of visible storke

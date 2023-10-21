@@ -22,11 +22,14 @@ import {
 } from "../styles";
 import {
   initClientInfo,
+  initDiscoverFeed,
   initHomeFeed,
   initInbox,
 } from "../store/client/client.slice";
 import { View } from "react-native";
 import BottomTabBar from "../components/BottomTabBar";
+import { generatePostObjects } from "../mocks/posts";
+import { addManyPostToStore } from "../store/post/post.slice";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,6 +64,12 @@ export default function AppLayout() {
     appDataStore.dispatch(initClientInfo(generateAccountObject()));
     appDataStore.dispatch(initHomeFeed({ posts: [] }));
     appDataStore.dispatch(initInbox(oneToOneChatAccounts));
+
+    const discoverFeedPosts = generatePostObjects(23);
+
+    appDataStore.dispatch(addManyPostToStore(discoverFeedPosts));
+
+    appDataStore.dispatch(initDiscoverFeed({ posts: discoverFeedPosts }));
   }, []);
 
   if (!fontsLoaded && !fontError) {

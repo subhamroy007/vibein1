@@ -29,3 +29,8 @@ export type CommentSectionSelectorParams = {
   postAuthor: string;
   commentSection: CommentSectionStoreParams;
 };
+
+export type GridPostGroupParams = {
+  groupId: string;
+  posts: string[];
+};

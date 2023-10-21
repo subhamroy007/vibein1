@@ -1,18 +1,26 @@
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { useCallback, useEffect, useState } from "react";
-import { layoutStyle } from "../styles";
+import { layoutStyle, marginStyle, paddingStyle } from "../styles";
 import useCommentSection from "../hooks/post.hooks";
 import CommentListItem from "./CommentListItem";
 import CommentBox from "./CommentBox";
 import AnimatedLaodingIndicator from "./AnimatedLaodingIndicator";
 import CircleIcon from "./CircleIcon";
-import { SIZE_24 } from "../constants";
+import {
+  SIZE_24,
+  SIZE_36,
+  SIZE_42,
+  SIZE_48,
+  SIZE_54,
+  SIZE_60,
+} from "../constants";
+import Animated from "react-native-reanimated";
+import { Portal } from "@gorhom/portal";
 
 export default function CommentSection({ id }: { id: string }) {
   const { storeParams, fetch } = useCommentSection(id);
 
   useEffect(() => {
-    console.log("fetching comments...");
     fetch();
   }, [fetch]);
 
@@ -48,8 +56,8 @@ export default function CommentSection({ id }: { id: string }) {
 
   return (
     <View style={[layoutStyle.flex_1]}>
-      <FlatList
-        data={comments}
+      <Animated.FlatList
+        data={commentSectionThunkInfo.state === "loading" ? [] : comments}
         renderItem={({ item }) => {
           return <CommentListItem id={item} onReply={replyCallback} />;
         }}
@@ -58,30 +66,29 @@ export default function CommentSection({ id }: { id: string }) {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item}
         ListEmptyComponent={
-          commentSectionThunkInfo.state === "loading" ? (
-            <AnimatedLaodingIndicator />
-          ) : (
-            <Pressable onPress={fetch} hitSlop={SIZE_24}>
-              <CircleIcon name="retry" />
-            </Pressable>
-          )
+          <View style={styles.empty_component}>
+            {commentSectionThunkInfo.state === "loading" ? (
+              <AnimatedLaodingIndicator />
+            ) : (
+              <Pressable onPress={fetch} hitSlop={SIZE_24}>
+                <CircleIcon name="retry" />
+              </Pressable>
+            )}
+          </View>
         }
-        // contentContainerStyle={styles.content_container}
+        contentContainerStyle={[styles.content_container]}
       />
-      {/* <CommentBox
-        onSend={sendCallback}
-        comment={comment}
-        setComment={setComment}
-        replyTo={replyParams?.replyTo}
-        resetReplyTo={replyResetCallback}
-        postAuthor={author}
-      /> */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   content_container: {
-    paddingBottom: 120,
+    paddingBottom: 2 * SIZE_54,
+    ...paddingStyle.padding_top_12,
+  },
+  empty_component: {
+    ...layoutStyle.align_self_center,
+    marginTop: SIZE_36,
   },
 });

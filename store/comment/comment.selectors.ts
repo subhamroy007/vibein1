@@ -3,14 +3,10 @@ import { RootState } from "..";
 import { selectCommentById } from "./comment.adapter";
 import { selectAccountParams } from "../account/account.selectors";
 import { selectClientAccountParams } from "../client/client.selector";
-import {
-  CommentSelectorParams,
-  ReplySectionSelectorParams,
-} from "../../types/selector.types";
 
 export const selectCommentParams = createSelector(
   [(state: RootState) => state, (state: RootState, id: string) => id],
-  (state, commentId): CommentSelectorParams | undefined => {
+  (state, commentId) => {
     const comment = selectCommentById(state.comment, commentId);
 
     if (!comment) {
@@ -28,7 +24,7 @@ export const selectCommentParams = createSelector(
     if (!client) {
       return undefined;
     }
-    const result: CommentSelectorParams = {
+    const result = {
       ...comment,
       createdBy: author,
       isClientAuthorOfComment: author._id === client._id,

@@ -1,14 +1,5 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ReactNode, useCallback, useEffect } from "react";
+import { StatusBar, StyleSheet, View, useWindowDimensions } from "react-native";
 import AppText from "./AppText";
 import {
   useBackHandler,
@@ -22,126 +13,164 @@ import {
   layoutStyle,
   paddingStyle,
 } from "../styles";
-import { SIZE_16, SIZE_24 } from "../constants";
-import Animated, { Layout } from "react-native-reanimated";
+import { SIZE_16 } from "../constants";
+import Animated, {
+  Layout,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type AppModalProps = {
   children: ReactNode;
   title: string;
   onDismiss: () => void;
-  useMaxHeight?: boolean;
+  useFullScreen?: boolean;
+  useBreakPoint?: boolean;
 };
 
 export default function SwipeUpPortal({
   children,
   title,
   onDismiss,
-  useMaxHeight,
+  useFullScreen,
+  useBreakPoint,
 }: AppModalProps) {
-  const { height: screenHeight } = useWindowDimensions();
-
   const { onLayout: onContentContainerLayout, height: contentContainerHeight } =
     useLayout();
 
-  // const scrollToCallback = useCallback(
-  //   (position: number) => {
-  //     if (scrollViewRef.current) {
-  //       scrollViewRef.current.scrollTo({
-  //         animated: true,
-  //         y: position === 0 ? 0 : contentContainerHeight,
-  //         x: 0,
-  //       });
-  //     }
-  //   },
-  //   [contentContainerHeight]
-  // );
+  const { height: screenHeight } = useWindowDimensions();
 
-  // const onScrollEndDragCallback = useCallback(
-  //   ({
-  //     nativeEvent: { contentOffset, velocity },
-  //   }: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //     setDragging(false);
-  //     if (velocity?.y! >= 9) {
-  //       scrollToCallback(0);
-  //     } else if (velocity?.y! <= -9) {
-  //       scrollToCallback(1);
-  //     } else {
-  //       if (contentOffset.y < contentContainerHeight * 0.5) {
-  //         scrollToCallback(0);
-  //       } else {
-  //         scrollToCallback(1);
-  //       }
-  //     }
-  //   },
-  //   [contentContainerHeight, scrollToCallback]
-  // );
-
-  // const onScrollBeginDragCallback = useCallback(() => setDragging(true), []);
-
-  // const onMomentumScrollEndCallback = useCallback(
-  //   ({
-  //     nativeEvent: { contentOffset, velocity },
-  //   }: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //     if (contentOffset.y === 0) {
-  //       onDismiss();
-  //     }
-  //   },
-  //   [onDismiss]
-  // );
-
-  // const onScrollCallback = useCallback(
-  //   ({
-  //     nativeEvent: { contentOffset, velocity },
-  //   }: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //     if (contentOffset.y === 0 && !isDragging) {
-  //       onDismiss();
-  //     }
-  //   },
-  //   [onDismiss, isDragging]
-  // );
-
-  const backgroundPressCallback = useCallback(() => {
-    // scrollToCallback(0);
-  }, []);
-
-  // useBackHandler(() => {
-  //   scrollToCallback(0);
-  //   return true;
-  // });
-
-  // useEffect(() => {
-  //   scrollToCallback(1);
-  // }, [scrollToCallback]);
+  const { top } = useSafeAreaInsets();
 
   const { keyboardHeight, keyboardShown } = useKeyboard();
 
-  const currentContainerHeight = useMaxHeight ? 540 : undefined;
+  const calculatedHeight = useFullScreen
+    ? keyboardShown
+      ? screenHeight - keyboardHeight - top
+      : screenHeight - top
+    : undefined;
+
+  const translateYAnimatedValue = useSharedValue(0);
+
+  const translateYReference = useSharedValue(0);
+
+  const switchTo = useCallback(
+    (fraction: number) => {
+      if (contentContainerHeight > 0) {
+        const newTranslation = Math.round(-contentContainerHeight * fraction);
+
+        translateYAnimatedValue.value = withTiming(
+          newTranslation,
+          {
+            duration: 300,
+          },
+          (value) => {
+            translateYReference.value = newTranslation;
+            if (fraction === 0) {
+              runOnJS(onDismiss)();
+            }
+          }
+        );
+      }
+    },
+    [contentContainerHeight, onDismiss]
+  );
+
+  useEffect(() => {
+    switchTo(useBreakPoint ? 0.7 : 1);
+  }, [switchTo, useBreakPoint]);
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetY([-40, 40])
+    .onEnd((arg) => {
+      if (arg.velocityY >= 2500) {
+        runOnJS(switchTo)(0);
+      } else if (arg.velocityY <= -2500) {
+        runOnJS(switchTo)(1);
+      } else {
+        const fraction =
+          translateYAnimatedValue.value / -contentContainerHeight;
+
+        const offsets = useBreakPoint ? [0, 0.7, 1] : [0, 1];
+
+        const upperBoundIndex = offsets.findIndex(
+          (offset) => fraction < offset
+        );
+        const upperBound = offsets[upperBoundIndex];
+        const lowerBound = offsets[upperBoundIndex - 1];
+
+        if (fraction > (upperBound + lowerBound) / 2) {
+          runOnJS(switchTo)(upperBound);
+        } else {
+          runOnJS(switchTo)(lowerBound);
+        }
+      }
+    })
+    .onUpdate((arg) => {
+      translateYAnimatedValue.value = Math.max(
+        -contentContainerHeight,
+        Math.min(0, translateYReference.value + arg.translationY)
+      );
+    })
+    .onStart((arg) => {
+      translateYReference.value = translateYAnimatedValue.value;
+    });
+
+  const animatedContentContainerStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateYAnimatedValue.value }],
+    };
+  });
+
+  useBackHandler(() => {
+    switchTo(0);
+    return true;
+  });
+
+  const nativeGestutre = Gesture.Native();
+
+  const tapGesture = Gesture.Tap()
+    .onStart(() => {
+      runOnJS(switchTo)(0);
+    })
+    .enabled(false);
+
+  const complexGesture = Gesture.Race(nativeGestutre, panGesture, tapGesture);
 
   return (
     <Portal hostName="root">
-      <Pressable
-        style={[styles.root_container, StyleSheet.absoluteFill]}
-        onPress={onDismiss}
-      >
-        <StatusBar translucent={true} hidden={false} />
+      <GestureDetector gesture={complexGesture}>
         <Animated.View
-          layout={Layout.duration(400)}
           style={[
-            styles.content_container,
-            {
-              height: currentContainerHeight,
-            },
+            styles.root_container,
+            StyleSheet.absoluteFill,
+            { marginTop: top },
           ]}
-          onLayout={onContentContainerLayout}
         >
-          <View style={[styles.title_container]}>
-            <AppText weight="bold" size={SIZE_16}>
-              {title}
-            </AppText>
-          </View>
-          {children}
+          <Animated.View
+            // layout={Layout.duration(400)}
+            style={[
+              styles.content_container,
+              {
+                height: calculatedHeight,
+              },
+              animatedContentContainerStyle,
+            ]}
+            onLayout={onContentContainerLayout}
+          >
+            <View style={[styles.title_container]}>
+              <AppText weight="bold" size={SIZE_16}>
+                {title}
+              </AppText>
+            </View>
+            {children}
+          </Animated.View>
         </Animated.View>
-      </Pressable>
+      </GestureDetector>
     </Portal>
   );
 }
@@ -149,11 +178,11 @@ export default function SwipeUpPortal({
 const styles = StyleSheet.create({
   root_container: {
     ...backgroundStyle.background_color_3,
-    ...layoutStyle.justify_content_flex_end,
   },
   content_container: {
     ...backgroundStyle.background_color_1,
     ...borderStyle.border_top_radius_12,
+    top: "100%",
   },
   title_container: {
     ...borderStyle.border_bottom_width_hairline,

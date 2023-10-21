@@ -1,25 +1,24 @@
-import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { layoutStyle } from "../styles";
-import AppText from "../components/AppText";
 import { Tabs } from "expo-router";
+import { useDiscoverFeed } from "../hooks/client.hooks";
+import GridPostList from "../components/grid-post/GripPostList";
 
 export default function Discover() {
+  const { discoverFeedParams } = useDiscoverFeed();
+
+  if (!discoverFeedParams) {
+    return null;
+  }
+
   return (
-    <SafeAreaView
-      style={[
-        layoutStyle.flex_1,
-        layoutStyle.align_item_center,
-        layoutStyle.justify_content_space_around,
-      ]}
-    >
-      <StatusBar translucent={true} hidden={false} />
+    <SafeAreaView style={[layoutStyle.flex_1]}>
       <Tabs.Screen
         options={{
-          headerTitle: "",
+          headerShown: false,
         }}
       />
-      <AppText>Discover Feed</AppText>
+      <GridPostList postGroups={discoverFeedParams.postGrounps} />
     </SafeAreaView>
   );
 }

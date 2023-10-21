@@ -1,18 +1,17 @@
 import { ScrollView, View } from "react-native";
 import { layoutStyle, marginStyle, paddingStyle } from "../styles";
 import AppText from "./AppText";
-import SolidButton from "./SolidButton";
 import {
   COLOR_2,
   HEIGHT_SCALE_1,
   SIZE_11,
-  SIZE_30,
   SIZE_54,
   SIZE_6,
 } from "../constants";
 import useAccountParams from "../hooks/accountHook";
 import Avatar from "./Avatar";
 import AppTouchableHighlight from "./AppTouchableHighlight";
+import AppButton from "./AppButton";
 
 export default function PostTaggedAccount({ id }: { id: string }) {
   const { accountParams, toggleAccountFollowingStateCallback } =
@@ -52,20 +51,20 @@ export default function PostTaggedAccount({ id }: { id: string }) {
           layoutStyle.flex_2,
         ]}
       >
-        <AppText numberOfLines={1}>{username}</AppText>
-        <AppText numberOfLines={1} color={COLOR_2} size={SIZE_11}>
+        <AppText>{username}</AppText>
+        <AppText color={COLOR_2} size={SIZE_11}>
           {fullname}
         </AppText>
       </View>
-      <SolidButton
-        onPress={toggleAccountFollowingStateCallback}
-        title={
+      <AppButton
+        text={
           isFollowing
             ? "following"
             : hasRequestedToFollow
             ? "requested"
             : "follow"
         }
+        onPress={toggleAccountFollowingStateCallback}
         style={[layoutStyle.flex_1]}
       />
     </AppTouchableHighlight>
@@ -82,16 +81,15 @@ export function PostTag({ accounts }: PostTagProps) {
     HEIGHT_SCALE_1
   );
   return (
-    <View style={{ height: containerHeight }}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        overScrollMode="never"
-        contentContainerStyle={paddingStyle.padding_vertical_6}
-      >
-        {accounts.map((account) => (
-          <PostTaggedAccount id={account} key={account} />
-        ))}
-      </ScrollView>
-    </View>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      contentContainerStyle={paddingStyle.padding_vertical_6}
+      style={{ maxHeight: containerHeight }}
+    >
+      {accounts.map((account) => (
+        <PostTaggedAccount id={account} key={account} />
+      ))}
+    </ScrollView>
   );
 }

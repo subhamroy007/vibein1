@@ -1,7 +1,17 @@
-import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 import AppText from "./AppText";
-import { COLOR_1, COLOR_5 } from "../constants";
-import { backgroundStyle, layoutStyle, paddingStyle } from "../styles";
+import { COLOR_1 } from "../constants";
+import {
+  backgroundStyle,
+  borderStyle,
+  layoutStyle,
+  paddingStyle,
+} from "../styles";
 
 export type SolidButtonProps = {
   title: string;
@@ -18,17 +28,7 @@ export default function SolidButton({
 }: SolidButtonProps) {
   return (
     <TouchableOpacity
-      style={[
-        {
-          borderRadius: 6,
-        },
-        style,
-        paddingStyle.padding_vertical_8,
-        paddingStyle.padding_horizontal_16,
-        layoutStyle.align_item_center,
-        layoutStyle.justify_content_center,
-        backgroundStyle.background_color_5,
-      ]}
+      style={[style, styles.touchable_container]}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -38,3 +38,14 @@ export default function SolidButton({
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  touchable_container: {
+    ...paddingStyle.padding_vertical_8,
+    ...paddingStyle.padding_horizontal_16,
+    ...layoutStyle.align_item_center,
+    ...layoutStyle.justify_content_center,
+    ...backgroundStyle.background_color_5,
+    ...borderStyle.border_radius_6,
+  },
+});

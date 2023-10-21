@@ -30,7 +30,7 @@ export type ReplyAdapterParams = ReplyTemplateParams<string>;
  */
 export type ReplySectionStoreParams = {
   replies: string[];
-  replySectionThunkInfo: ThunkInfo | null;
+  replySectionThunkInfo: ThunkInfo;
 };
 
 /**
@@ -76,7 +76,7 @@ export type ChatItemIdentifierParams =
  */
 export type InboxStoreParams = {
   chats: ChatItemIdentifierParams[];
-  thunkInfo: ThunkInfo | null;
+  thunkInfo: ThunkInfo;
 };
 
 /**
@@ -93,6 +93,14 @@ export type PostFeedItemIdentfierParams = {
 export type HomeFeedStoreParams = {
   memoryAuthors: string[];
   posts: PostFeedItemIdentfierParams[];
+  thunkInfo: ThunkInfo;
+};
+
+/**
+ * represents the data params of the home feed
+ */
+export type DiscoverFeedStoreParams = {
+  posts: string[];
   thunkInfo: ThunkInfo;
 };
 
@@ -114,5 +122,6 @@ export type ClientStoreParams = {
   theme?: "light" | "dark" | "system";
   toasterMsg?: { text: string; timestamp: number };
   homeFeed?: HomeFeedStoreParams;
+  discoverFeed?: DiscoverFeedStoreParams;
   inbox?: InboxStoreParams;
 };

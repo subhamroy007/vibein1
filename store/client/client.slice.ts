@@ -17,7 +17,7 @@ const clientSlice = createSlice({
   reducers: {
     initInbox(state, action: PayloadAction<AccountResponseParams[]>) {
       state.inbox = {
-        thunkInfo: null,
+        thunkInfo: { state: "idle", lastRequestError: null, meta: null },
         chats: action.payload.map((item) => ({
           type: "one-to-one",
           username: item.username,
@@ -35,6 +35,15 @@ const clientSlice = createSlice({
           type: "post",
           postId: post._id,
         })),
+      };
+    },
+    initDiscoverFeed(
+      state,
+      action: PayloadAction<{ posts: PostResponseParams[] }>
+    ) {
+      state.discoverFeed = {
+        thunkInfo: { state: "idle", lastRequestError: null, meta: null },
+        posts: action.payload.posts.map((post) => post._id),
       };
     },
     updateToasterMsg(state, action: PayloadAction<string>) {
@@ -95,5 +104,11 @@ const clientReducer = clientSlice.reducer;
 export default clientReducer;
 
 export const {
-  actions: { updateToasterMsg, initInbox, initHomeFeed, initClientInfo },
+  actions: {
+    updateToasterMsg,
+    initInbox,
+    initHomeFeed,
+    initClientInfo,
+    initDiscoverFeed,
+  },
 } = clientSlice;

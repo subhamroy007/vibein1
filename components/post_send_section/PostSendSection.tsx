@@ -5,67 +5,15 @@ import {
   layoutStyle,
   marginStyle,
   paddingStyle,
-} from "../styles";
-import SolidButton from "./SolidButton";
+} from "../../styles";
+import SolidButton from "../SolidButton";
 import { useCallback, useState } from "react";
-import { useAppSelector } from "../hooks/storeHooks";
-import { selectInboxParams } from "../store/client/client.selector";
-import Avatar from "./Avatar";
-import AppText from "./AppText";
-import { COLOR_2, COLOR_5, SIZE_11, SIZE_24, SIZE_48 } from "../constants";
-import Icon from "./Icon";
-import AppTextInput from "./AppTextInput";
-import AppTouchableHighlight from "./AppTouchableHighlight";
-import { ChatItemIdentifierParams } from "../types/store.types";
-import { useAccountAdapterParams } from "../hooks/account.hooks";
-
-export type ChatListItemProps = {
-  username: string;
-  onSelect: (username: string) => void;
-  selected: boolean;
-};
-
-export function ChatListItem({
-  username,
-  onSelect,
-  selected,
-}: ChatListItemProps) {
-  const accountParams = useAccountAdapterParams(username, ["fullname"]);
-
-  if (!accountParams) {
-    return null;
-  }
-
-  const pressCallback = useCallback(
-    () => onSelect(username),
-    [onSelect, username]
-  );
-
-  return (
-    <AppTouchableHighlight
-      style={[
-        paddingStyle.padding_horizontal_12,
-        paddingStyle.padding_vertical_6,
-        layoutStyle.align_item_center,
-        layoutStyle.flex_direction_row,
-      ]}
-      onPress={pressCallback}
-    >
-      <Avatar url={accountParams.profilePictureUrl} size={SIZE_48} />
-      <View style={[marginStyle.margin_left_6, layoutStyle.flex_1]}>
-        <AppText>{accountParams.username}</AppText>
-        <AppText size={SIZE_11} color={COLOR_2}>
-          {accountParams.fullname}
-        </AppText>
-      </View>
-      {!selected ? (
-        <Icon name="radio-unchecked" size={SIZE_24} color={COLOR_2} />
-      ) : (
-        <Icon name="tick-circle-solid" size={SIZE_24} color={COLOR_5} />
-      )}
-    </AppTouchableHighlight>
-  );
-}
+import { useAppSelector } from "../../hooks/storeHooks";
+import { selectInboxParams } from "../../store/client/client.selector";
+import AppTextInput from "../AppTextInput";
+import { ChatItemIdentifierParams } from "../../types/store.types";
+import { OneToOneChatReceipient } from "./OneToOneChatReceipient";
+import { Portal } from "@gorhom/portal";
 
 export default function PostSendSection() {
   const [caption, setCaption] = useState("");
@@ -99,6 +47,10 @@ export default function PostSendSection() {
     );
   }, [caption, selectedChats]);
 
+  if (!inbox) {
+    return null;
+  }
+
   return (
     <View style={[layoutStyle.flex_1, backgroundStyle.background_color_1]}>
       <View style={[paddingStyle.padding_12, borderStyle.border_color_2]}>
@@ -124,12 +76,12 @@ export default function PostSendSection() {
         ]}
         nestedScrollEnabled
       >
-        {inbox.data.chats.map((chat) => {
+        {inbox.chats.map((chat, index) => {
           if (chat.type === "one-to-one") {
             return (
-              <ChatListItem
+              <OneToOneChatReceipient
                 username={chat.username}
-                key={chat.username}
+                key={chat.username + index}
                 onSelect={selectCallback}
                 selected={
                   selectedChats.find(

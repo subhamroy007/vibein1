@@ -1,20 +1,29 @@
-import { StyleSheet, Text, TextProps } from "react-native";
-import { SIZE_13 } from "../constants";
+import {
+  PixelRatio,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextProps,
+  TextStyle,
+} from "react-native";
+import { COLOR_4, SIZE_13 } from "../constants";
 
 export type AppTextProps = {
   size?: number;
   color?: string;
   weight?: "bold" | "medium" | "regular";
+  isMultiline?: boolean;
 } & TextProps;
 
 export default function AppText({
   size,
   color,
   weight,
+  isMultiline,
   style,
   ...restProps
 }: AppTextProps) {
-  const textStyle = [style];
+  const textStyle: StyleProp<TextStyle> = [];
 
   switch (weight) {
     case "bold":
@@ -29,11 +38,28 @@ export default function AppText({
       break;
   }
 
-  textStyle.push({ fontSize: size ? size : SIZE_13 });
+  const textSize = size ? size : SIZE_13;
 
-  textStyle.push({ color: color ? color : "black" });
+  const textHeight = isMultiline
+    ? PixelRatio.roundToNearestPixel(1.5 * textSize)
+    : textSize;
 
-  return <Text style={textStyle} {...restProps} ellipsizeMode="tail"></Text>;
+  textStyle.push({
+    fontSize: textSize,
+    lineHeight: textHeight,
+    color: color ? color : COLOR_4,
+  });
+
+  textStyle.push(style);
+
+  return (
+    <Text
+      ellipsizeMode="tail"
+      numberOfLines={isMultiline ? undefined : 1}
+      style={textStyle}
+      {...restProps}
+    ></Text>
+  );
 }
 
 const styles = StyleSheet.create({

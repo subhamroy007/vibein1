@@ -1,6 +1,7 @@
 import { StyleProp, TextStyle } from "react-native";
 import { AppDispatch, RootState } from "../store";
 import { Tabs } from "expo-router";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
 export type IconName =
   | "home-outline"
@@ -42,11 +43,14 @@ export type IconName =
   | "report"
   | "delete"
   | "pin-solid"
-  | "pin-outline"
   | "edit"
   | "link"
   | "share"
-  | "circulate";
+  | "circulate"
+  | "comment-outline"
+  | "album"
+  | "info"
+  | "play-outlne";
 
 export type IconProps = {
   name: IconName;

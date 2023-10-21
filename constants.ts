@@ -1,4 +1,4 @@
-import { Dimensions, PixelRatio } from "react-native";
+import { Dimensions, PixelRatio, StyleSheet } from "react-native";
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
 
@@ -50,6 +50,8 @@ export const SIZE_40 = sizeRelativeToWidth(11.11);
 
 export const SIZE_42 = sizeRelativeToWidth(11.66);
 
+export const SIZE_45 = sizeRelativeToWidth(12.5);
+
 export const SIZE_48 = sizeRelativeToWidth(13.33);
 
 export const SIZE_54 = sizeRelativeToWidth(15);
@@ -59,6 +61,8 @@ export const SIZE_60 = sizeRelativeToWidth(16.66);
 export const SIZE_70 = sizeRelativeToWidth(20);
 
 export const SIZE_90 = sizeRelativeToWidth(25);
+
+export const SIZE_120 = sizeRelativeToWidth(33.33);
 
 export const HEIGHT_SCALE_1 = sizeRelativeToHeight(60);
 export const HEIGHT_SCALE_2 = sizeRelativeToHeight(50);
@@ -78,6 +82,7 @@ export const COLOR_10 = "red";
 export const COLOR_11 = "#2EF642";
 export const COLOR_12 = "#1E6ADC";
 export const COLOR_13 = "#F2F2F2";
+export const COLOR_14 = "#404040";
 
 export const PRESSABLE_ANIMATION_DURATION = 150;
 export const PRESSABLE_ANIMATION_RESET_DURATION = 25;
@@ -85,3 +90,7 @@ export const PHOTO_MAX_BLUR_RADIUS = 12;
 
 export const LOADING_INDICATOR_ANIMATION_1_DURATION = 1500;
 export const LOADING_INDICATOR_ANIMATION_2_DURATION = 750;
+
+export const BOTTOM_TAB_HEIGHT = SIZE_45;
+
+export const POST_GRID_WIDTH = SIZE_120 - 2 * StyleSheet.hairlineWidth;

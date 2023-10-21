@@ -23,6 +23,28 @@ export const selectHomeFeedParams = createSelector(
   }
 );
 
+export const selectDiscoverFeedParams = createSelector(
+  [(state: RootState) => state.client.discoverFeed],
+  (feed) => {
+    if (!feed) {
+      return undefined;
+    }
+
+    const postGrounps = [];
+
+    for (let i = 0; i < feed.posts.length; i += 3) {
+      const postId1 = feed.posts[i];
+      const postId2 = feed.posts[i + 1] ? feed.posts[i + 1] : "";
+      const postId3 = feed.posts[i + 2] ? feed.posts[i + 2] : "";
+      const groupId = postId1 + postId2 + postId3;
+
+      postGrounps.push({ groupId, posts: feed.posts.slice(i, i + 3) });
+    }
+
+    return { postGrounps, thunkInfo: feed.thunkInfo };
+  }
+);
+
 export const selectInboxParams = createSelector(
   [(state: RootState) => state.client.inbox],
   (inbox) => {

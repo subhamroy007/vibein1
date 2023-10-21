@@ -1,10 +1,13 @@
 import { useCallback } from "react";
-import { selectPostCommentSection } from "../store/post/post.selector";
+import {
+  selectGridPostParams,
+  selectPostCommentSection,
+} from "../store/post/post.selector";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
 import { RootState } from "../store";
 import { fetchComments } from "../store/post/post.thunk";
 
-export default function useCommentSection(postId: string) {
+export function useCommentSection(postId: string) {
   const dispatch = useAppDispatch();
 
   const commentSectionSelectorCallback = useCallback(
@@ -21,5 +24,18 @@ export default function useCommentSection(postId: string) {
   return {
     storeParams,
     fetch,
+  };
+}
+
+export function useGridPost(id: string) {
+  const postSelectotCallback = useCallback(
+    (state: RootState) => selectGridPostParams(state, id),
+    [id]
+  );
+
+  const postParams = useAppSelector(postSelectotCallback);
+
+  return {
+    postParams,
   };
 }

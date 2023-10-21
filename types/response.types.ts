@@ -72,3 +72,13 @@ export type CommentSectionResponseDataParams = {
 
 export type CommentSectionResponseParams =
   ThunkResponseParams<CommentSectionResponseDataParams>;
+
+/**
+ * reprsents the data params of the request of a comment replies section
+ */
+export type ReplySectionResponseDataParams = {
+  replies: ReplyResponseParams[];
+};
+
+export type ReplySectionResponseParams =
+  ThunkResponseParams<ReplySectionResponseDataParams>;

@@ -127,7 +127,6 @@ const postSlice = createSlice({
       if (targetPost) {
         targetPost.comments = [
           ...action.payload.comments.map((comment) => comment._id),
-          ...targetPost.comments,
         ];
         targetPost.commentSectionThunkInfo = {
           lastRequestError: null,

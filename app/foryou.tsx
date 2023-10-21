@@ -13,7 +13,6 @@ export default function Foryou() {
         layoutStyle.justify_content_space_around,
       ]}
     >
-      <StatusBar translucent={true} hidden={false} />
       <Tabs.Screen
         options={{
           headerTitle: "",

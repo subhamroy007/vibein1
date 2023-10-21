@@ -35,6 +35,7 @@ import Option from "./Option";
 import Avatar from "./Avatar";
 import CircleSolidIcon from "./CircleSolidIcon";
 import CommentSection from "./CommentSection";
+import PostSendSection from "./post_send_section/PostSendSection";
 
 export type PostProps = {
   id: string;
@@ -104,6 +105,13 @@ export default function ClassicPost({ id }: PostProps) {
   const toggleCommentSectionPortalCallback = useCallback(
     () => setCommentSectionPortalState((prevState) => !prevState),
     [setCommentSectionPortalState]
+  );
+
+  const [isSendSectionPortalOpen, setSendSectionPortalState] = useState(false);
+
+  const toggleSendSectionPortalCallback = useCallback(
+    () => setSendSectionPortalState((prevState) => !prevState),
+    [setSendSectionPortalState]
   );
 
   const clientAccountParams = useAppSelector((state) =>
@@ -219,10 +227,13 @@ export default function ClassicPost({ id }: PostProps) {
             color={isLiked ? COLOR_6 : undefined}
           />
         </AppPressable>
-        <Pressable hitSlop={SIZE_24}>
+        <Pressable
+          hitSlop={SIZE_24}
+          onPress={toggleCommentSectionPortalCallback}
+        >
           <Icon name="comment" size={SIZE_27} />
         </Pressable>
-        <Pressable hitSlop={SIZE_24}>
+        <Pressable hitSlop={SIZE_24} onPress={toggleSendSectionPortalCallback}>
           <Icon name="send-outline" size={SIZE_27} />
         </Pressable>
         <AppPressable onPress={togglePostSaveStateCallback} hitSlop={SIZE_24}>
@@ -337,8 +348,20 @@ export default function ClassicPost({ id }: PostProps) {
         <SwipeUpPortal
           onDismiss={toggleCommentSectionPortalCallback}
           title="Comments"
+          useFullScreen
+          useBreakPoint
         >
           <CommentSection id={id} />
+        </SwipeUpPortal>
+      )}
+      {isSendSectionPortalOpen && (
+        <SwipeUpPortal
+          onDismiss={toggleSendSectionPortalCallback}
+          title="Send To"
+          useFullScreen
+          useBreakPoint
+        >
+          <PostSendSection />
         </SwipeUpPortal>
       )}
     </Animated.View>

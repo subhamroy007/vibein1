@@ -1,5 +1,4 @@
-import { Pressable, View } from "react-native";
-import useComment from "../hooks/commentHook";
+import { Pressable, StyleSheet, View } from "react-native";
 import { layoutStyle, marginStyle, paddingStyle } from "../styles";
 import AppText from "./AppText";
 import HighlightedText from "./HighlightedText";
@@ -8,10 +7,11 @@ import {
   COLOR_10,
   COLOR_6,
   SIZE_11,
-  SIZE_12,
+  SIZE_18,
   SIZE_20,
   SIZE_24,
   SIZE_30,
+  SIZE_36,
 } from "../constants";
 import AppPressable from "./AppPressable";
 import { useCallback, useState } from "react";
@@ -50,33 +50,26 @@ export default function Reply({ id, onReply }: ReplyProps) {
     return null;
   }
 
-  const { content, createdAt, createdBy, isLiked, noOfLikes } = replyParams;
+  const {
+    content,
+    createdAt,
+    createdBy,
+    isLiked,
+    noOfLikes,
+    isClientAuthorOfReply,
+  } = replyParams;
 
   return (
-    <Pressable
-      style={[
-        layoutStyle.flex_direction_row,
-        layoutStyle.align_item_flex_start,
-        paddingStyle.padding_12,
-      ]}
-      onLongPress={toggleMoreOptionPortal}
-    >
+    <View style={styles.root_container}>
       <Avatar
         url={createdBy.profilePictureUrl}
-        style={{ marginLeft: 36 }}
+        style={styles.avatar}
         size={SIZE_30}
       />
-      <View style={[layoutStyle.flex_1, marginStyle.margin_horizontal_6]}>
-        <AppText>{createdBy.username}</AppText>
+      <View style={styles.content_container}>
+        <AppText style={marginStyle.margin_top_3}>{createdBy.username}</AppText>
         <HighlightedText>{content}</HighlightedText>
-        <View
-          style={[
-            layoutStyle.flex_direction_row,
-            layoutStyle.align_item_center,
-            marginStyle.margin_top_6,
-            layoutStyle.align_self_start,
-          ]}
-        >
+        <View style={styles.info_container}>
           <AppText color={"grey"} onPress={replyPressCallback} size={SIZE_11}>
             Reply
           </AppText>
@@ -87,20 +80,17 @@ export default function Reply({ id, onReply }: ReplyProps) {
           >
             {formatTimeDifference(createdAt)}
           </AppText>
+          <Pressable
+            hitSlop={SIZE_18}
+            style={marginStyle.margin_left_24}
+            onPress={toggleMoreOptionPortal}
+          >
+            <Icon color={"grey"} name="more-horiz" size={SIZE_18} />
+          </Pressable>
         </View>
       </View>
-      <View
-        style={[
-          layoutStyle.align_self_start,
-          layoutStyle.align_item_center,
-          marginStyle.margin_top_6,
-        ]}
-      >
-        <AppPressable
-          onPress={toggleReplyLikeStateCallback}
-          hitSlop={SIZE_24}
-          pressRetentionOffset={SIZE_24}
-        >
+      <View style={styles.like_container}>
+        <AppPressable onPress={toggleReplyLikeStateCallback} hitSlop={SIZE_24}>
           <Icon
             name={isLiked ? "heart-solid" : "heart-outline"}
             color={isLiked ? COLOR_6 : "grey"}
@@ -121,26 +111,56 @@ export default function Reply({ id, onReply }: ReplyProps) {
       {isMoreOptionPortalOpen && (
         <SwipeUpPortal onDismiss={toggleMoreOptionPortal} title="Options">
           <View>
-            <Option
-              icon="explore"
-              text="Block Account"
-              onPress={blockPressCallback}
-            />
-            <Option
-              icon="delete"
-              text="Delete"
-              color={COLOR_10}
-              onPress={deletePressCallback}
-            />
-            <Option
-              icon="report"
-              text="Report"
-              color={COLOR_10}
-              onPress={reportPressCallback}
-            />
+            {isClientAuthorOfReply ? (
+              <Option
+                icon="delete"
+                text="Delete"
+                color={COLOR_10}
+                onPress={deletePressCallback}
+              />
+            ) : (
+              <>
+                <Option
+                  icon="explore"
+                  text="Block Account"
+                  onPress={blockPressCallback}
+                />
+
+                <Option
+                  icon="report"
+                  text="Report"
+                  color={COLOR_10}
+                  onPress={reportPressCallback}
+                />
+              </>
+            )}
           </View>
         </SwipeUpPortal>
       )}
-    </Pressable>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root_container: {
+    ...layoutStyle.flex_direction_row,
+    ...layoutStyle.align_item_flex_start,
+    ...paddingStyle.padding_12,
+  },
+  like_container: {
+    ...layoutStyle.align_item_center,
+    ...marginStyle.margin_top_6,
+  },
+  avatar: {
+    marginLeft: SIZE_36,
+  },
+  content_container: {
+    ...layoutStyle.flex_1,
+    ...marginStyle.margin_horizontal_6,
+  },
+  info_container: {
+    ...layoutStyle.flex_direction_row,
+    ...layoutStyle.align_item_center,
+    ...marginStyle.margin_top_6,
+  },
+});

@@ -3,6 +3,7 @@ import { fetchComments } from "../post/post.thunk";
 import { ReplyResponseParams } from "../../types/response.types";
 import { ReplyAdapterParams } from "../../types/store.types";
 import { getReplyInitialState, upsertManyReply } from "./reply.adapter";
+import { fetchReplies } from "../comment/comment.thunks";
 
 /**
  * utlity function that takes a single argument of type ReplyResponseParams
@@ -58,6 +59,15 @@ const replySlice = createSlice({
             );
           }
         });
+      }
+    );
+    builder.addCase(
+      fetchReplies.fulfilled,
+      (state, { payload: { replies } }) => {
+        upsertManyReply(
+          state,
+          replies.map((reply) => tranformToReplyAdapterParams(reply))
+        );
       }
     );
   },

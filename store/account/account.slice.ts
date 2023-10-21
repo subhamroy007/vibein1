@@ -4,6 +4,7 @@ import { getHomeFeedData } from "../client/client.thunk";
 import { fetchComments } from "../post/post.thunk";
 import { AccountResponseParams } from "../../types/response.types";
 import { AccountAdapterParams } from "../../types/store.types";
+import { fetchReplies } from "../comment/comment.thunks";
 
 function tranformToAccountAdapterParams(
   account: AccountResponseParams
@@ -84,6 +85,16 @@ const accountSlice = createSlice({
               )
             );
           }
+        });
+        upsertManyAccount(state, accounts);
+      }
+    );
+    builder.addCase(
+      fetchReplies.fulfilled,
+      (state, { payload: { replies } }) => {
+        const accounts: AccountAdapterParams[] = [];
+        replies.forEach((reply) => {
+          accounts.push(tranformToAccountAdapterParams(reply.createdBy));
         });
         upsertManyAccount(state, accounts);
       }

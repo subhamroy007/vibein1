@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { BottomTabBarProps } from "../types/component.types";
 import { layoutStyle, borderStyle } from "../styles";
-import { SIZE_24, SIZE_27, SIZE_42, SIZE_48 } from "../constants";
+import { BOTTOM_TAB_HEIGHT, SIZE_24, SIZE_27 } from "../constants";
 import { useCallback } from "react";
 import Icon from "./Icon";
 
@@ -34,30 +34,26 @@ export default function BottomTabBar({ navigation, state }: BottomTabBarProps) {
       <Pressable hitSlop={SIZE_24} onPress={homePressCallback}>
         <Icon
           name={currentTabName === "index" ? "home-solid" : "home-outline"}
-          size={SIZE_27}
         />
       </Pressable>
       <Pressable hitSlop={SIZE_24} onPress={foryouPressCallback}>
         <Icon
           name={currentTabName === "foryou" ? "heart-solid" : "heart-outline"}
-          size={SIZE_27}
         />
       </Pressable>
       <Pressable hitSlop={SIZE_24}>
-        <Icon name="add-circle-outline" size={SIZE_27} />
+        <Icon name="add-circle-outline" />
       </Pressable>
       <Pressable hitSlop={SIZE_24} onPress={discoverPressCallback}>
         <Icon
           name={
             currentTabName === "discover" ? "search-bold" : "search-regular"
           }
-          size={SIZE_27}
         />
       </Pressable>
       <Pressable hitSlop={SIZE_24} onPress={inboxPressCallback}>
         <Icon
           name={currentTabName === "inbox" ? "send-solid" : "send-outline"}
-          size={SIZE_27}
         />
       </Pressable>
     </View>
@@ -71,6 +67,6 @@ const styles = StyleSheet.create({
     ...layoutStyle.flex_direction_row,
     ...borderStyle.border_top_width_hairline,
     ...borderStyle.border_color_2,
-    height: SIZE_48,
+    height: BOTTOM_TAB_HEIGHT,
   },
 });

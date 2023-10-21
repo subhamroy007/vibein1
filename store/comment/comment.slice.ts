@@ -3,6 +3,7 @@ import { getCommentInitialState, upsertManyComment } from "./comment.adapter";
 import { fetchComments } from "../post/post.thunk";
 import { CommentResponseParams } from "../../types/response.types";
 import { CommentAdapterParams } from "../../types/store.types";
+import { fetchReplies } from "./comment.thunks";
 
 /**
  * utlity function that takes a single argument of type CommentResponseParams
@@ -19,7 +20,11 @@ function tranformToCommentAdapterParams(
     ...comment,
     createdBy: comment.createdBy.username,
     replies: comment.replies ? comment.replies.map((reply) => reply._id) : [],
-    replySectionThunkInfo: null,
+    replySectionThunkInfo: {
+      lastRequestError: null,
+      meta: null,
+      state: "idle",
+    },
   };
 }
 
@@ -71,6 +76,50 @@ const commentSlice = createSlice({
         );
       }
     );
+    builder.addCase(fetchReplies.pending, (state, action) => {
+      const targetCommentId = action.meta.arg; //fetch the target comment id;
+      const targetComment = state.entities[targetCommentId]; //fetch the target comment from the store;
+      if (targetComment) {
+        targetComment.replySectionThunkInfo = {
+          lastRequestError: null,
+          meta: null,
+          state: "loading",
+        };
+      }
+    });
+
+    builder.addCase(fetchReplies.rejected, (state, action) => {
+      const targetCommentId = action.meta.arg; //fetch the target comment id;
+      const targetComment = state.entities[targetCommentId]; //fetch the target comment from the store;
+      if (targetComment) {
+        targetComment.replySectionThunkInfo = {
+          lastRequestError: action.payload!,
+          meta: {
+            lastRequestStatusCode: action.meta.statusCode!,
+            lastRequestTimestamp: action.meta.requestTimestamp!,
+          },
+          state: "failed",
+        };
+      }
+    });
+
+    builder.addCase(fetchReplies.fulfilled, (state, action) => {
+      const targetCommentId = action.meta.arg; //fetch the target comment id;
+      const targetComment = state.entities[targetCommentId]; //fetch the target comment from the store;
+      if (targetComment) {
+        targetComment.replies = [
+          ...action.payload.replies.map((reply) => reply._id),
+        ];
+        targetComment.replySectionThunkInfo = {
+          lastRequestError: null,
+          meta: {
+            lastRequestStatusCode: action.meta.statusCode!,
+            lastRequestTimestamp: action.meta.requestTimestamp!,
+          },
+          state: "success",
+        };
+      }
+    });
   },
 });
 

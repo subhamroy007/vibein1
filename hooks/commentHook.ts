@@ -6,6 +6,7 @@ import {
   toggleCommentLikeState,
   toggleCommentPinkState,
 } from "../store/comment/comment.slice";
+import { fetchReplies } from "../store/comment/comment.thunks";
 
 export default function useComment(id: string) {
   const commentSelectotCallback = useCallback(
@@ -25,9 +26,14 @@ export default function useComment(id: string) {
     storeDispatch(toggleCommentPinkState(id));
   }, [id]);
 
+  const getReplies = useCallback(() => {
+    storeDispatch(fetchReplies(id));
+  }, [id]);
+
   return {
     commentParams,
     toggleCommentLikeStateCallback,
     toggleCommentPinStateCallback,
+    getReplies,
   };
 }
