@@ -1,7 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Vibration, View } from "react-native";
 import { useGridPost } from "../../hooks/post.hooks";
 import {
   COLOR_1,
+  LONG_PRESS_VIBRATION_DURATION,
   POST_GRID_WIDTH,
   SIZE_11,
   SIZE_12,
@@ -13,6 +14,7 @@ import Icon from "../Icon";
 import AppText from "../AppText";
 import { formatNumber } from "../../utility";
 import { usePhotoFetch } from "../../hooks/utility.hooks";
+import { useCallback } from "react";
 
 export type GridPostProps = {
   id: string;
@@ -20,6 +22,8 @@ export type GridPostProps = {
   portrait?: boolean;
   showPin?: boolean;
   showViews?: boolean;
+  onPress: (id: string) => void;
+  onLongPress: (id: string) => void;
 };
 
 export function GridPost({
@@ -28,6 +32,8 @@ export function GridPost({
   portrait,
   showPin,
   showViews,
+  onLongPress,
+  onPress,
 }: GridPostProps) {
   const { postParams } = useGridPost(id);
 
@@ -38,6 +44,15 @@ export function GridPost({
     photoLoadingState,
   } = usePhotoFetch(true);
 
+  const pressCallback = useCallback(() => {
+    onPress(id);
+  }, [id, onPress]);
+
+  const longPressCallback = useCallback(() => {
+    Vibration.vibrate(LONG_PRESS_VIBRATION_DURATION);
+    onLongPress(id);
+  }, [id, onLongPress]);
+
   if (!postParams) {
     return null;
   }
@@ -45,7 +60,10 @@ export function GridPost({
   const { previewUrl, isAlbum, isPinned, noOfViews } = postParams;
 
   return (
-    <View
+    <Pressable
+      delayLongPress={300}
+      onPress={pressCallback}
+      onLongPress={longPressCallback}
       style={[
         {
           aspectRatio: portrait ? "9/16" : "1/1",
@@ -103,6 +121,6 @@ export function GridPost({
           )}
         </>
       )}
-    </View>
+    </Pressable>
   );
 }

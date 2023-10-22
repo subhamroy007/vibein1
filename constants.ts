@@ -94,3 +94,5 @@ export const LOADING_INDICATOR_ANIMATION_2_DURATION = 750;
 export const BOTTOM_TAB_HEIGHT = SIZE_45;
 
 export const POST_GRID_WIDTH = SIZE_120 - 2 * StyleSheet.hairlineWidth;
+
+export const LONG_PRESS_VIBRATION_DURATION = 50;

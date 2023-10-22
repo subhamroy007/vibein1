@@ -7,6 +7,8 @@ export type GridPostGroupProps = {
   portrait?: boolean;
   showPin?: boolean;
   showViews?: boolean;
+  onPress: (id: string) => void;
+  onLongPress: (id: string) => void;
 };
 
 export function GridPostGroup({ posts, ...restProps }: GridPostGroupProps) {

@@ -28,18 +28,23 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import AnimatedPressable from "../AnimatedPressable";
+
+export type PostPreviewProps = {
+  id: string;
+  scrollOffset: SharedValue<number>;
+  index: number;
+  length: number;
+  onDismiss: () => void;
+};
 
 export default function PostPreview({
   id,
   index,
   length,
   scrollOffset,
-}: {
-  id: string;
-  scrollOffset: SharedValue<number>;
-  index: number;
-  length: number;
-}) {
+  onDismiss,
+}: PostPreviewProps) {
   const { width: screenWidth } = useWindowDimensions();
 
   const { postParams, togglePostLikeStateCallback } = usePostPreview(id);
@@ -95,13 +100,14 @@ export default function PostPreview({
   const { createdBy, isLiked, originalUrl, previewUrl } = postParams;
 
   return (
-    <Animated.View
+    <AnimatedPressable
       style={[
         { width: screenWidth },
         styles.root_container,
         animatedRootContainerStyle,
         layoutStyle.flex_1,
       ]}
+      onPress={onDismiss}
     >
       <Animated.View
         style={[styles.content_container, animatedContentContainerStyle]}
@@ -149,7 +155,7 @@ export default function PostPreview({
           <Icon name="send-outline" size={SIZE_24} />
         </View>
       </Animated.View>
-    </Animated.View>
+    </AnimatedPressable>
   );
 }
 

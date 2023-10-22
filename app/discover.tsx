@@ -3,9 +3,14 @@ import { layoutStyle } from "../styles";
 import { Tabs } from "expo-router";
 import { useDiscoverFeed } from "../hooks/client.hooks";
 import GridPostList from "../components/grid-post/GripPostList";
+import { useCallback } from "react";
 
 export default function Discover() {
   const { discoverFeedParams } = useDiscoverFeed();
+
+  const gridPressCallback = useCallback((id: string) => {
+    console.log("grid pressed", id);
+  }, []);
 
   if (!discoverFeedParams) {
     return null;
@@ -18,7 +23,10 @@ export default function Discover() {
           headerShown: false,
         }}
       />
-      <GridPostList postGroups={discoverFeedParams.postGrounps} />
+      <GridPostList
+        postGroups={discoverFeedParams.postGrounps}
+        onPress={gridPressCallback}
+      />
     </SafeAreaView>
   );
 }
