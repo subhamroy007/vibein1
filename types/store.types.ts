@@ -48,10 +48,19 @@ export type CommentSectionStoreParams = {
 };
 
 /**
+ * represents the similar post section of a post
+ */
+export type SimilarPostSectionStoreParams = {
+  similarPosts: PostFeedItemIdentfierParams[];
+  similarPostSectionThunkInfo: ThunkInfo;
+};
+
+/**
  * represents a post and all the associated parameters
  */
 export type PostAdapterParams = PostTemplateParams<string> &
-  CommentSectionStoreParams;
+  CommentSectionStoreParams &
+  SimilarPostSectionStoreParams;
 
 /**
  * represents an account and all the associated parameters

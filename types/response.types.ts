@@ -82,3 +82,13 @@ export type ReplySectionResponseDataParams = {
 
 export type ReplySectionResponseParams =
   ThunkResponseParams<ReplySectionResponseDataParams>;
+
+/**
+ * reprsents the data params of the similar posts requests
+ */
+export type SimilarPostResponseDataParams = {
+  posts: PostResponseParams[];
+};
+
+export type SimilarPostResponseParams =
+  ThunkResponseParams<SimilarPostResponseDataParams>;

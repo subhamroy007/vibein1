@@ -4,6 +4,7 @@ import { selectPostById } from "./post.adapter";
 import { selectAccountParams } from "../account/account.selectors";
 import { selectClientAccountParams } from "../client/client.selector";
 import { CommentSectionSelectorParams } from "../../types/selector.types";
+import { SimilarPostSectionStoreParams } from "../../types/store.types";
 
 export const selectPostParams = createSelector(
   [(state: RootState) => state, (state: RootState, id: string) => id],
@@ -109,5 +110,23 @@ export const selectPostPreviewParams = createSelector(
     };
 
     return postOutput;
+  }
+);
+
+export const selectSimilarPostSection = createSelector(
+  [(state: RootState) => state, (state: RootState, id: string) => id],
+  (state, postId) => {
+    const post = selectPostById(state.post, postId);
+
+    if (!post) {
+      return undefined;
+    }
+
+    const output: SimilarPostSectionStoreParams = {
+      similarPosts: post.similarPosts,
+      similarPostSectionThunkInfo: post.similarPostSectionThunkInfo,
+    };
+
+    return output;
   }
 );

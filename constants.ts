@@ -96,3 +96,5 @@ export const BOTTOM_TAB_HEIGHT = SIZE_45;
 export const POST_GRID_WIDTH = SIZE_120 - 2 * StyleSheet.hairlineWidth;
 
 export const LONG_PRESS_VIBRATION_DURATION = 50;
+
+export const HEADER_HEIGHT = SIZE_70;

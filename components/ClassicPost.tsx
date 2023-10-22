@@ -1,10 +1,10 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import AppText from "./AppText";
 import Icon from "./Icon";
 import HighlightedText from "./HighlightedText";
-import Album from "./Album";
 import Animated, {
   Easing,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -36,18 +36,23 @@ import Avatar from "./Avatar";
 import CircleSolidIcon from "./CircleSolidIcon";
 import CommentSection from "./CommentSection";
 import PostSendSection from "./post_send_section/PostSendSection";
+import Album from "./Album/Album";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useSpringAnimation } from "../hooks/animation.hooks";
 
 export type PostProps = {
   id: string;
+  onPress: (id: string) => void;
 };
 
-export default function ClassicPost({ id }: PostProps) {
+export default function ClassicPost({ id, onPress }: PostProps) {
   const {
     postParams,
     togglePostLikeStateCallback,
     togglePostSaveStateCallback,
   } = usePost(id);
-  const animatedValue = useSharedValue(1);
+
+  const { width: screenWidth } = useWindowDimensions();
 
   const [isTagPortalOpen, setTagPortalOpen] = useState(false);
 
@@ -56,41 +61,37 @@ export default function ClassicPost({ id }: PostProps) {
     []
   );
 
-  const animatedHeartIconStyle = useAnimatedStyle(() => {
-    return {
-      opacity: animatedValue.value === 1 ? 0 : 1,
-      transform: [
-        {
-          scale: animatedValue.value,
-        },
-      ],
-      position: "absolute",
-    };
-  });
+  const {
+    animatedStyle: animatedHeartIconStyle,
+    startAnimation: startHeartIconAnimation,
+  } = useSpringAnimation();
 
-  const onDoubleTapCallback = useCallback(() => {
+  const doubleTapCallback = useCallback(() => {
+    startHeartIconAnimation();
     if (!postParams?.isLiked) {
       togglePostLikeStateCallback();
     }
+  }, [
+    postParams?.isLiked,
+    togglePostLikeStateCallback,
+    startHeartIconAnimation,
+  ]);
 
-    animatedValue.value = withSequence(
-      withTiming(1, {
-        duration: 50,
-        easing: Easing.ease,
-      }),
-      withTiming(2, {
-        duration: 400,
-        easing: Easing.elastic(2.5),
-      }),
-      withDelay(
-        800,
-        withTiming(1, {
-          duration: 100,
-          easing: Easing.ease,
-        })
-      )
-    );
-  }, [postParams?.isLiked, togglePostLikeStateCallback]);
+  const doubleTapGesture = Gesture.Tap()
+    .numberOfTaps(2)
+    .onStart(() => {
+      runOnJS(doubleTapCallback)();
+    });
+
+  const singleTapCallback = useCallback(() => {
+    onPress(id);
+  }, [id, onPress]);
+
+  const singleTapGesture = Gesture.Tap().onStart(() => {
+    runOnJS(singleTapCallback)();
+  });
+
+  const complexGesture = Gesture.Exclusive(doubleTapGesture, singleTapGesture);
 
   const [isMoreOptionPortalOpen, setMoreOptionPortalState] = useState(false);
 
@@ -118,11 +119,16 @@ export default function ClassicPost({ id }: PostProps) {
     selectClientAccountParams(state)
   );
 
+  const [isCaptionCollapsed, setCaptionCollapsedState] = useState(true);
+
+  const toggleCaptionCollapsedState = useCallback(
+    () => setCaptionCollapsedState((prevState) => !prevState),
+    []
+  );
+
   const copyToPressCallback = useCallback(() => {}, []);
 
   const shareToPressCallback = useCallback(() => {}, []);
-
-  const sendToPressCallback = useCallback(() => {}, []);
 
   const addToMemoryPressCallback = useCallback(() => {}, []);
 
@@ -190,9 +196,12 @@ export default function ClassicPost({ id }: PostProps) {
         style={[
           layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
+          { width: screenWidth, aspectRatio: "3/4" },
         ]}
       >
-        <Album photos={photos} onDoubleTap={onDoubleTapCallback} />
+        <GestureDetector gesture={complexGesture}>
+          <Album photos={photos} containerAspectRatio={"3/4"} type="light" />
+        </GestureDetector>
         <Animated.View style={animatedHeartIconStyle}>
           <Icon name="heart-solid" size={SIZE_42} color={COLOR_6} />
         </Animated.View>
@@ -271,7 +280,11 @@ export default function ClassicPost({ id }: PostProps) {
             </View>
           )}
         {caption && (
-          <HighlightedText style={marginStyle.margin_bottom_3}>
+          <HighlightedText
+            style={marginStyle.margin_bottom_3}
+            collapsed={isCaptionCollapsed}
+            onPress={toggleCaptionCollapsedState}
+          >
             {caption}
           </HighlightedText>
         )}
@@ -321,7 +334,7 @@ export default function ClassicPost({ id }: PostProps) {
                 <Option icon="edit" onPress={updatePressCallback} text="Edit" />
 
                 <Option
-                  icon={isPinned ? "pin-solid" : "pin-outline"}
+                  icon={"pin-solid"}
                   text={isPinned ? "Unpin" : "Pin"}
                   onPress={pinPressCallback}
                 />

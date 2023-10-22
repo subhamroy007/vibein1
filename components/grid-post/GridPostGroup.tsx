@@ -13,7 +13,7 @@ export type GridPostGroupProps = {
 
 export function GridPostGroup({ posts, ...restProps }: GridPostGroupProps) {
   return (
-    <View style={[layoutStyle.flex_direction_row]}>
+    <View style={layoutStyle.flex_direction_row}>
       {posts.map((post, index) => (
         <GridPost id={post} key={post} first={index === 0} {...restProps} />
       ))}

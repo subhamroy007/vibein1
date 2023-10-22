@@ -1,16 +1,21 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { layoutStyle } from "../styles";
-import { Tabs } from "expo-router";
-import { useDiscoverFeed } from "../hooks/client.hooks";
-import GridPostList from "../components/grid-post/GripPostList";
+import { layoutStyle } from "../../styles";
+import { Tabs, useRouter } from "expo-router";
+import { useDiscoverFeed } from "../../hooks/client.hooks";
+import GridPostList from "../../components/grid-post/GripPostList";
 import { useCallback } from "react";
 
 export default function Discover() {
   const { discoverFeedParams } = useDiscoverFeed();
 
-  const gridPressCallback = useCallback((id: string) => {
-    console.log("grid pressed", id);
-  }, []);
+  const router = useRouter();
+
+  const gridPressCallback = useCallback(
+    (id: string) => {
+      router.push({ pathname: `/discover/classic_post_feed/${id}` });
+    },
+    [router]
+  );
 
   if (!discoverFeedParams) {
     return null;

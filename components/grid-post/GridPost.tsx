@@ -5,8 +5,8 @@ import {
   LONG_PRESS_VIBRATION_DURATION,
   POST_GRID_WIDTH,
   SIZE_11,
-  SIZE_12,
   SIZE_15,
+  SIZE_6,
 } from "../../constants";
 import { Image } from "expo-image";
 import { backgroundStyle, layoutStyle } from "../../styles";
@@ -67,20 +67,16 @@ export function GridPost({
       style={[
         {
           aspectRatio: portrait ? "9/16" : "1/1",
-          width: POST_GRID_WIDTH,
           marginLeft: first ? 0 : 3 * StyleSheet.hairlineWidth,
         },
-        backgroundStyle.background_color_7,
+        styles.root_container,
       ]}
     >
       {photoLoadingState !== "failed" && (
         <Image
           contentFit="cover"
           source={previewUrl}
-          style={[
-            layoutStyle.width_100_percent,
-            layoutStyle.height_100_percent,
-          ]}
+          style={styles.image}
           onLoad={photoLoadCallback}
           onLoadStart={photoLoadStartCallback}
           onError={photoLoadErrorCallback}
@@ -93,7 +89,7 @@ export function GridPost({
               name="album"
               size={SIZE_15}
               color={COLOR_1}
-              style={[layoutStyle.position_absolute, { top: 6, left: 6 }]}
+              style={styles.albumIcon}
             />
           )}
           {isPinned && showPin && (
@@ -101,18 +97,11 @@ export function GridPost({
               name="pin-solid"
               size={SIZE_15}
               color={COLOR_1}
-              style={[layoutStyle.position_absolute, { top: 6, right: 6 }]}
+              style={styles.pinIcon}
             />
           )}
           {noOfViews > 0 && showViews && (
-            <View
-              style={[
-                layoutStyle.flex_direction_row,
-                layoutStyle.align_item_center,
-                layoutStyle.position_absolute,
-                { bottom: 6, right: 6 },
-              ]}
-            >
+            <View style={styles.views_container}>
               <AppText size={SIZE_11} color={COLOR_1} weight="regular">
                 {formatNumber(noOfViews)}
               </AppText>
@@ -124,3 +113,31 @@ export function GridPost({
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  albumIcon: {
+    ...layoutStyle.position_absolute,
+    top: SIZE_6,
+    left: SIZE_6,
+  },
+  pinIcon: {
+    ...layoutStyle.position_absolute,
+    top: SIZE_6,
+    right: SIZE_6,
+  },
+  views_container: {
+    ...layoutStyle.flex_direction_row,
+    ...layoutStyle.align_item_center,
+    ...layoutStyle.position_absolute,
+    bottom: 6,
+    right: 6,
+  },
+  root_container: {
+    ...backgroundStyle.background_color_7,
+    width: POST_GRID_WIDTH,
+  },
+  image: {
+    ...layoutStyle.width_100_percent,
+    ...layoutStyle.height_100_percent,
+  },
+});

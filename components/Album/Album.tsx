@@ -56,13 +56,15 @@ export default function Album({
           type={type}
         />
       ))}
-      <LinearGradient
-        style={[StyleSheet.absoluteFill]}
-        colors={[COLOR_3, COLOR_8, COLOR_3]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        locations={[0.0, 0.4, 1.0]}
-      />
+      {type === "dark" && (
+        <LinearGradient
+          style={[StyleSheet.absoluteFill]}
+          colors={[COLOR_3, COLOR_8, COLOR_3]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          locations={[0.0, 0.4, 1.0]}
+        />
+      )}
     </Animated.ScrollView>
   );
 }

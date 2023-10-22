@@ -1,21 +1,33 @@
 import {
   ListRenderItemInfo,
   Pressable,
+  StyleSheet,
+  View,
   useWindowDimensions,
 } from "react-native";
 import { useCallback } from "react";
 import ClassicPost from "./ClassicPost";
 import Animated, { Layout } from "react-native-reanimated";
-import { paddingStyle } from "../styles";
+import { paddingStyle, layoutStyle } from "../styles";
 import { PostFeedItemIdentfierParams, ThunkState } from "../types/store.types";
 import AnimatedLaodingIndicator from "./AnimatedLaodingIndicator";
-import { SIZE_24, SIZE_42, SIZE_48, SIZE_60, SIZE_70 } from "../constants";
+import {
+  SIZE_24,
+  SIZE_36,
+  SIZE_42,
+  SIZE_48,
+  SIZE_60,
+  SIZE_70,
+} from "../constants";
 import CircleIcon from "./CircleIcon";
 
 export type ClassicPostListProps = {
   data: PostFeedItemIdentfierParams[];
   state: ThunkState;
   onRetry: () => void;
+  pageState: ThunkState;
+  onPageRetry: () => void;
+  onPostTap: (id: string) => void;
 };
 
 /**
@@ -25,14 +37,15 @@ export default function ClassicPostList({
   data,
   state,
   onRetry,
+  onPageRetry,
+  pageState,
+  onPostTap,
 }: ClassicPostListProps) {
-  const { height: screenHeight } = useWindowDimensions();
-
   const renderItemCallback = useCallback(
     ({ item }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
       switch (item.type) {
         case "post":
-          return <ClassicPost id={item.postId} />;
+          return <ClassicPost id={item.postId} onPress={onPostTap} />;
       }
     },
     []
@@ -49,25 +62,34 @@ export default function ClassicPostList({
       itemLayoutAnimation={Layout.duration(300)}
       contentContainerStyle={paddingStyle.padding_vertical_12}
       ListEmptyComponent={
-        state === "loading" ? (
-          <AnimatedLaodingIndicator
-            size={SIZE_60}
-            style={{
-              marginTop: (screenHeight - SIZE_60) / 2 - SIZE_70,
-            }}
-          />
-        ) : state === "failed" ? (
-          <Pressable
-            style={{
-              marginTop: (screenHeight - SIZE_48) / 2 - SIZE_70,
-            }}
-            hitSlop={SIZE_24}
-            onPress={onRetry}
-          >
-            <CircleIcon name="retry" />
-          </Pressable>
-        ) : undefined
+        <View style={styles.empty_component}>
+          {state === "loading" ? (
+            <AnimatedLaodingIndicator size={SIZE_60} />
+          ) : state === "failed" ? (
+            <Pressable onPress={onRetry} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          ) : undefined}
+        </View>
+      }
+      ListFooterComponent={
+        <View style={styles.empty_component}>
+          {pageState === "loading" ? (
+            <AnimatedLaodingIndicator size={SIZE_60} />
+          ) : pageState === "failed" ? (
+            <Pressable onPress={onPageRetry} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          ) : undefined}
+        </View>
       }
     />
   );
 }
+
+const styles = StyleSheet.create({
+  empty_component: {
+    ...layoutStyle.align_self_center,
+    marginTop: SIZE_36,
+  },
+});

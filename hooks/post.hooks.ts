@@ -3,10 +3,11 @@ import {
   selectGridPostParams,
   selectPostCommentSection,
   selectPostPreviewParams,
+  selectSimilarPostSection,
 } from "../store/post/post.selector";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
 import { RootState } from "../store";
-import { fetchComments } from "../store/post/post.thunk";
+import { fetchComments, fetchSimilarPosts } from "../store/post/post.thunk";
 import { togglePostLikeState } from "../store/post/post.slice";
 
 export function useCommentSection(postId: string) {
@@ -58,5 +59,31 @@ export function usePostPreview(id: string) {
   return {
     postParams,
     togglePostLikeStateCallback,
+  };
+}
+
+export function useSimilarPostsSection(postId?: string) {
+  const dispatch = useAppDispatch();
+
+  const similarPostsSectionSelectorCallback = useCallback(
+    (state: RootState) => selectSimilarPostSection(state, postId ? postId : ""),
+    [postId]
+  );
+
+  const storeParams = useAppSelector(similarPostsSectionSelectorCallback);
+
+  const fetch = useCallback(() => {
+    if (
+      postId &&
+      postId !== "" &&
+      storeParams?.similarPostSectionThunkInfo.state === "idle"
+    ) {
+      dispatch(fetchSimilarPosts(postId));
+    }
+  }, [postId]);
+
+  return {
+    storeParams,
+    fetch,
   };
 }

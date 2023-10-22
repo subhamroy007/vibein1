@@ -1,19 +1,15 @@
 import {
   Pressable,
   PressableProps,
-  StyleProp,
   StyleSheet,
   View,
-  ViewStyle,
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BOTTOM_TAB_HEIGHT,
   COLOR_1,
-  COLOR_3,
   COLOR_6,
-  COLOR_8,
   SIZE_11,
   SIZE_12,
   SIZE_24,
@@ -37,24 +33,12 @@ import HighlightedText from "./HighlightedText";
 import Animated, { Layout, runOnJS } from "react-native-reanimated";
 import Album from "./Album/Album";
 import { useCallback, useState } from "react";
-import {
-  Gesture,
-  GestureDetector,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSpringAnimation } from "../hooks/animation.hooks";
 import SwipeUpPortal from "./SwipeUpPortal";
 import { PostTag } from "./PostTag";
 import Option from "./Option";
 import AppButton from "./AppButton";
-
-const captionText = `Get ready for a Tamil musical extravaganza presented by Aditya Music! Presenting the sensational "#SaamiSaami (Tamil) Lyrical" video from the much-awaited film Pushpa. This mesmerizing track showcases the exceptional talents of Allu Arjun and Rashmika, backed by the soul-stirring composition by the legendary DSP. Brace yourself for an immersion into an enchanting world of melody and rhythm crafted by the magic touch of Rajalakshmi Senthiganesh. The fusion of Tamil lyrics, powerful vocals, and extraordinary dance moves will leave you awe-struck.
-
-#SaamiSaami #SaamiSaamiTamilSong #SaamiSaamiLyrical #AlluArjun #Reshmika #TeluguSongs #NewSongsTelugu #TrendingSongs #PopularSongs #TeluguVideoSongs #AdityaMusic
-
-Stay updated with the latest videos, Subscribe on the link - http://bit.ly/adityamusic
-WhatsApp Channel Link: https://bitly.ws/W2Md
-Click here to share on Facebook- https://bit.ly/2PkSZv5`;
 
 export default function FullScreenPost({ id }: { id: string }) {
   const {
@@ -96,10 +80,10 @@ export default function FullScreenPost({ id }: { id: string }) {
   } = useSpringAnimation();
 
   const doubleTapCallback = useCallback(() => {
+    startHeartIconAnimation();
     if (!postParams?.isLiked) {
       togglePostLikeStateCallback();
     }
-    startHeartIconAnimation();
   }, [
     postParams?.isLiked,
     togglePostLikeStateCallback,
@@ -205,7 +189,7 @@ export default function FullScreenPost({ id }: { id: string }) {
                   onPress={toggleCaptionCollapsedState}
                   collapsed={isCaptionCollapsed}
                 >
-                  {captionText}
+                  {caption}
                 </HighlightedText>
               </Animated.ScrollView>
             )}
@@ -311,7 +295,7 @@ export default function FullScreenPost({ id }: { id: string }) {
             <Option icon="edit" onPress={updatePressCallback} text="Edit" />
 
             <Option
-              icon={isPinned ? "pin-solid" : "pin-outline"}
+              icon={"pin-solid"}
               text={isPinned ? "Unpin" : "Pin"}
               onPress={pinPressCallback}
             />

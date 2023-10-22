@@ -1,9 +1,12 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { getPostInitialState, upsertManyPost } from "./post.adapter";
 import { getHomeFeedData } from "../client/client.thunk";
-import { fetchComments } from "./post.thunk";
+import { fetchComments, fetchSimilarPosts } from "./post.thunk";
 import { PostResponseParams } from "../../types/response.types";
-import { PostAdapterParams } from "../../types/store.types";
+import {
+  PostAdapterParams,
+  PostFeedItemIdentfierParams,
+} from "../../types/store.types";
 
 /**
  * utlity function that takes a single argument of type PostResponseParams
@@ -27,6 +30,12 @@ function tranformToPostAdapterParams(
       state: "idle",
       meta: null,
       lastRequestError: null,
+    },
+    similarPosts: [{ postId: post._id, type: "post" }],
+    similarPostSectionThunkInfo: {
+      lastRequestError: null,
+      meta: null,
+      state: "idle",
     },
   };
 }
@@ -91,6 +100,65 @@ const postSlice = createSlice({
         );
       }
     );
+    builder.addCase(fetchSimilarPosts.pending, (state, action) => {
+      const targetPostId = action.meta.arg; //fetch the target post id;
+      const targetPost = state.entities[targetPostId]; //fetch the target post from the store;
+      if (targetPost) {
+        targetPost.similarPostSectionThunkInfo = {
+          lastRequestError: null,
+          meta: null,
+          state: "loading",
+        };
+      }
+    });
+    builder.addCase(fetchSimilarPosts.rejected, (state, action) => {
+      const targetPostId = action.meta.arg; //fetch the target post id;
+      const targetPost = state.entities[targetPostId]; //fetch the target post from the store;
+      if (targetPost) {
+        targetPost.similarPostSectionThunkInfo = {
+          lastRequestError: action.payload!,
+          meta: {
+            lastRequestStatusCode: action.meta.statusCode!,
+            lastRequestTimestamp: action.meta.requestTimestamp!,
+          },
+          state: "failed",
+        };
+      }
+    });
+    builder.addCase(
+      fetchSimilarPosts.fulfilled,
+      (state, { payload: { posts }, meta }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+
+        const targetPostId = meta.arg; //fetch the target post id;
+
+        const targetPost = state.entities[targetPostId]; //fetch the target post from the post id;
+
+        //check if the target post exists
+        if (targetPost) {
+          targetPost.similarPosts = [
+            ...targetPost.similarPosts,
+            ...posts.map<PostFeedItemIdentfierParams>((post) => {
+              return {
+                postId: post._id,
+                type: "post",
+              };
+            }),
+          ];
+          targetPost.similarPostSectionThunkInfo = {
+            lastRequestError: null,
+            meta: {
+              lastRequestStatusCode: meta.statusCode!,
+              lastRequestTimestamp: meta.requestTimestamp!,
+            },
+            state: "success",
+          };
+        }
+      }
+    );
     builder.addCase(fetchComments.pending, (state, action) => {
       const targetPostId = action.meta.arg; //fetch the target post id;
       const targetPost = state.entities[targetPostId]; //fetch the target post from the store;
@@ -102,7 +170,6 @@ const postSlice = createSlice({
         };
       }
     });
-
     builder.addCase(fetchComments.rejected, (state, action) => {
       const targetPostId = action.meta.arg; //fetch the target post id;
       const targetPost = state.entities[targetPostId]; //fetch the target post from the store;
@@ -117,7 +184,6 @@ const postSlice = createSlice({
         };
       }
     });
-
     builder.addCase(fetchComments.fulfilled, (state, action) => {
       const targetPostId = action.meta.arg; //fetch the target post id;
 
