@@ -44,9 +44,9 @@ export default function Home() {
   }
   const insets = useSafeAreaInsets();
 
-  // useEffect(() => {
-  //   fetch();
-  // }, [fetch]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   return (
     <SafeAreaView
@@ -89,6 +89,14 @@ export default function Home() {
         state={homeFeedParams.thunkInfo.state}
         onRetry={fetch}
       /> */}
+      <ClassicPostList
+        data={homeFeedParams.posts}
+        state={homeFeedParams.thunkInfo.state}
+        onPostTap={() => {}}
+        onPageRetry={() => {}}
+        onRetry={fetch}
+        pageState="idle"
+      />
     </SafeAreaView>
   );
 }

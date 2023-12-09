@@ -12,7 +12,14 @@ export default function Discover() {
 
   const gridPressCallback = useCallback(
     (id: string) => {
-      router.push({ pathname: `/discover/classic_post_feed/${id}` });
+      // router.push({ pathname: `/discover/classic_post_feed/${id}` });
+    },
+    [router]
+  );
+
+  const previewPressCallback = useCallback(
+    (id: string) => {
+      // router.push({ pathname: `/discover/classic_post_feed/${id}` });
     },
     [router]
   );
@@ -31,6 +38,7 @@ export default function Discover() {
       <GridPostList
         postGroups={discoverFeedParams.postGrounps}
         onPress={gridPressCallback}
+        onPreviewPress={previewPressCallback}
       />
     </SafeAreaView>
   );

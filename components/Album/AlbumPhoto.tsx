@@ -4,28 +4,20 @@ import { ThunkState } from "../../types/store.types";
 import { useCallback, useState } from "react";
 import {
   COLOR_2,
-  COLOR_7,
   PHOTO_MAX_BLUR_RADIUS,
   SIZE_24,
   SIZE_90,
 } from "../../constants";
 import { backgroundStyle, layoutStyle } from "../../styles";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { BaseButton } from "react-native-gesture-handler";
 import RoundIcon from "../RoundIcon";
 
 type AlbumphotoProps = {
-  containerAspectRatio: string;
   type?: "light" | "dark";
 } & PostPhotoParams;
 
-export function AlbumPhoto({
-  containerAspectRatio,
-  url,
-  previewUrl,
-  type,
-}: AlbumphotoProps) {
+export function AlbumPhoto({ url, previewUrl, type }: AlbumphotoProps) {
   const { width: screenWidth } = useWindowDimensions();
 
   const [loadingState, setLoadingState] = useState<ThunkState>("loading");
@@ -90,7 +82,7 @@ export function AlbumPhoto({
             { opacity: loadingState === "success" ? 1 : 0 },
           ]}
           source={url}
-          contentFit={containerAspectRatio === "9/16" ? "cover" : "contain"}
+          contentFit={"cover"}
           onLoadStart={imageLoadStartCallback}
           onError={imageLoadErrorCallback}
           onLoad={imageLoadCallback}
@@ -111,14 +103,14 @@ export function AlbumPhoto({
             },
           ]}
           source={previewUrl}
-          contentFit={containerAspectRatio === "9/16" ? "cover" : "contain"}
+          contentFit={"cover"}
           onLoadStart={previewLoadStartCallback}
           onError={previewLoadErrorCallback}
           onLoad={previewLoadCallback}
           blurRadius={previewBlurRadius}
         />
       )}
-      {loadingState === "loading" && <View style={[styles.loadingIndicator]} />}
+      {loadingState === "loading" && <View style={[styles.loadingRing]} />}
       {loadingState === "failed" && (
         <BaseButton
           rippleRadius={null}
@@ -134,7 +126,7 @@ export function AlbumPhoto({
 }
 
 const styles = StyleSheet.create({
-  loadingIndicator: {
+  loadingRing: {
     width: SIZE_90,
     height: SIZE_90,
     borderRadius: SIZE_90 * 0.5,

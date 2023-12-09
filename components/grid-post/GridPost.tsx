@@ -14,7 +14,9 @@ import Icon from "../Icon";
 import AppText from "../AppText";
 import { formatNumber } from "../../utility";
 import { usePhotoFetch } from "../../hooks/utility.hooks";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { Portal } from "@gorhom/portal";
+import PostPreview from "../preview-post/PostPreview2";
 
 export type GridPostProps = {
   id: string;
@@ -23,7 +25,7 @@ export type GridPostProps = {
   showPin?: boolean;
   showViews?: boolean;
   onPress: (id: string) => void;
-  onLongPress: (id: string) => void;
+  onPreviewPress: (id: string) => void;
 };
 
 export function GridPost({
@@ -32,10 +34,17 @@ export function GridPost({
   portrait,
   showPin,
   showViews,
-  onLongPress,
   onPress,
+  onPreviewPress,
 }: GridPostProps) {
   const { postParams } = useGridPost(id);
+
+  const [isPreviewVisible, setPreviewVisibleState] = useState(false);
+
+  const togglePreviewVisibleState = useCallback(
+    () => setPreviewVisibleState((prevState) => !prevState),
+    []
+  );
 
   const {
     photoLoadCallback,
@@ -50,8 +59,12 @@ export function GridPost({
 
   const longPressCallback = useCallback(() => {
     Vibration.vibrate(LONG_PRESS_VIBRATION_DURATION);
-    onLongPress(id);
-  }, [id, onLongPress]);
+    togglePreviewVisibleState();
+  }, []);
+
+  const previewPressCallback = useCallback(() => {
+    onPreviewPress(id);
+  }, [onPreviewPress, id]);
 
   if (!postParams) {
     return null;
@@ -60,57 +73,68 @@ export function GridPost({
   const { previewUrl, isAlbum, isPinned, noOfViews } = postParams;
 
   return (
-    <Pressable
-      delayLongPress={300}
-      onPress={pressCallback}
-      onLongPress={longPressCallback}
-      style={[
-        {
-          aspectRatio: portrait ? "9/16" : "1/1",
-          marginLeft: first ? 0 : 3 * StyleSheet.hairlineWidth,
-        },
-        styles.root_container,
-      ]}
-    >
-      {photoLoadingState !== "failed" && (
-        <Image
-          contentFit="cover"
-          source={previewUrl}
-          style={styles.image}
-          onLoad={photoLoadCallback}
-          onLoadStart={photoLoadStartCallback}
-          onError={photoLoadErrorCallback}
-        />
+    <>
+      <Pressable
+        delayLongPress={200}
+        onPress={pressCallback}
+        onLongPress={longPressCallback}
+        style={[
+          {
+            aspectRatio: portrait ? "9/16" : "1/1",
+            marginLeft: first ? 0 : 3 * StyleSheet.hairlineWidth,
+          },
+          styles.root_container,
+        ]}
+      >
+        {photoLoadingState !== "failed" && (
+          <Image
+            contentFit="cover"
+            source={previewUrl}
+            style={styles.image}
+            onLoad={photoLoadCallback}
+            onLoadStart={photoLoadStartCallback}
+            onError={photoLoadErrorCallback}
+          />
+        )}
+        {photoLoadingState === "success" && (
+          <>
+            {isAlbum && (
+              <Icon
+                name="album"
+                size={SIZE_15}
+                color={COLOR_1}
+                style={styles.albumIcon}
+              />
+            )}
+            {isPinned && showPin && (
+              <Icon
+                name="pin-solid"
+                size={SIZE_15}
+                color={COLOR_1}
+                style={styles.pinIcon}
+              />
+            )}
+            {noOfViews > 0 && showViews && (
+              <View style={styles.views_container}>
+                <AppText size={SIZE_11} color={COLOR_1} weight="regular">
+                  {formatNumber(noOfViews)}
+                </AppText>
+                <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
+              </View>
+            )}
+          </>
+        )}
+      </Pressable>
+      {isPreviewVisible && (
+        <Portal>
+          <PostPreview
+            id={id}
+            onDismiss={togglePreviewVisibleState}
+            onPress={previewPressCallback}
+          />
+        </Portal>
       )}
-      {photoLoadingState === "success" && (
-        <>
-          {isAlbum && (
-            <Icon
-              name="album"
-              size={SIZE_15}
-              color={COLOR_1}
-              style={styles.albumIcon}
-            />
-          )}
-          {isPinned && showPin && (
-            <Icon
-              name="pin-solid"
-              size={SIZE_15}
-              color={COLOR_1}
-              style={styles.pinIcon}
-            />
-          )}
-          {noOfViews > 0 && showViews && (
-            <View style={styles.views_container}>
-              <AppText size={SIZE_11} color={COLOR_1} weight="regular">
-                {formatNumber(noOfViews)}
-              </AppText>
-              <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
-            </View>
-          )}
-        </>
-      )}
-    </Pressable>
+    </>
   );
 }
 

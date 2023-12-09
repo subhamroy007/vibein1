@@ -14,15 +14,10 @@ import { COLOR_3, COLOR_8 } from "../../constants";
 
 export type AlbumProps = {
   photos: PostPhotoParams[];
-  containerAspectRatio: string;
   type?: "light" | "dark";
 };
 
-export default function Album({
-  photos,
-  containerAspectRatio,
-  type,
-}: AlbumProps) {
+export default function Album({ photos, type }: AlbumProps) {
   const { width: screenWidth } = useWindowDimensions();
 
   const [photoIndex, setphotoIndex] = useState(0);
@@ -49,12 +44,7 @@ export default function Album({
       style={[layoutStyle.align_self_stretch, layoutStyle.flex_1]}
     >
       {photos.map((photo, index) => (
-        <AlbumPhoto
-          key={photo.url + index}
-          containerAspectRatio={containerAspectRatio}
-          {...photo}
-          type={type}
-        />
+        <AlbumPhoto key={photo.url + index} {...photo} type={type} />
       ))}
       {type === "dark" && (
         <LinearGradient

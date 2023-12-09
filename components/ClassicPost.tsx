@@ -2,17 +2,9 @@ import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import AppText from "./AppText";
 import Icon from "./Icon";
 import HighlightedText from "./HighlightedText";
-import Animated, {
-  Easing,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { runOnJS } from "react-native-reanimated";
 import AppPressable from "./AppPressable";
-import { layoutStyle, marginStyle, paddingStyle } from "../styles";
+import { borderStyle, layoutStyle, marginStyle, paddingStyle } from "../styles";
 import { useCallback, useState } from "react";
 import {
   COLOR_6,
@@ -25,6 +17,7 @@ import {
   SIZE_20,
   SIZE_36,
   SIZE_27,
+  COLOR_2,
 } from "../constants";
 import SwipeUpPortal from "./SwipeUpPortal";
 import { PostTag } from "./PostTag";
@@ -196,11 +189,11 @@ export default function ClassicPost({ id, onPress }: PostProps) {
         style={[
           layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
-          { width: screenWidth, aspectRatio: "3/4" },
+          { width: screenWidth, aspectRatio: "2/3" },
         ]}
       >
         <GestureDetector gesture={complexGesture}>
-          <Album photos={photos} containerAspectRatio={"3/4"} type="light" />
+          <Album photos={photos} type="light" />
         </GestureDetector>
         <Animated.View style={animatedHeartIconStyle}>
           <Icon name="heart-solid" size={SIZE_42} color={COLOR_6} />
@@ -236,21 +229,38 @@ export default function ClassicPost({ id, onPress }: PostProps) {
             color={isLiked ? COLOR_6 : undefined}
           />
         </AppPressable>
-        <Pressable
+        {/* <Pressable
           hitSlop={SIZE_24}
           onPress={toggleCommentSectionPortalCallback}
         >
           <Icon name="comment" size={SIZE_27} />
-        </Pressable>
+        </Pressable> */}
+        <View
+          style={[
+            styles.comment_box,
+            layoutStyle.align_item_center,
+            layoutStyle.flex_direction_row,
+            layoutStyle.justify_content_center,
+          ]}
+        >
+          <Avatar size={SIZE_24} url={clientAccountParams.profilePictureUrl} />
+          <AppText
+            color={COLOR_2}
+            weight="regular"
+            style={marginStyle.margin_left_6}
+          >
+            write a comment
+          </AppText>
+        </View>
         <Pressable hitSlop={SIZE_24} onPress={toggleSendSectionPortalCallback}>
-          <Icon name="send-outline" size={SIZE_27} />
+          <Icon name="share" size={SIZE_27} />
         </Pressable>
-        <AppPressable onPress={togglePostSaveStateCallback} hitSlop={SIZE_24}>
+        {/* <AppPressable onPress={togglePostSaveStateCallback} hitSlop={SIZE_24}>
           <Icon
             name={isSaved ? "bookmark-solid" : "bookmark-outline"}
             size={SIZE_27}
           />
-        </AppPressable>
+        </AppPressable> */}
       </View>
       <View
         style={[
@@ -258,26 +268,11 @@ export default function ClassicPost({ id, onPress }: PostProps) {
           paddingStyle.padding_bottom_12,
         ]}
       >
-        {(engagementSummary.noOfLikes > 0 || engagementSummary.noOfViews > 0) &&
+        {engagementSummary.noOfLikes > 0 &&
           !advancedOptions.hideEngagementCount && (
-            <View
-              style={[
-                layoutStyle.align_item_center,
-                layoutStyle.flex_direction_row,
-                marginStyle.margin_bottom_3,
-              ]}
-            >
-              {engagementSummary.noOfViews > 0 && (
-                <AppText weight="medium" style={marginStyle.margin_right_6}>
-                  {engagementSummary.noOfViews} views
-                </AppText>
-              )}
-              {engagementSummary.noOfLikes > 0 && (
-                <AppText weight="medium">
-                  {engagementSummary.noOfLikes} likes
-                </AppText>
-              )}
-            </View>
+            <AppText weight="medium" style={marginStyle.margin_bottom_3}>
+              {engagementSummary.noOfLikes} likes
+            </AppText>
           )}
         {caption && (
           <HighlightedText
@@ -383,4 +378,12 @@ export default function ClassicPost({ id, onPress }: PostProps) {
 
 const styles = StyleSheet.create({
   tag_icon: { bottom: SIZE_14, left: SIZE_14 },
+  comment_box: {
+    width: "54%",
+    // borderWidth: 2 * StyleSheet.hairlineWidth,
+    height: SIZE_42,
+    ...borderStyle.border_color_2,
+    ...borderStyle.border_radius_24,
+    ...borderStyle.border_width_hairline,
+  },
 });
