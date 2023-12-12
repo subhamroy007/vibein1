@@ -1,4 +1,4 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import { getHomeFeedData } from "./client.thunk";
 import {
   ClientStoreParams,
@@ -8,8 +8,9 @@ import {
   AccountResponseParams,
   PostResponseParams,
 } from "../../types/response.types";
+import * as FileSystem from "expo-file-system";
 
-const initialState: ClientStoreParams = {};
+const initialState: ClientStoreParams = { imageCache: {} };
 
 const clientSlice = createSlice({
   name: "client",
@@ -54,6 +55,12 @@ const clientSlice = createSlice({
         ...payload,
         noOfUnseenNotifications: 0,
       };
+    },
+    setImageFileUrl(
+      state,
+      { payload }: PayloadAction<{ url: string; fileUrl: string }>
+    ) {
+      state.imageCache[payload.url] = payload.fileUrl;
     },
   },
   extraReducers: (builder) => {
@@ -110,5 +117,6 @@ export const {
     initHomeFeed,
     initClientInfo,
     initDiscoverFeed,
+    setImageFileUrl,
   },
 } = clientSlice;

@@ -14,6 +14,7 @@ import {
   SIZE_15,
   SIZE_16,
   SIZE_18,
+  SIZE_2,
   SIZE_20,
   SIZE_24,
   SIZE_3,
@@ -276,6 +277,9 @@ export const marginStyle = StyleSheet.create({
   },
   margin_right_18: {
     marginRight: SIZE_18,
+  },
+  margin_horizontal_2: {
+    marginHorizontal: SIZE_2,
   },
   margin_horizontal_3: {
     marginHorizontal: SIZE_3,

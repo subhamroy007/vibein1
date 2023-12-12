@@ -9,10 +9,10 @@ export const getProfilePictureUrl = (index: number) =>
   `${profile_picture_base_address}image%20${index}.jpg`;
 
 const getPostPhotoUrl = (index: number) =>
-  `${post_photo_base_address}image%20${index}.jpg`;
+  `${post_photo_base_address}image${index}.jpg`;
 
 const getPostPhotoPreviewUrl = (index: number) =>
-  `${post_photo_preview_base_address}image%20${index}.jpg`;
+  `${post_photo_preview_base_address}image${index}.jpg`;
 
 export const PHOTOS: PostPhotoParams[] = [
   {
@@ -147,82 +147,5 @@ export const PHOTOS: PostPhotoParams[] = [
     aspectRatio: "3/4",
     width: 1080,
     height: 1440,
-  },
-  {
-    url: getPostPhotoUrl(20),
-    previewUrl: getPostPhotoPreviewUrl(20),
-    aspectRatio: "9/16",
-    width: 1080,
-    height: 1920,
-  },
-  {
-    url: getPostPhotoUrl(21),
-    previewUrl: getPostPhotoPreviewUrl(21),
-    aspectRatio: "3/4",
-    width: 1080,
-    height: 1440,
-  },
-  {
-    url: getPostPhotoUrl(22),
-    previewUrl: getPostPhotoPreviewUrl(22),
-    aspectRatio: "9/16",
-    width: 1080,
-    height: 1920,
-  },
-  {
-    url: getPostPhotoUrl(23),
-    previewUrl: getPostPhotoPreviewUrl(23),
-    aspectRatio: "9/16",
-    width: 1080,
-    height: 1920,
-  },
-  {
-    url: getPostPhotoUrl(24),
-    previewUrl: getPostPhotoPreviewUrl(24),
-    aspectRatio: "3/4",
-    width: 1000,
-    height: 1333,
-  },
-  {
-    url: getPostPhotoUrl(25),
-    previewUrl: getPostPhotoPreviewUrl(25),
-    aspectRatio: "9/16",
-    width: 1080,
-    height: 1920,
-  },
-  {
-    url: getPostPhotoUrl(26),
-    previewUrl: getPostPhotoPreviewUrl(26),
-    aspectRatio: "1/1",
-    width: 1080,
-    height: 1080,
-  },
-  {
-    url: getPostPhotoUrl(27),
-    previewUrl: getPostPhotoPreviewUrl(27),
-    aspectRatio: "4/3",
-    width: 1000,
-    height: 750,
-  },
-  {
-    url: getPostPhotoUrl(28),
-    previewUrl: getPostPhotoPreviewUrl(28),
-    aspectRatio: "3/4",
-    width: 1080,
-    height: 1440,
-  },
-  {
-    url: getPostPhotoUrl(29),
-    previewUrl: getPostPhotoPreviewUrl(29),
-    aspectRatio: "9/16",
-    width: 1080,
-    height: 1920,
-  },
-  {
-    url: getPostPhotoUrl(30),
-    previewUrl: getPostPhotoPreviewUrl(30),
-    aspectRatio: "4/3",
-    width: 1000,
-    height: 750,
   },
 ];

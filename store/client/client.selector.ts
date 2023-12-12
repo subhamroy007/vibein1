@@ -58,3 +58,14 @@ export const selectToasterMsg = createSelector(
     return msg;
   }
 );
+
+export const getImageFileUrl = createSelector(
+  [
+    (state: RootState, _: string) => state.client.imageCache,
+    (state: RootState, url: string) => url,
+  ],
+  (imageCache, url) => {
+    const fileUrl = imageCache[url];
+    return fileUrl ? fileUrl : null;
+  }
+);

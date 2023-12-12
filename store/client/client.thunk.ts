@@ -8,7 +8,7 @@ import { createAppAsyncThunk, delay } from "../../utility";
 export const getHomeFeedData = createAppAsyncThunk(
   "client/homefeed",
   async (_, thunkApi) => {
-    const posts = generatePostObjects(4);
+    const posts = generatePostObjects(1);
 
     const data: HomeFeedResponseParams = { posts };
     await delay(1_000);

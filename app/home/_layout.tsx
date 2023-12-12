@@ -1,7 +1,7 @@
-import { Stack, Tabs } from "expo-router";
+import { Stack } from "expo-router";
 import { backgroundStyle } from "../../styles";
 
-export default function DiscoverStack() {
+export default function Home() {
   return (
     <Stack
       screenOptions={{

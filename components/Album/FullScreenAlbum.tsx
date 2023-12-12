@@ -1,26 +1,28 @@
-import { useCallback, useState } from "react";
+import Animated, { runOnJS } from "react-native-reanimated";
 import { PostPhotoParams } from "../../types/utility.types";
+import { layoutStyle } from "../../styles";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   useWindowDimensions,
 } from "react-native";
-import { AlbumPhoto } from "./AlbumPhoto";
-import { layoutStyle } from "../../styles";
-import Animated, { runOnJS } from "react-native-reanimated";
-import { COLOR_6, SIZE_42 } from "../../constants";
-import Carosol from "../Carosol/Carosol";
+import { useCallback, useState } from "react";
 import { useSpringAnimation } from "../../hooks/animation.hooks";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { AlbumPhoto } from "./AlbumPhoto";
 import Icon from "../Icon";
+import { COLOR_6, SIZE_42 } from "../../constants";
+import Carosol from "../Carosol/Carosol";
 
-export type AlbumProps = {
+export type FullScreenAlbumProps = {
   photos: PostPhotoParams[];
   onDoubleTap: () => void;
-  onTap: () => void;
 };
 
-export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
+export default function FullScreenAlbum({
+  onDoubleTap,
+  photos,
+}: FullScreenAlbumProps) {
   const { width: screenWidth } = useWindowDimensions();
 
   const [photoIndex, setphotoIndex] = useState(0);
@@ -53,9 +55,7 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
       runOnJS(doubleTapCallback)();
     });
 
-  const singleTapGesture = Gesture.Tap().onStart(() => {
-    runOnJS(onTap)();
-  });
+  const singleTapGesture = Gesture.Tap().onStart(() => {});
   const complexGesture = Gesture.Exclusive(doubleTapGesture, singleTapGesture);
 
   return (
@@ -65,7 +65,6 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
           layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
           layoutStyle.flex_1,
-          { aspectRatio: "2/3", width: screenWidth },
         ]}
       >
         {photos.length > 1 ? (
@@ -83,9 +82,9 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
               ))}
             </Animated.ScrollView>
             <Carosol
+              style={{ bottom: "18%" }}
               activeIndex={photoIndex}
               length={photos.length}
-              style={{ bottom: "3%" }}
             />
           </>
         ) : (

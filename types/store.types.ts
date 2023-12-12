@@ -133,4 +133,5 @@ export type ClientStoreParams = {
   homeFeed?: HomeFeedStoreParams;
   discoverFeed?: DiscoverFeedStoreParams;
   inbox?: InboxStoreParams;
+  imageCache: { [key: string]: string | undefined };
 };

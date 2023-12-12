@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import AppText from "./AppText";
 import Icon from "./Icon";
 import HighlightedText from "./HighlightedText";
-import Animated, { runOnJS } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import AppPressable from "./AppPressable";
 import { borderStyle, layoutStyle, marginStyle, paddingStyle } from "../styles";
 import { useCallback, useState } from "react";
@@ -13,9 +13,6 @@ import {
   SIZE_14,
   SIZE_24,
   SIZE_30,
-  COLOR_9,
-  SIZE_20,
-  SIZE_36,
   SIZE_27,
   COLOR_2,
 } from "../constants";
@@ -26,12 +23,9 @@ import { useAppSelector } from "../hooks/storeHooks";
 import { selectClientAccountParams } from "../store/client/client.selector";
 import Option from "./Option";
 import Avatar from "./Avatar";
-import CircleSolidIcon from "./CircleSolidIcon";
 import CommentSection from "./CommentSection";
 import PostSendSection from "./post_send_section/PostSendSection";
 import Album from "./Album/Album";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useSpringAnimation } from "../hooks/animation.hooks";
 
 export type PostProps = {
   id: string;
@@ -39,13 +33,7 @@ export type PostProps = {
 };
 
 export default function ClassicPost({ id, onPress }: PostProps) {
-  const {
-    postParams,
-    togglePostLikeStateCallback,
-    togglePostSaveStateCallback,
-  } = usePost(id);
-
-  const { width: screenWidth } = useWindowDimensions();
+  const { postParams, togglePostLikeStateCallback } = usePost(id);
 
   const [isTagPortalOpen, setTagPortalOpen] = useState(false);
 
@@ -54,37 +42,15 @@ export default function ClassicPost({ id, onPress }: PostProps) {
     []
   );
 
-  const {
-    animatedStyle: animatedHeartIconStyle,
-    startAnimation: startHeartIconAnimation,
-  } = useSpringAnimation();
-
   const doubleTapCallback = useCallback(() => {
-    startHeartIconAnimation();
     if (!postParams?.isLiked) {
       togglePostLikeStateCallback();
     }
-  }, [
-    postParams?.isLiked,
-    togglePostLikeStateCallback,
-    startHeartIconAnimation,
-  ]);
-
-  const doubleTapGesture = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart(() => {
-      runOnJS(doubleTapCallback)();
-    });
+  }, [postParams?.isLiked, togglePostLikeStateCallback]);
 
   const singleTapCallback = useCallback(() => {
     onPress(id);
   }, [id, onPress]);
-
-  const singleTapGesture = Gesture.Tap().onStart(() => {
-    runOnJS(singleTapCallback)();
-  });
-
-  const complexGesture = Gesture.Exclusive(doubleTapGesture, singleTapGesture);
 
   const [isMoreOptionPortalOpen, setMoreOptionPortalState] = useState(false);
 
@@ -185,33 +151,11 @@ export default function ClassicPost({ id, onPress }: PostProps) {
           <Icon name="more-horiz" size={SIZE_24} />
         </Pressable>
       </View>
-      <View
-        style={[
-          layoutStyle.align_item_center,
-          layoutStyle.justify_content_center,
-          { width: screenWidth, aspectRatio: "2/3" },
-        ]}
-      >
-        <GestureDetector gesture={complexGesture}>
-          <Album photos={photos} type="light" />
-        </GestureDetector>
-        <Animated.View style={animatedHeartIconStyle}>
-          <Icon name="heart-solid" size={SIZE_42} color={COLOR_6} />
-        </Animated.View>
-        {taggedAccounts && (
-          <Pressable
-            onPress={toggleTagPortalOpen}
-            style={[styles.tag_icon, layoutStyle.position_absolute]}
-            hitSlop={SIZE_36}
-          >
-            <CircleSolidIcon
-              iconName="tag-solid"
-              size={SIZE_20}
-              color={COLOR_9}
-            />
-          </Pressable>
-        )}
-      </View>
+      <Album
+        photos={photos}
+        onTap={singleTapCallback}
+        onDoubleTap={doubleTapCallback}
+      />
       <View
         style={[
           layoutStyle.align_item_center,
@@ -229,12 +173,6 @@ export default function ClassicPost({ id, onPress }: PostProps) {
             color={isLiked ? COLOR_6 : undefined}
           />
         </AppPressable>
-        {/* <Pressable
-          hitSlop={SIZE_24}
-          onPress={toggleCommentSectionPortalCallback}
-        >
-          <Icon name="comment" size={SIZE_27} />
-        </Pressable> */}
         <View
           style={[
             styles.comment_box,
@@ -255,12 +193,6 @@ export default function ClassicPost({ id, onPress }: PostProps) {
         <Pressable hitSlop={SIZE_24} onPress={toggleSendSectionPortalCallback}>
           <Icon name="share" size={SIZE_27} />
         </Pressable>
-        {/* <AppPressable onPress={togglePostSaveStateCallback} hitSlop={SIZE_24}>
-          <Icon
-            name={isSaved ? "bookmark-solid" : "bookmark-outline"}
-            size={SIZE_27}
-          />
-        </AppPressable> */}
       </View>
       <View
         style={[
@@ -380,10 +312,25 @@ const styles = StyleSheet.create({
   tag_icon: { bottom: SIZE_14, left: SIZE_14 },
   comment_box: {
     width: "54%",
-    // borderWidth: 2 * StyleSheet.hairlineWidth,
     height: SIZE_42,
     ...borderStyle.border_color_2,
     ...borderStyle.border_radius_24,
     ...borderStyle.border_width_hairline,
   },
 });
+
+/**
+ * {taggedAccounts && (
+          <Pressable
+            onPress={toggleTagPortalOpen}
+            style={[styles.tag_icon, layoutStyle.position_absolute]}
+            hitSlop={SIZE_36}
+          >
+            <CircleSolidIcon
+              iconName="tag-solid"
+              size={SIZE_20}
+              color={COLOR_9}
+            />
+          </Pressable>
+        )}
+ */

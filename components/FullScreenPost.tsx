@@ -13,7 +13,6 @@ import {
   SIZE_11,
   SIZE_12,
   SIZE_24,
-  SIZE_42,
 } from "../constants";
 import Icon from "./Icon";
 import {
@@ -30,15 +29,13 @@ import AppPressable from "./AppPressable";
 import { IconName } from "../types/component.types";
 import Avatar from "./Avatar";
 import HighlightedText from "./HighlightedText";
-import Animated, { Layout, runOnJS } from "react-native-reanimated";
-import Album from "./Album/Album";
+import Animated, { Layout } from "react-native-reanimated";
 import { useCallback, useState } from "react";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useSpringAnimation } from "../hooks/animation.hooks";
 import SwipeUpPortal from "./SwipeUpPortal";
 import { PostTag } from "./PostTag";
 import Option from "./Option";
 import AppButton from "./AppButton";
+import FullScreenAlbum from "./Album/FullScreenAlbum";
 
 export default function FullScreenPost({ id }: { id: string }) {
   const {
@@ -53,6 +50,12 @@ export default function FullScreenPost({ id }: { id: string }) {
     () => setTagPortalOpen((prevState) => !prevState),
     []
   );
+
+  const doubleTapCallback = useCallback(() => {
+    if (!postParams?.isLiked) {
+      togglePostLikeStateCallback();
+    }
+  }, [postParams?.isLiked, togglePostLikeStateCallback]);
 
   const [isMoreOptionPortalOpen, setMoreOptionPortalState] = useState(false);
 
@@ -70,31 +73,9 @@ export default function FullScreenPost({ id }: { id: string }) {
 
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
 
-  const { bottom, top } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
 
-  const containerHeight = screenHeight - bottom - top - BOTTOM_TAB_HEIGHT;
-
-  const {
-    animatedStyle: animatedHeartIconStyle,
-    startAnimation: startHeartIconAnimation,
-  } = useSpringAnimation();
-
-  const doubleTapCallback = useCallback(() => {
-    startHeartIconAnimation();
-    if (!postParams?.isLiked) {
-      togglePostLikeStateCallback();
-    }
-  }, [
-    postParams?.isLiked,
-    togglePostLikeStateCallback,
-    startHeartIconAnimation,
-  ]);
-
-  const doubleTapGesture = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart(() => {
-      runOnJS(doubleTapCallback)();
-    });
+  const containerHeight = screenHeight - bottom - BOTTOM_TAB_HEIGHT;
 
   const copyToPressCallback = useCallback(() => {}, []);
 
@@ -135,26 +116,27 @@ export default function FullScreenPost({ id }: { id: string }) {
     <View
       style={[
         {
-          width: screenWidth,
           height: containerHeight,
+          backgroundColor: "black",
         },
         layoutStyle.justify_content_center,
         layoutStyle.align_item_center,
       ]}
     >
-      <GestureDetector gesture={doubleTapGesture}>
-        <Album containerAspectRatio="9/16" type="dark" photos={photos} />
-      </GestureDetector>
-      <Animated.View style={animatedHeartIconStyle}>
-        <Icon name="heart-solid" size={SIZE_42} color={COLOR_6} />
-      </Animated.View>
+      <FullScreenAlbum photos={photos} onDoubleTap={doubleTapCallback} />
       {!isCaptionCollapsed && (
         <Pressable
           style={[StyleSheet.absoluteFill, backgroundStyle.background_color_3]}
           onPress={toggleCaptionCollapsedState}
         />
       )}
-      <View style={[styles.template_container, StyleSheet.absoluteFill]}>
+      <View
+        style={[
+          styles.template_container,
+          StyleSheet.absoluteFill,
+          paddingStyle.padding_horizontal_9,
+        ]}
+      >
         <View style={styles.metadata_container}>
           <Animated.View
             style={styles.caption_and_author_info_container}
@@ -234,7 +216,7 @@ export default function FullScreenPost({ id }: { id: string }) {
             )}
           </View>
           <View style={layoutStyle.align_item_center}>
-            <Icon name="comment-outline" color={COLOR_1} />
+            <Icon name="comment" color={COLOR_1} />
             {noOfComments > 0 && (
               <AppText
                 style={marginStyle.margin_top_6}
@@ -246,7 +228,7 @@ export default function FullScreenPost({ id }: { id: string }) {
             )}
           </View>
 
-          <Icon name="send-outline" color={COLOR_1} />
+          <Icon name="share" color={COLOR_1} />
           <AppPressable hitSlop={SIZE_24} onPress={togglePostSaveStateCallback}>
             <Icon
               name={isSaved ? "bookmark-solid" : "bookmark-outline"}
@@ -356,17 +338,16 @@ const styles = StyleSheet.create({
   icons_container: {
     height: 300,
     ...layoutStyle.align_item_center,
-    ...paddingStyle.padding_horizontal_6,
     ...layoutStyle.justify_content_space_around,
   },
   template_container: {
     ...layoutStyle.flex_direction_row,
     ...layoutStyle.align_item_flex_end,
+    ...paddingStyle.padding_vertical_9,
   },
   resource_container: {
     ...layoutStyle.flex_direction_row,
-    ...paddingStyle.padding_horizontal_6,
-    ...paddingStyle.padding_vertical_6,
+    ...marginStyle.margin_top_9,
   },
   author_info_container: {
     ...layoutStyle.align_item_center,
@@ -374,12 +355,11 @@ const styles = StyleSheet.create({
   },
   caption_and_author_info_container: {
     maxHeight: 240,
-    ...paddingStyle.padding_horizontal_6,
-    ...paddingStyle.padding_vertical_6,
   },
   metadata_container: {
     ...layoutStyle.flex_1,
     ...layoutStyle.justify_content_flex_end,
+    ...marginStyle.margin_right_9,
     height: 300,
   },
 });

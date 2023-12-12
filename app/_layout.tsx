@@ -37,15 +37,6 @@ export default function AppLayout() {
   const theme = useTheme();
 
   const [fontsLoaded, fontError] = useFonts({
-    // mooli: require("../assets/fonts/Mooli-Regular.ttf"),
-    // ubuntu_regular: require("../assets/fonts/Ubuntu-Regular.ttf"),
-    // ubuntu_italic: require("../assets/fonts/Ubuntu-Italic.ttf"),
-    // ubuntu_light: require("../assets/fonts/Ubuntu-Light.ttf"),
-    // ubuntu_light_italic: require("../assets/fonts/Ubuntu-LightItalic.ttf"),
-    // ubuntu_medium: require("../assets/fonts/Ubuntu-Medium.ttf"),
-    // ubuntu_medium_italic: require("../assets/fonts/Ubuntu-MediumItalic.ttf"),
-    // ubuntu_bold: require("../assets/fonts/Ubuntu-Bold.ttf"),
-    // ubuntu_bold_italic: require("../assets/fonts/Ubuntu-BoldItalic.ttf"),
     roboto_regular: require("../assets/fonts/Roboto-Regular.ttf"),
     roboto_medium: require("../assets/fonts/Roboto-Medium.ttf"),
     roboto_bold: require("../assets/fonts/Roboto-Bold.ttf"),
@@ -90,16 +81,10 @@ export default function AppLayout() {
               <Tabs
                 sceneContainerStyle={backgroundStyle.background_color_1}
                 screenOptions={{
-                  headerLeftContainerStyle: paddingStyle.padding_horizontal_12,
-                  headerRightContainerStyle: paddingStyle.padding_horizontal_12,
-                  headerShadowVisible: false,
-                  headerBackgroundContainerStyle: [
-                    borderStyle.border_bottom_color_2,
-                    borderStyle.border_bottom_width_hairline,
-                  ],
-                  headerTitleAlign: "center",
+                  headerShown: false,
                 }}
                 tabBar={(props) => <BottomTabBar {...props} />}
+                initialRouteName="home"
               />
             </ThemeProvider>
           </SafeAreaProvider>

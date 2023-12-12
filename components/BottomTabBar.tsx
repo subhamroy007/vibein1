@@ -10,7 +10,7 @@ export default function BottomTabBar({ navigation, state }: BottomTabBarProps) {
   const currentTabName = state.routeNames[currentTabIndex];
 
   const homePressCallback = useCallback(
-    () => navigation.navigate("index"),
+    () => navigation.navigate("home"),
     [navigation]
   );
 
@@ -33,7 +33,7 @@ export default function BottomTabBar({ navigation, state }: BottomTabBarProps) {
     <View style={styles.root_container}>
       <Pressable hitSlop={SIZE_24} onPress={homePressCallback}>
         <Icon
-          name={currentTabName === "index" ? "home-solid" : "home-outline"}
+          name={currentTabName === "home" ? "home-solid" : "home-outline"}
         />
       </Pressable>
       <Pressable hitSlop={SIZE_24} onPress={foryouPressCallback}>

@@ -1,6 +1,6 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { layoutStyle } from "../../styles";
-import { Tabs, useRouter } from "expo-router";
+import { Stack, Tabs, useRouter } from "expo-router";
 import { useDiscoverFeed } from "../../hooks/client.hooks";
 import GridPostList from "../../components/grid-post/GripPostList";
 import { useCallback } from "react";
@@ -30,7 +30,7 @@ export default function Discover() {
 
   return (
     <SafeAreaView style={[layoutStyle.flex_1]}>
-      <Tabs.Screen
+      <Stack.Screen
         options={{
           headerShown: false,
         }}
