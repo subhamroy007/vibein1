@@ -1,10 +1,9 @@
-import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { layoutStyle } from "../styles";
-import AppText from "../components/AppText";
+import { layoutStyle } from "../../styles";
+import AppText from "../../components/AppText";
 import { Tabs } from "expo-router";
 
-export default function Foryou() {
+export default function Inbox() {
   return (
     <SafeAreaView
       style={[
@@ -18,7 +17,7 @@ export default function Foryou() {
           headerTitle: "",
         }}
       />
-      <AppText>For you Feed</AppText>
+      <AppText>Inbox Tag</AppText>
     </SafeAreaView>
   );
 }

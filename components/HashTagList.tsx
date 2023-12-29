@@ -9,7 +9,7 @@ import {
 import AppText from "./AppText";
 import { formatNumber } from "../utility";
 import { COLOR_7, SIZE_11 } from "../constants";
-import RoundIcon from "./RoundIcon";
+import RoundIconfrom "./RoundIcon";
 import { HashtagResponseParams } from "../types/component.types";
 
 export type HashTagListProps = {
@@ -41,7 +41,7 @@ export function HashTagListItem({
           paddingStyle.padding_vertical_6,
         ]}
       >
-        <RoundIcon name="hashtag" />
+        <RoundIconname="hashtag" />
         <View style={marginStyle.margin_left_6}>
           <AppText size={SIZE_11}>{name}</AppText>
           <AppText size={SIZE_11} color="grey">

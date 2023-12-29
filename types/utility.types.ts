@@ -6,10 +6,15 @@ import { AccountResponseParams } from "./response.types";
  */
 export type PostPhotoParams = {
   url: string;
-  width: number;
-  height: number;
-  aspectRatio: string;
   previewUrl: string;
+};
+
+export type PostMomentVideoParams = {
+  url: string;
+  thumbnail: {
+    url: string;
+    previewUrl: string;
+  };
 };
 
 /**
@@ -31,18 +36,13 @@ export type PostEngagementParams = {
   noOfComments: number;
 };
 
-/**
- * represents a post template that can be used as adapter type and/or response type
- */
-export type PostTemplateParams<T = string | AccountResponseParams> = {
+export type PostTemplateCommonParams<T = string | AccountResponseParams> = {
   _id: string;
   isPinned: boolean;
   createdAt: string;
   createdBy: T;
   isUpdated: boolean;
   caption?: string;
-  postType: "photo";
-  photos: PostPhotoParams[];
   taggedLocation?: {
     name: string;
     _id: string;
@@ -54,6 +54,22 @@ export type PostTemplateParams<T = string | AccountResponseParams> = {
   isLiked: boolean;
   isSaved: boolean;
 };
+
+/**
+ * represents a post template that can be used as adapter type and/or response type
+ */
+export type PostTemplateParams<T = string | AccountResponseParams> =
+  PostTemplateCommonParams<T> &
+    (
+      | {
+          postType: "photo";
+          photos: PostPhotoParams[];
+        }
+      | {
+          postType: "moment";
+          video: PostMomentVideoParams;
+        }
+    );
 
 /**
  * represents a reply template that can be used as adapter type and/or response type

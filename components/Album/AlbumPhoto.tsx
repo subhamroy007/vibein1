@@ -1,35 +1,38 @@
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { PostPhotoParams } from "../../types/utility.types";
 import { COLOR_2, SIZE_90 } from "../../constants";
-import { backgroundStyle, layoutStyle } from "../../styles";
-import { Image } from "expo-image";
-import { useImageCache } from "../../hooks/utility.hooks";
+import { layoutStyle } from "../../styles";
+import { useDeviceLayout } from "../../hooks/utility.hooks";
+import RetryableImage from "../RetryableImage";
+import { useCallback, useState } from "react";
+import { ThunkState } from "../../types/store.types";
 
 type AlbumphotoProps = {} & PostPhotoParams;
 
 export function AlbumPhoto({ url, previewUrl }: AlbumphotoProps) {
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: imageWidth } = useDeviceLayout();
 
-  const { downloadState, fileUrl } = useImageCache(url, true);
+  const [showLoadingRing, setLoadingRingStatus] = useState(false);
+
+  const stateChangeCallback = useCallback((currentState: ThunkState) => {
+    setLoadingRingStatus(currentState === "loading");
+  }, []);
 
   return (
     <View
       style={[
         {
-          width: screenWidth,
+          width: imageWidth,
         },
         styles.root_container,
       ]}
     >
-      {downloadState === "success" && fileUrl && (
-        <Image
-          style={[styles.original_image]}
-          source={fileUrl}
-          contentFit={"cover"}
-        />
-      )}
-
-      {downloadState !== "success" && <View style={[styles.loadingRing]} />}
+      <RetryableImage
+        source={url}
+        onStateChange={stateChangeCallback}
+        style={[styles.original_image]}
+      />
+      {showLoadingRing && <View style={[styles.loadingRing]} />}
     </View>
   );
 }

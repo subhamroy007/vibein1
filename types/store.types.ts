@@ -131,7 +131,18 @@ export type ClientStoreParams = {
   theme?: "light" | "dark" | "system";
   toasterMsg?: { text: string; timestamp: number };
   homeFeed?: HomeFeedStoreParams;
+  foryou: {
+    moments: {
+      posts: PostFeedItemIdentfierParams[];
+      thunkInfo: ThunkInfo;
+    };
+    photos: {
+      posts: PostFeedItemIdentfierParams[];
+      thunkInfo: ThunkInfo;
+    };
+  };
   discoverFeed?: DiscoverFeedStoreParams;
   inbox?: InboxStoreParams;
   imageCache: { [key: string]: string | undefined };
+  isFullScreenActive: boolean;
 };

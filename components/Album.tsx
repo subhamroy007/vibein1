@@ -25,7 +25,7 @@ import {
 } from "../constants";
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
 import { Image } from "expo-image";
-import RoundIcon from "./RoundIcon";
+import RoundIconfrom "./RoundIcon";
 import { PostPhotoParams } from "../types/utility.types";
 import { ThunkState } from "../types/store.types";
 import { LinearGradient } from "expo-linear-gradient";
@@ -193,7 +193,7 @@ export function Albumphoto({
             style={layoutStyle.position_absolute}
             onPress={retryCallback}
           >
-            <RoundIcon name="retry" iconColor={COLOR_2} />
+            <RoundIconname="retry" iconColor={COLOR_2} />
           </BaseButton>
         )}
       </Animated.View>

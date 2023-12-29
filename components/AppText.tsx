@@ -58,7 +58,7 @@ export default function AppText({
       numberOfLines={isMultiline ? undefined : 1}
       style={textStyle}
       {...restProps}
-    ></Text>
+    />
   );
 }
 

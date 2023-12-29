@@ -7,12 +7,12 @@ import {
 } from "react-native";
 import { AlbumPhoto } from "./AlbumPhoto";
 import { layoutStyle } from "../../styles";
-import Animated, { runOnJS } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { COLOR_6, SIZE_42 } from "../../constants";
 import Carosol from "../Carosol/Carosol";
 import { useSpringAnimation } from "../../hooks/animation.hooks";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Icon from "../Icon";
+import { AnimatedIcon } from "../Icon";
 
 export type AlbumProps = {
   photos: PostPhotoParams[];
@@ -25,13 +25,11 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
 
   const [photoIndex, setphotoIndex] = useState(0);
 
-  const onMomentumScrollEndCallback = useCallback(
+  const scrollHandler = useCallback(
     ({
       nativeEvent: { contentOffset },
     }: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const newPhotoIndex = Math.floor(
-        Math.floor(contentOffset.x) / Math.floor(screenWidth)
-      );
+      const newPhotoIndex = Math.abs(contentOffset.x / screenWidth);
       setphotoIndex(newPhotoIndex);
     },
     []
@@ -42,20 +40,19 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
     startAnimation: startHeartIconAnimation,
   } = useSpringAnimation();
 
-  const doubleTapCallback = useCallback(() => {
-    startHeartIconAnimation();
-    onDoubleTap();
-  }, [startHeartIconAnimation, onDoubleTap]);
-
   const doubleTapGesture = Gesture.Tap()
     .numberOfTaps(2)
     .onStart(() => {
-      runOnJS(doubleTapCallback)();
-    });
+      startHeartIconAnimation();
+      onDoubleTap();
+    })
+    .runOnJS(true);
 
-  const singleTapGesture = Gesture.Tap().onStart(() => {
-    runOnJS(onTap)();
-  });
+  const singleTapGesture = Gesture.Tap()
+    .onStart(() => {
+      onTap();
+    })
+    .runOnJS(true);
   const complexGesture = Gesture.Exclusive(doubleTapGesture, singleTapGesture);
 
   return (
@@ -75,7 +72,7 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
               horizontal
               pagingEnabled
               overScrollMode="never"
-              onMomentumScrollEnd={onMomentumScrollEndCallback}
+              onScroll={scrollHandler}
               style={[layoutStyle.align_self_stretch, layoutStyle.flex_1]}
             >
               {photos.map((photo, index) => (
@@ -91,9 +88,12 @@ export default function Album({ photos, onDoubleTap, onTap }: AlbumProps) {
         ) : (
           <AlbumPhoto {...photos[0]} />
         )}
-        <Animated.View style={animatedHeartIconStyle}>
-          <Icon name="heart-solid" size={SIZE_42} color={COLOR_6} />
-        </Animated.View>
+        <AnimatedIcon
+          name="heart-solid"
+          size={SIZE_42}
+          color={COLOR_6}
+          style={animatedHeartIconStyle}
+        />
       </Animated.View>
     </GestureDetector>
   );

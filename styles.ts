@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 import {
   COLOR_1,
   COLOR_13,
+  COLOR_14,
   COLOR_2,
   COLOR_3,
   COLOR_4,
@@ -119,6 +120,9 @@ export const borderStyle = StyleSheet.create({
   border_color_2: {
     borderColor: COLOR_2,
   },
+  border_color_14: {
+    borderColor: COLOR_14,
+  },
   border_color_7: {
     borderColor: COLOR_7,
   },
@@ -166,6 +170,9 @@ export const backgroundStyle = StyleSheet.create({
   },
   background_color_13: {
     backgroundColor: COLOR_13,
+  },
+  background_color_14: {
+    backgroundColor: COLOR_14,
   },
 });
 
@@ -295,6 +302,9 @@ export const marginStyle = StyleSheet.create({
   },
   margin_horizontal_12: {
     marginHorizontal: SIZE_12,
+  },
+  margin_top_36: {
+    marginTop: SIZE_36,
   },
   margin_top_24: {
     marginTop: SIZE_24,

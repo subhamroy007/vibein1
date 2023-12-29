@@ -2,12 +2,12 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { layoutStyle } from "../../../styles";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
-import { useSimilarPostsSection } from "../../../hooks/post.hooks";
 import { useCallback } from "react";
-import FullScreenPostList from "../../../components/FullScreenPostList";
+import { useSimilarPostsSection } from "../../../../hooks/post.hooks";
+import { layoutStyle } from "../../../../styles";
+import FullScreenPostList from "../../../../components/fullscreen-post/FullScreenPostList";
 
 export default function FullScreenFeed() {
   const { post } = useLocalSearchParams<{ post: string }>();

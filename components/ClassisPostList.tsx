@@ -2,32 +2,38 @@ import {
   ListRenderItemInfo,
   Pressable,
   StyleSheet,
-  View,
-  useWindowDimensions,
+  ViewToken,
+  ViewabilityConfig,
 } from "react-native";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import ClassicPost from "./ClassicPost";
-import Animated, { Layout } from "react-native-reanimated";
-import { paddingStyle, layoutStyle } from "../styles";
+import Animated, {
+  Layout,
+  SharedValue,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
+import { layoutStyle } from "../styles";
 import { PostFeedItemIdentfierParams, ThunkState } from "../types/store.types";
 import AnimatedLaodingIndicator from "./AnimatedLaodingIndicator";
-import {
-  SIZE_24,
-  SIZE_36,
-  SIZE_42,
-  SIZE_48,
-  SIZE_60,
-  SIZE_70,
-} from "../constants";
+import { SIZE_24, SIZE_60 } from "../constants";
 import CircleIcon from "./CircleIcon";
+import { useDeviceLayout } from "../hooks/utility.hooks";
+
+const min = 0;
+const max = SIZE_60;
+
+const viewabilityConfig: ViewabilityConfig = {
+  minimumViewTime: 150,
+  itemVisiblePercentThreshold: 60,
+};
 
 export type ClassicPostListProps = {
   data: PostFeedItemIdentfierParams[];
   state: ThunkState;
   onRetry: () => void;
-  pageState: ThunkState;
-  onPageRetry: () => void;
   onPostTap: (id: string) => void;
+  clampedScrollOffset?: SharedValue<number>;
 };
 
 /**
@@ -37,15 +43,54 @@ export default function ClassicPostList({
   data,
   state,
   onRetry,
-  onPageRetry,
-  pageState,
   onPostTap,
+  clampedScrollOffset,
 }: ClassicPostListProps) {
+  const { width, height } = useDeviceLayout();
+
+  const [activePostIndex, setActivePostIndex] = useState(0);
+
+  const prevScrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll(event) {
+      if (clampedScrollOffset) {
+        const diff = event.contentOffset.y - prevScrollY.value;
+        const clampedDiff = Math.min(Math.max(diff, min - max), max - min);
+        clampedScrollOffset.value = Math.min(
+          Math.max(clampedScrollOffset.value + clampedDiff, min),
+          max
+        );
+        prevScrollY.value = event.contentOffset.y;
+      }
+    },
+  });
+
   const renderItemCallback = useCallback(
-    ({ item }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
+    ({ item, index }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
       switch (item.type) {
         case "post":
-          return <ClassicPost id={item.postId} onPress={onPostTap} />;
+          return (
+            <ClassicPost
+              id={item.postId}
+              onPress={onPostTap}
+              focused={index === activePostIndex}
+            />
+          );
+      }
+    },
+    [activePostIndex]
+  );
+
+  const viewableItemsChangedCallback = useCallback(
+    ({
+      viewableItems,
+    }: {
+      viewableItems: ViewToken[];
+      changed: ViewToken[];
+    }) => {
+      if (viewableItems.length > 0) {
+        setActivePostIndex(viewableItems[0].index!);
       }
     },
     []
@@ -60,36 +105,31 @@ export default function ClassicPostList({
       showsVerticalScrollIndicator={false}
       overScrollMode="never"
       itemLayoutAnimation={Layout.duration(300)}
-      contentContainerStyle={paddingStyle.padding_vertical_12}
-      ListEmptyComponent={
-        <View style={styles.empty_component}>
-          {state === "loading" ? (
-            <AnimatedLaodingIndicator size={SIZE_60} />
-          ) : state === "failed" ? (
-            <Pressable onPress={onRetry} hitSlop={SIZE_24}>
-              <CircleIcon name="retry" />
-            </Pressable>
-          ) : undefined}
-        </View>
-      }
+      nestedScrollEnabled
       ListFooterComponent={
-        <View style={styles.empty_component}>
-          {pageState === "loading" ? (
-            <AnimatedLaodingIndicator size={SIZE_60} />
-          ) : pageState === "failed" ? (
-            <Pressable onPress={onPageRetry} hitSlop={SIZE_24}>
-              <CircleIcon name="retry" />
-            </Pressable>
-          ) : undefined}
-        </View>
+        state === "loading" ? (
+          <AnimatedLaodingIndicator size={SIZE_60} />
+        ) : state === "failed" ? (
+          <Pressable onPress={onRetry} hitSlop={SIZE_24}>
+            <CircleIcon name="retry" />
+          </Pressable>
+        ) : undefined
       }
+      ListFooterComponentStyle={[
+        { width, height: 0.2 * height },
+        styles.footer_component,
+      ]}
+      onScroll={scrollHandler}
+      contentContainerStyle={{ paddingTop: max - min }}
+      viewabilityConfig={viewabilityConfig}
+      onViewableItemsChanged={viewableItemsChangedCallback}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  empty_component: {
-    ...layoutStyle.align_self_center,
-    marginTop: SIZE_36,
+  footer_component: {
+    ...layoutStyle.align_item_center,
+    ...layoutStyle.justify_content_center,
   },
 });

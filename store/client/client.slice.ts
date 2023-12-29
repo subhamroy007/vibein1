@@ -1,5 +1,9 @@
-import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
-import { getHomeFeedData } from "./client.thunk";
+import {
+  getHomeFeedThunk,
+  getForYouMomentFeedThunk,
+  getForYouPhotosFeedThunk,
+} from "./client.thunk";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
   ClientStoreParams,
   PostFeedItemIdentfierParams,
@@ -8,9 +12,21 @@ import {
   AccountResponseParams,
   PostResponseParams,
 } from "../../types/response.types";
-import * as FileSystem from "expo-file-system";
 
-const initialState: ClientStoreParams = { imageCache: {} };
+const initialState: ClientStoreParams = {
+  imageCache: {},
+  isFullScreenActive: false,
+  foryou: {
+    moments: {
+      posts: [],
+      thunkInfo: { state: "idle", lastRequestError: null, meta: null },
+    },
+    photos: {
+      posts: [],
+      thunkInfo: { state: "idle", lastRequestError: null, meta: null },
+    },
+  },
+};
 
 const clientSlice = createSlice({
   name: "client",
@@ -62,9 +78,12 @@ const clientSlice = createSlice({
     ) {
       state.imageCache[payload.url] = payload.fileUrl;
     },
+    setFullScreenActiveState(state, action: PayloadAction<boolean>) {
+      state.isFullScreenActive = action.payload;
+    },
   },
   extraReducers: (builder) => {
-    builder.addCase(getHomeFeedData.pending, (state, action) => {
+    builder.addCase(getHomeFeedThunk.pending, (state, action) => {
       if (state.homeFeed) {
         state.homeFeed.thunkInfo = {
           lastRequestError: null,
@@ -73,7 +92,7 @@ const clientSlice = createSlice({
         };
       }
     });
-    builder.addCase(getHomeFeedData.rejected, (state, action) => {
+    builder.addCase(getHomeFeedThunk.rejected, (state, action) => {
       if (state.homeFeed) {
         state.homeFeed.thunkInfo = {
           lastRequestError: action.payload!,
@@ -85,7 +104,7 @@ const clientSlice = createSlice({
         };
       }
     });
-    builder.addCase(getHomeFeedData.fulfilled, (state, action) => {
+    builder.addCase(getHomeFeedThunk.fulfilled, (state, action) => {
       if (state.homeFeed) {
         state.homeFeed.thunkInfo = {
           lastRequestError: null,
@@ -103,6 +122,72 @@ const clientSlice = createSlice({
         state.homeFeed.posts = [...newFeedItems];
       }
     });
+    builder.addCase(getForYouMomentFeedThunk.pending, (state, action) => {
+      state.foryou.moments.thunkInfo = {
+        lastRequestError: null,
+        meta: null,
+        state: "loading",
+      };
+    });
+    builder.addCase(getForYouMomentFeedThunk.rejected, (state, action) => {
+      state.foryou.moments.thunkInfo = {
+        lastRequestError: action.payload!,
+        meta: {
+          lastRequestStatusCode: action.meta.statusCode!,
+          lastRequestTimestamp: action.meta.requestTimestamp!,
+        },
+        state: "failed",
+      };
+    });
+    builder.addCase(getForYouMomentFeedThunk.fulfilled, (state, action) => {
+      state.foryou.moments.thunkInfo = {
+        lastRequestError: null,
+        meta: {
+          lastRequestStatusCode: action.meta.statusCode!,
+          lastRequestTimestamp: action.meta.requestTimestamp!,
+        },
+        state: "success",
+      };
+      const newFeedItems =
+        action.payload.posts.map<PostFeedItemIdentfierParams>((post) => ({
+          postId: post._id,
+          type: "post",
+        }));
+      state.foryou.moments.posts = [...newFeedItems];
+    });
+    builder.addCase(getForYouPhotosFeedThunk.pending, (state, action) => {
+      state.foryou.photos.thunkInfo = {
+        lastRequestError: null,
+        meta: null,
+        state: "loading",
+      };
+    });
+    builder.addCase(getForYouPhotosFeedThunk.rejected, (state, action) => {
+      state.foryou.photos.thunkInfo = {
+        lastRequestError: action.payload!,
+        meta: {
+          lastRequestStatusCode: action.meta.statusCode!,
+          lastRequestTimestamp: action.meta.requestTimestamp!,
+        },
+        state: "failed",
+      };
+    });
+    builder.addCase(getForYouPhotosFeedThunk.fulfilled, (state, action) => {
+      state.foryou.photos.thunkInfo = {
+        lastRequestError: null,
+        meta: {
+          lastRequestStatusCode: action.meta.statusCode!,
+          lastRequestTimestamp: action.meta.requestTimestamp!,
+        },
+        state: "success",
+      };
+      const newFeedItems =
+        action.payload.posts.map<PostFeedItemIdentfierParams>((post) => ({
+          postId: post._id,
+          type: "post",
+        }));
+      state.foryou.photos.posts = [...newFeedItems];
+    });
   },
 });
 
@@ -118,5 +203,6 @@ export const {
     initClientInfo,
     initDiscoverFeed,
     setImageFileUrl,
+    setFullScreenActiveState,
   },
 } = clientSlice;

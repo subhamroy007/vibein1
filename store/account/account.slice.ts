@@ -1,6 +1,10 @@
+import {
+  getForYouMomentFeedThunk,
+  getForYouPhotosFeedThunk,
+  getHomeFeedThunk,
+} from "./../client/client.thunk";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { getAccountInitialState, upsertManyAccount } from "./account.adapter";
-import { getHomeFeedData } from "../client/client.thunk";
 import { fetchComments, fetchSimilarPosts } from "../post/post.thunk";
 import { AccountResponseParams } from "../../types/response.types";
 import { AccountAdapterParams } from "../../types/store.types";
@@ -54,7 +58,45 @@ const accountSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(
-      getHomeFeedData.fulfilled,
+      getHomeFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        const accounts: AccountAdapterParams[] = [];
+
+        posts.forEach((post) => {
+          accounts.push(tranformToAccountAdapterParams(post.createdBy));
+          if (post.taggedAccounts) {
+            accounts.push(
+              ...post.taggedAccounts.map((taggedAccount) =>
+                tranformToAccountAdapterParams(taggedAccount)
+              )
+            );
+          }
+        });
+
+        upsertManyAccount(state, accounts);
+      }
+    );
+    builder.addCase(
+      getForYouMomentFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        const accounts: AccountAdapterParams[] = [];
+
+        posts.forEach((post) => {
+          accounts.push(tranformToAccountAdapterParams(post.createdBy));
+          if (post.taggedAccounts) {
+            accounts.push(
+              ...post.taggedAccounts.map((taggedAccount) =>
+                tranformToAccountAdapterParams(taggedAccount)
+              )
+            );
+          }
+        });
+
+        upsertManyAccount(state, accounts);
+      }
+    );
+    builder.addCase(
+      getForYouPhotosFeedThunk.fulfilled,
       (state, { payload: { posts } }) => {
         const accounts: AccountAdapterParams[] = [];
 

@@ -13,31 +13,40 @@ import {
   SIZE_11,
   SIZE_12,
   SIZE_24,
-} from "../constants";
-import Icon from "./Icon";
+} from "../../constants";
+import Icon from "../Icon";
 import {
   backgroundStyle,
   borderStyle,
   layoutStyle,
   marginStyle,
   paddingStyle,
-} from "../styles";
-import AppText from "./AppText";
-import usePost from "../hooks/postHook";
-import { formatNumber } from "../utility";
-import AppPressable from "./AppPressable";
-import { IconName } from "../types/component.types";
-import Avatar from "./Avatar";
-import HighlightedText from "./HighlightedText";
+} from "../../styles";
+import AppText from "../AppText";
+import usePost from "../../hooks/postHook";
+import { formatNumber } from "../../utility";
+import AppPressable from "../AppPressable";
+import { IconName } from "../../types/component.types";
+import Avatar from "../Avatar";
+import HighlightedText from "../HighlightedText";
 import Animated, { Layout } from "react-native-reanimated";
 import { useCallback, useState } from "react";
-import SwipeUpPortal from "./SwipeUpPortal";
-import { PostTag } from "./PostTag";
-import Option from "./Option";
-import AppButton from "./AppButton";
-import FullScreenAlbum from "./Album/FullScreenAlbum";
+import SwipeUpPortal from "../SwipeUpPortal";
+import { PostTag } from "../PostTag";
+import Option from "../Option";
+import AppButton from "../AppButton";
+import FullScreenAlbum from "./FullScreenAlbum";
+import FullScreenVideoPlayer from "./FullScreenVideoPlayer";
 
-export default function FullScreenPost({ id }: { id: string }) {
+export default function FullScreenPost({
+  id,
+  postHeight,
+  focused,
+}: {
+  id: string;
+  postHeight: number;
+  focused: boolean;
+}) {
   const {
     postParams,
     togglePostLikeStateCallback,
@@ -71,12 +80,6 @@ export default function FullScreenPost({ id }: { id: string }) {
     []
   );
 
-  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
-
-  const { bottom } = useSafeAreaInsets();
-
-  const containerHeight = screenHeight - bottom - BOTTOM_TAB_HEIGHT;
-
   const copyToPressCallback = useCallback(() => {}, []);
 
   const shareToPressCallback = useCallback(() => {}, []);
@@ -104,39 +107,44 @@ export default function FullScreenPost({ id }: { id: string }) {
     engagementSummary: { noOfComments, noOfLikes },
     isLiked,
     isSaved,
-    photos,
     caption,
     taggedAccounts,
     taggedLocation,
     advancedOptions,
     isPinned,
+
+    ...restParams
   } = postParams;
 
   return (
     <View
       style={[
         {
-          height: containerHeight,
-          backgroundColor: "black",
+          height: postHeight,
         },
-        layoutStyle.justify_content_center,
-        layoutStyle.align_item_center,
+        backgroundStyle.background_color_4,
       ]}
     >
-      <FullScreenAlbum photos={photos} onDoubleTap={doubleTapCallback} />
+      {restParams.postType === "photo" && (
+        <FullScreenAlbum
+          photos={restParams.photos}
+          onDoubleTap={doubleTapCallback}
+        />
+      )}
+      {restParams.postType === "moment" && (
+        <FullScreenVideoPlayer
+          video={restParams.video}
+          onDoubleTap={doubleTapCallback}
+          focused={focused}
+        />
+      )}
       {!isCaptionCollapsed && (
         <Pressable
           style={[StyleSheet.absoluteFill, backgroundStyle.background_color_3]}
           onPress={toggleCaptionCollapsedState}
         />
       )}
-      <View
-        style={[
-          styles.template_container,
-          StyleSheet.absoluteFill,
-          paddingStyle.padding_horizontal_9,
-        ]}
-      >
+      <View style={[styles.template_container, StyleSheet.absoluteFill]}>
         <View style={styles.metadata_container}>
           <Animated.View
             style={styles.caption_and_author_info_container}
@@ -343,7 +351,7 @@ const styles = StyleSheet.create({
   template_container: {
     ...layoutStyle.flex_direction_row,
     ...layoutStyle.align_item_flex_end,
-    ...paddingStyle.padding_vertical_9,
+    ...paddingStyle.padding_12,
   },
   resource_container: {
     ...layoutStyle.flex_direction_row,

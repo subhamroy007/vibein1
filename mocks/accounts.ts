@@ -1,5 +1,5 @@
 import { nanoid } from "@reduxjs/toolkit";
-import { getProfilePictureUrl } from "./photos";
+import { getProfilePictureUrl } from "./data";
 import { AccountResponseParams } from "../types/response.types";
 import { getRandom } from ".";
 

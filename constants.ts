@@ -1,6 +1,10 @@
 import { Dimensions, PixelRatio, StyleSheet } from "react-native";
 
-const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+export const { width: windowWidth, height: windowHeight } =
+  Dimensions.get("window");
+
+export const { width: screenWidth, height: screenHeight } =
+  Dimensions.get("screen");
 
 const sizeRelativeToWidth = (value: number) =>
   PixelRatio.roundToNearestPixel((windowWidth * value) / 100);
@@ -83,6 +87,7 @@ export const COLOR_11 = "#2EF642";
 export const COLOR_12 = "#1E6ADC";
 export const COLOR_13 = "#F2F2F2";
 export const COLOR_14 = "#404040";
+export const COLOR_15 = "rgba(0, 0, 0, 0.4)";
 
 export const PRESSABLE_ANIMATION_DURATION = 150;
 export const PRESSABLE_ANIMATION_RESET_DURATION = 25;

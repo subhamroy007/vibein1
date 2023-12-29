@@ -22,7 +22,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.officialarjuntrivedi.vibein1"
     },
     "web": {
       "favicon": "./assets/favicon.png"

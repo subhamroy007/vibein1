@@ -25,11 +25,12 @@ export function useSpringAnimation() {
   });
 
   const startAnimation = useCallback(() => {
+    animatedValue.value = 1;
     animatedValue.value = withSequence(
-      withTiming(1, {
-        duration: 50,
-        easing: Easing.ease,
-      }),
+      // withTiming(1, {
+      //   duration: 50,
+      //   easing: Easing.ease,
+      // }),
       withTiming(2, {
         duration: 400,
         easing: Easing.elastic(2.5),

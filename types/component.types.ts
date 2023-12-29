@@ -50,7 +50,9 @@ export type IconName =
   | "comment-outline"
   | "album"
   | "info"
-  | "play-outlne";
+  | "play-outlne"
+  | "pause"
+  | "play-solid";
 
 export type IconProps = {
   name: IconName;

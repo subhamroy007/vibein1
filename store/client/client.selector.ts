@@ -23,6 +23,20 @@ export const selectHomeFeedParams = createSelector(
   }
 );
 
+export const selectForYouMomentsFeedParams = createSelector(
+  [(state: RootState) => state.client.foryou.moments],
+  (momentsFeed) => {
+    return momentsFeed;
+  }
+);
+
+export const selectForYouPhotosFeedParams = createSelector(
+  [(state: RootState) => state.client.foryou.photos],
+  (photosFeed) => {
+    return photosFeed;
+  }
+);
+
 export const selectDiscoverFeedParams = createSelector(
   [(state: RootState) => state.client.discoverFeed],
   (feed) => {
@@ -67,5 +81,12 @@ export const getImageFileUrl = createSelector(
   (imageCache, url) => {
     const fileUrl = imageCache[url];
     return fileUrl ? fileUrl : null;
+  }
+);
+
+export const getFullScreenActiveState = createSelector(
+  [(state: RootState) => state.client.isFullScreenActive],
+  (isFullScreenActive) => {
+    return isFullScreenActive;
   }
 );

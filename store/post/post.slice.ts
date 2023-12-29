@@ -1,6 +1,10 @@
+import {
+  getForYouMomentFeedThunk,
+  getForYouPhotosFeedThunk,
+  getHomeFeedThunk,
+} from "./../client/client.thunk";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { getPostInitialState, upsertManyPost } from "./post.adapter";
-import { getHomeFeedData } from "../client/client.thunk";
 import { fetchComments, fetchSimilarPosts } from "./post.thunk";
 import { PostResponseParams } from "../../types/response.types";
 import {
@@ -92,7 +96,25 @@ const postSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(
-      getHomeFeedData.fulfilled,
+      getHomeFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getForYouMomentFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getForYouPhotosFeedThunk.fulfilled,
       (state, { payload: { posts } }) => {
         upsertManyPost(
           state,

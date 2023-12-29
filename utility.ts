@@ -38,14 +38,11 @@ export function formatNumber(n: number): string {
   if (n < 1000) {
     return n.toString();
   } else if (n < 1e6) {
-    const thousands = (n / 1000).toFixed(1);
-    return `${n % 1000 === 0 ? n / 1000 : thousands}k`;
+    return `${Math.floor(n / 1000)}k`;
   } else if (n < 1e9) {
-    const millions = (n / 1e6).toFixed(1);
-    return `${n % 1e6 === 0 ? n / 1e6 : millions}m`;
+    return `${Math.floor(n / 1e6)}m`;
   } else {
-    const billions = (n / 1e9).toFixed(1);
-    return `${n % 1e9 === 0 ? n / 1e9 : billions}b`;
+    return `${Math.floor(n / 1e9)}b`;
   }
 }
 

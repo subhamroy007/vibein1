@@ -26,13 +26,15 @@ import Avatar from "./Avatar";
 import CommentSection from "./CommentSection";
 import PostSendSection from "./post_send_section/PostSendSection";
 import Album from "./Album/Album";
+import ClassicPostVideoPlayer from "./ClassicPostVideoPlayer";
 
 export type PostProps = {
   id: string;
   onPress: (id: string) => void;
+  focused: boolean;
 };
 
-export default function ClassicPost({ id, onPress }: PostProps) {
+export default function ClassicPost({ id, onPress, focused }: PostProps) {
   const { postParams, togglePostLikeStateCallback } = usePost(id);
 
   const [isTagPortalOpen, setTagPortalOpen] = useState(false);
@@ -111,12 +113,12 @@ export default function ClassicPost({ id, onPress }: PostProps) {
     engagementSummary,
     isLiked,
     isSaved,
-    photos,
     caption,
     taggedAccounts,
     taggedLocation,
     advancedOptions,
     isPinned,
+    ...restParams
   } = postParams;
 
   return (
@@ -151,11 +153,21 @@ export default function ClassicPost({ id, onPress }: PostProps) {
           <Icon name="more-horiz" size={SIZE_24} />
         </Pressable>
       </View>
-      <Album
-        photos={photos}
-        onTap={singleTapCallback}
-        onDoubleTap={doubleTapCallback}
-      />
+      {restParams.postType === "photo" && (
+        <Album
+          photos={restParams.photos}
+          onTap={singleTapCallback}
+          onDoubleTap={doubleTapCallback}
+        />
+      )}
+      {restParams.postType === "moment" && (
+        <ClassicPostVideoPlayer
+          focused={focused}
+          onDoubleTap={doubleTapCallback}
+          onTap={singleTapCallback}
+          video={restParams.video}
+        />
+      )}
       <View
         style={[
           layoutStyle.align_item_center,

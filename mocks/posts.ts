@@ -1,8 +1,14 @@
 import { nanoid } from "@reduxjs/toolkit";
-import { PHOTOS } from "./photos";
-import { PostResponseParams } from "../types/response.types";
+import { MOMENT_VIDEOS, PHOTOS } from "./data";
+import {
+  AccountResponseParams,
+  PostResponseParams,
+} from "../types/response.types";
 import { getDate, getRandom } from ".";
-import { PostPhotoParams } from "../types/utility.types";
+import {
+  PostPhotoParams,
+  PostTemplateCommonParams,
+} from "../types/utility.types";
 import { generateAccountObject, generateAccountObjects } from "./accounts";
 
 const captions = [
@@ -94,22 +100,16 @@ Outfit - @upgradebya
 Team - @greenlight__media`,
 ];
 
-export const generatePostObject = (): PostResponseParams => {
+export const generatePostObject = (
+  type?: "photo" | "moment"
+): PostResponseParams => {
   const noOfViews = getRandom(400000);
 
   const noOfLikes = getRandom(noOfViews);
 
   const noOfComments = getRandom(noOfLikes);
 
-  const noOfPhotos = getRandom(10, 1);
-
-  const photos: PostPhotoParams[] = [];
-
-  for (let i = 0; i < noOfPhotos; i++) {
-    photos.push(PHOTOS[getRandom(PHOTOS.length - 1)]);
-  }
-
-  return {
+  const commonParams: PostTemplateCommonParams<AccountResponseParams> = {
     _id: nanoid(),
     advancedOptions: {
       commentSetting: "all",
@@ -129,17 +129,45 @@ export const generatePostObject = (): PostResponseParams => {
     isSaved: Math.random() < 0.5 ? false : true,
     isUpdated: Math.random() < 0.5 ? false : true,
     isViewed: Math.random() < 0.5 ? false : true,
-    postType: "photo",
-    photos,
     taggedAccounts: generateAccountObjects(getRandom(6, 1)),
     caption: captions[getRandom(captions.length - 1)],
   };
+
+  const postTypeIdentifier = type
+    ? type === "photo"
+      ? 1
+      : 2
+    : getRandom(2, 1);
+
+  if (postTypeIdentifier === 1) {
+    const noOfPhotos = getRandom(10, 1);
+
+    const photos: PostPhotoParams[] = [];
+
+    for (let i = 0; i < noOfPhotos; i++) {
+      photos.push(PHOTOS[getRandom(PHOTOS.length - 1)]);
+    }
+    return {
+      ...commonParams,
+      postType: "photo",
+      photos,
+    };
+  }
+
+  return {
+    postType: "moment",
+    video: MOMENT_VIDEOS[getRandom(MOMENT_VIDEOS.length - 1)],
+    ...commonParams,
+  };
 };
 
-export const generatePostObjects = (size: number) => {
+export const generatePostObjects = (
+  size: number,
+  type?: "photo" | "moment"
+) => {
   const posts: PostResponseParams[] = [];
   for (let i = 0; i < size; i++) {
-    posts.push(generatePostObject());
+    posts.push(generatePostObject(type));
   }
   return posts;
 };

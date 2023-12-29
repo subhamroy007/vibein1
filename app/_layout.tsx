@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Stack, Tabs } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useCallback, useEffect } from "react";
@@ -26,10 +26,12 @@ import {
   initHomeFeed,
   initInbox,
 } from "../store/client/client.slice";
-import { View } from "react-native";
+import { LogBox, View } from "react-native";
 import BottomTabBar from "../components/BottomTabBar";
 import { generatePostObjects } from "../mocks/posts";
 import { addManyPostToStore } from "../store/post/post.slice";
+
+LogBox.ignoreLogs(["The `redirect` prop"]);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -78,13 +80,17 @@ export default function AppLayout() {
         >
           <SafeAreaProvider>
             <ThemeProvider value={theme}>
-              <Tabs
-                sceneContainerStyle={backgroundStyle.background_color_1}
+              <Stack
                 screenOptions={{
+                  animation: "slide_from_right",
+                  animationDuration: 300,
                   headerShown: false,
+                  statusBarTranslucent: true,
+                  statusBarAnimation: "none",
+                  statusBarHidden: false,
+                  statusBarStyle: "auto",
+                  contentStyle: backgroundStyle.background_color_1,
                 }}
-                tabBar={(props) => <BottomTabBar {...props} />}
-                initialRouteName="home"
               />
             </ThemeProvider>
           </SafeAreaProvider>

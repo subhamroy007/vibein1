@@ -4,15 +4,17 @@ import { layoutStyle } from "../../styles";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
+  StyleSheet,
   useWindowDimensions,
 } from "react-native";
 import { useCallback, useState } from "react";
 import { useSpringAnimation } from "../../hooks/animation.hooks";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { AlbumPhoto } from "./AlbumPhoto";
-import Icon from "../Icon";
-import { COLOR_6, SIZE_42 } from "../../constants";
+import { AlbumPhoto } from "../Album/AlbumPhoto";
+import Icon, { AnimatedIcon } from "../Icon";
+import { COLOR_15, COLOR_6, COLOR_8, SIZE_42 } from "../../constants";
 import Carosol from "../Carosol/Carosol";
+import { LinearGradient } from "expo-linear-gradient";
 
 export type FullScreenAlbumProps = {
   photos: PostPhotoParams[];
@@ -72,6 +74,7 @@ export default function FullScreenAlbum({
             <Animated.ScrollView
               showsHorizontalScrollIndicator={false}
               horizontal
+              nestedScrollEnabled
               pagingEnabled
               overScrollMode="never"
               onMomentumScrollEnd={onMomentumScrollEndCallback}
@@ -80,6 +83,13 @@ export default function FullScreenAlbum({
               {photos.map((photo, index) => (
                 <AlbumPhoto key={photo.url + index} {...photo} />
               ))}
+              <LinearGradient
+                style={StyleSheet.absoluteFill}
+                colors={[COLOR_8, COLOR_15]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                locations={[0, 1]}
+              />
             </Animated.ScrollView>
             <Carosol
               style={{ bottom: "18%" }}
@@ -90,9 +100,13 @@ export default function FullScreenAlbum({
         ) : (
           <AlbumPhoto {...photos[0]} />
         )}
-        <Animated.View style={animatedHeartIconStyle}>
-          <Icon name="heart-solid" size={SIZE_42} color={COLOR_6} />
-        </Animated.View>
+
+        <AnimatedIcon
+          style={animatedHeartIconStyle}
+          name="heart-solid"
+          size={SIZE_42}
+          color={COLOR_6}
+        />
       </Animated.View>
     </GestureDetector>
   );

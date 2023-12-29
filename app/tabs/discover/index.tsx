@@ -1,9 +1,9 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { layoutStyle } from "../../styles";
 import { Stack, Tabs, useRouter } from "expo-router";
-import { useDiscoverFeed } from "../../hooks/client.hooks";
-import GridPostList from "../../components/grid-post/GripPostList";
 import { useCallback } from "react";
+import { useDiscoverFeed } from "../../../hooks/client.hooks";
+import { layoutStyle } from "../../../styles";
+import GridPostList from "../../../components/grid-post/GripPostList";
 
 export default function Discover() {
   const { discoverFeedParams } = useDiscoverFeed();
