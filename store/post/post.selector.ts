@@ -69,19 +69,30 @@ export const selectGridPostParams = createSelector(
     }
 
     const {
-      photos,
       isPinned,
+      postType,
       engagementSummary: { noOfViews },
     } = post;
 
-    const postOutput = {
-      previewUrl: photos[0].previewUrl,
+    const commonParams = {
       isPinned,
-      noOfViews,
-      isAlbum: photos.length > 1,
     };
 
-    return postOutput;
+    if (postType === "photo") {
+      return {
+        ...commonParams,
+        postType,
+        previewUrl: post.photos[0].previewUrl,
+        isAlbum: post.photos.length > 1,
+      };
+    }
+
+    return {
+      ...commonParams,
+      postType,
+      thumbnailPreviewUrl: post.video.thumbnail.previewUrl,
+      noOfViews,
+    };
   }
 );
 
@@ -94,7 +105,7 @@ export const selectPostPreviewParams = createSelector(
       return undefined;
     }
 
-    const { photos, isLiked, createdBy } = post;
+    const { isLiked, createdBy } = post;
 
     const author = selectAccountParams(state, createdBy);
 
@@ -102,14 +113,24 @@ export const selectPostPreviewParams = createSelector(
       return undefined;
     }
 
-    const postOutput = {
-      previewUrl: photos[0].previewUrl,
-      originalUrl: photos[0].url,
+    const commonParams = {
       createdBy: author,
       isLiked,
     };
 
-    return postOutput;
+    if (post.postType === "photo") {
+      return {
+        ...commonParams,
+        postType: post.postType,
+        ...post.photos[0],
+      };
+    }
+
+    return {
+      ...commonParams,
+      postType: post.postType,
+      ...post.video,
+    };
   }
 );
 

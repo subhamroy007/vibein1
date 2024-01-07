@@ -21,9 +21,10 @@ import Avatar from "../Avatar";
 import AppText from "../AppText";
 import { Image } from "expo-image";
 import Ring from "../Ring";
-import { usePhotoFetch } from "../../hooks/utility.hooks";
 import Animated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
+import RetryableImage from "../RetryableImage";
+import RetryableVideo from "../RetryableVideo";
 
 export type PostPreviewProps = {
   id: string;
@@ -38,32 +39,22 @@ export default function PostPreview({
 }: PostPreviewProps) {
   const { postParams, togglePostLikeStateCallback } = usePostPreview(id);
 
-  const {
-    photoLoadCallback: originalPhotoLoadCallback,
-    photoLoadErrorCallback: originalPhotoLoadErrorCallback,
-    photoLoadStartCallback: originalPhotoLoadStartCallback,
-    photoLoadingState: originalPhotoLoadingState,
-  } = usePhotoFetch(true);
-
-  const {
-    photoLoadCallback: previewPhotoLoadCallback,
-    photoLoadErrorCallback: previewPhotoLoadErrorCallback,
-    photoLoadStartCallback: previewPhotoLoadStartCallback,
-    photoLoadingState: previewPhotoLoadingState,
-  } = usePhotoFetch(true);
-
   if (!postParams) {
     return null;
   }
 
-  const { createdBy, isLiked, originalUrl, previewUrl } = postParams;
+  const { createdBy, isLiked, ...restProps } = postParams;
 
   return (
     <Pressable
       style={[styles.root_container, StyleSheet.absoluteFill]}
       onPress={onDismiss}
     >
-      <BlurView style={StyleSheet.absoluteFill} intensity={18} tint="light" />
+      <BlurView
+        style={StyleSheet.absoluteFill}
+        intensity={18}
+        tint="light"
+      ></BlurView>
       <Animated.View
         style={[styles.content_container]}
         entering={ZoomIn.duration(300)}
@@ -76,28 +67,10 @@ export default function PostPreview({
           </AppText>
         </View>
         <Pressable style={styles.body} onPress={onPress}>
-          {originalPhotoLoadingState !== "success" && (
-            <>
-              {previewPhotoLoadingState !== "success" && <Ring />}
-              {previewPhotoLoadingState !== "failed" && (
-                <Image
-                  source={previewUrl}
-                  style={[styles.preview]}
-                  onLoadStart={previewPhotoLoadStartCallback}
-                  onError={previewPhotoLoadErrorCallback}
-                  onLoad={previewPhotoLoadCallback}
-                />
-              )}
-            </>
-          )}
-          {originalPhotoLoadingState !== "failed" && (
-            <Image
-              source={originalUrl}
-              style={[styles.photo]}
-              onLoadStart={originalPhotoLoadStartCallback}
-              onError={originalPhotoLoadErrorCallback}
-              onLoad={originalPhotoLoadCallback}
-            />
+          {restProps.postType === "photo" ? (
+            <RetryableImage style={styles.content} source={restProps.url} />
+          ) : (
+            <RetryableVideo style={styles.content} focused video={restProps} />
           )}
         </Pressable>
         <View style={styles.footer}>
@@ -122,8 +95,8 @@ const styles = StyleSheet.create({
     ...layoutStyle.justify_content_center,
   },
   content_container: {
-    width: "85%",
-    aspectRatio: "9/14",
+    width: "95%",
+    aspectRatio: "4/7",
     ...backgroundStyle.background_color_1,
     ...borderStyle.border_radius_9,
   },
@@ -147,13 +120,8 @@ const styles = StyleSheet.create({
     ...borderStyle.border_bottom_width_hairline,
     ...borderStyle.border_color_7,
   },
-  photo: {
+  content: {
     ...layoutStyle.height_100_percent,
     ...layoutStyle.width_100_percent,
-  },
-  preview: {
-    ...layoutStyle.height_100_percent,
-    ...layoutStyle.width_100_percent,
-    ...layoutStyle.position_absolute,
   },
 });

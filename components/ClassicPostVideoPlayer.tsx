@@ -52,7 +52,14 @@ const ClassicPostVideoPlayer = ({
           { aspectRatio: "2/3", width: screenWidth },
         ]}
       >
-        <RetryableVideo {...restProps} paused={false} />
+        <RetryableVideo
+          {...restProps}
+          paused={false}
+          style={[
+            layoutStyle.width_100_percent,
+            layoutStyle.height_100_percent,
+          ]}
+        />
         <AnimatedIcon
           name="heart-solid"
           size={SIZE_42}

@@ -8,15 +8,15 @@ import {
   SIZE_15,
   SIZE_6,
 } from "../../constants";
-import { Image } from "expo-image";
 import { backgroundStyle, layoutStyle } from "../../styles";
 import Icon from "../Icon";
 import AppText from "../AppText";
 import { formatNumber } from "../../utility";
-import { usePhotoFetch } from "../../hooks/utility.hooks";
 import { useCallback, useState } from "react";
 import { Portal } from "@gorhom/portal";
 import PostPreview from "../preview-post/PostPreview2";
+import RetryableImage from "../RetryableImage";
+import { useBackHandler } from "@react-native-community/hooks";
 
 export type GridPostProps = {
   id: string;
@@ -41,17 +41,14 @@ export function GridPost({
 
   const [isPreviewVisible, setPreviewVisibleState] = useState(false);
 
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const imageLoadCallback = useCallback(() => setImageLoaded(true), []);
+
   const togglePreviewVisibleState = useCallback(
     () => setPreviewVisibleState((prevState) => !prevState),
     []
   );
-
-  const {
-    photoLoadCallback,
-    photoLoadErrorCallback,
-    photoLoadStartCallback,
-    photoLoadingState,
-  } = usePhotoFetch(true);
 
   const pressCallback = useCallback(() => {
     onPress(id);
@@ -66,11 +63,17 @@ export function GridPost({
     onPreviewPress(id);
   }, [onPreviewPress, id]);
 
+  useBackHandler(() => {
+    if (isPreviewVisible) {
+      togglePreviewVisibleState();
+      return true;
+    }
+    return false;
+  });
+
   if (!postParams) {
     return null;
   }
-
-  const { previewUrl, isAlbum, isPinned, noOfViews } = postParams;
 
   return (
     <>
@@ -86,19 +89,18 @@ export function GridPost({
           styles.root_container,
         ]}
       >
-        {photoLoadingState !== "failed" && (
-          <Image
-            contentFit="cover"
-            source={previewUrl}
-            style={styles.image}
-            onLoad={photoLoadCallback}
-            onLoadStart={photoLoadStartCallback}
-            onError={photoLoadErrorCallback}
-          />
-        )}
-        {photoLoadingState === "success" && (
+        <RetryableImage
+          source={
+            postParams.postType === "photo"
+              ? postParams.previewUrl
+              : postParams.thumbnailPreviewUrl
+          }
+          style={styles.image}
+          onLoad={imageLoadCallback}
+        />
+        {imageLoaded && (
           <>
-            {isAlbum && (
+            {postParams.postType === "photo" && postParams.isAlbum && (
               <Icon
                 name="album"
                 size={SIZE_15}
@@ -106,7 +108,7 @@ export function GridPost({
                 style={styles.albumIcon}
               />
             )}
-            {isPinned && showPin && (
+            {postParams.isPinned && showPin && (
               <Icon
                 name="pin-solid"
                 size={SIZE_15}
@@ -114,14 +116,16 @@ export function GridPost({
                 style={styles.pinIcon}
               />
             )}
-            {noOfViews > 0 && showViews && (
-              <View style={styles.views_container}>
-                <AppText size={SIZE_11} color={COLOR_1} weight="regular">
-                  {formatNumber(noOfViews)}
-                </AppText>
-                <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
-              </View>
-            )}
+            {postParams.postType === "moment" &&
+              postParams.noOfViews > 0 &&
+              showViews && (
+                <View style={styles.views_container}>
+                  <AppText size={SIZE_11} color={COLOR_1} weight="regular">
+                    {formatNumber(postParams.noOfViews)}
+                  </AppText>
+                  <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
+                </View>
+              )}
           </>
         )}
       </Pressable>

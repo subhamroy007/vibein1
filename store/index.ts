@@ -4,6 +4,8 @@ import postReducer from "./post/post.slice";
 import commentReducer from "./comment/comment.slice";
 import clientReducer from "./client/client.slice";
 import replyReducer from "./reply/reply.slice";
+import hashtagReducer from "./hashtag/hashtag.slice";
+import requestReducer from "./request/request.slice";
 
 const appDataStore = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const appDataStore = configureStore({
     comment: commentReducer,
     client: clientReducer,
     reply: replyReducer,
+    hashtag: hashtagReducer,
+    request: requestReducer,
   },
 });
 

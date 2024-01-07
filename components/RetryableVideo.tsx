@@ -3,7 +3,7 @@ import { PostMomentVideoParams } from "../types/utility.types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { layoutStyle } from "../styles";
 import RetryableImage from "./RetryableImage";
-import { StyleSheet } from "react-native";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { useFocusEffect } from "expo-router";
 
 export type RetryableVideoProps = {
@@ -11,6 +11,7 @@ export type RetryableVideoProps = {
   video: PostMomentVideoParams;
   muted?: boolean;
   paused?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 const RetryableVideo = ({
@@ -18,6 +19,7 @@ const RetryableVideo = ({
   video,
   muted,
   paused,
+  style,
 }: RetryableVideoProps) => {
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<Video | null>(null);
@@ -53,7 +55,6 @@ const RetryableVideo = ({
           }
         });
       } catch (error) {
-        console.log(error);
         setTimeout(() => {
           loadVideo(url);
         }, 2000);
@@ -101,10 +102,7 @@ const RetryableVideo = ({
           ref={(ref) => {
             videoRef.current = ref;
           }}
-          style={[
-            layoutStyle.width_100_percent,
-            layoutStyle.height_100_percent,
-          ]}
+          style={style}
           resizeMode={ResizeMode.COVER}
           onReadyForDisplay={() => {
             setVideoReady(true);

@@ -4,7 +4,11 @@ const index = () => {
   return (
     <>
       <Stack.Screen options={{ animation: "none" }} />
-      <Redirect href={{ pathname: "/tabs" }} />
+      <Redirect
+        href={{
+          pathname: "hashtag/hotgirls",
+        }}
+      />
     </>
   );
 };

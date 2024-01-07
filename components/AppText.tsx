@@ -11,7 +11,7 @@ import { COLOR_4, SIZE_13 } from "../constants";
 export type AppTextProps = {
   size?: number;
   color?: string;
-  weight?: "bold" | "medium" | "regular";
+  weight?: "bold" | "medium" | "regular" | "semi-bold" | "extra-bold" | "light";
   isMultiline?: boolean;
 } & TextProps;
 
@@ -27,14 +27,23 @@ export default function AppText({
 
   switch (weight) {
     case "bold":
-      textStyle.push(styles.bold_roboto);
+      textStyle.push(styles.bold);
       break;
     case "regular":
-      textStyle.push(styles.regular_roboto);
+      textStyle.push(styles.regular);
+      break;
+    case "extra-bold":
+      textStyle.push(styles.extra_bold);
+      break;
+    case "semi-bold":
+      textStyle.push(styles.semi_bold);
+      break;
+    case "light":
+      textStyle.push(styles.light);
       break;
     case "medium":
     default:
-      textStyle.push(styles.medium_roboto);
+      textStyle.push(styles.medium);
       break;
   }
 
@@ -63,13 +72,22 @@ export default function AppText({
 }
 
 const styles = StyleSheet.create({
-  bold_roboto: {
-    fontFamily: "roboto_bold",
+  bold: {
+    fontFamily: "bold",
   },
-  medium_roboto: {
-    fontFamily: "roboto_medium",
+  medium: {
+    fontFamily: "medium",
   },
-  regular_roboto: {
-    fontFamily: "roboto_regular",
+  regular: {
+    fontFamily: "regular",
+  },
+  extra_bold: {
+    fontFamily: "extra_bold",
+  },
+  semi_bold: {
+    fontFamily: "semi_bold",
+  },
+  light: {
+    fontFamily: "light",
   },
 });

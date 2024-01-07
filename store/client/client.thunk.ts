@@ -1,5 +1,10 @@
+import { getRandom } from "../../mocks";
 import { generatePostObjects } from "../../mocks/posts";
-import { HomeFeedResponseParams } from "../../types/response.types";
+import {
+  HashTagPageResponseParams,
+  HomeFeedResponseParams,
+  PostResponseParams,
+} from "../../types/response.types";
 import { createAppAsyncThunk, delay } from "../../utility";
 
 /**

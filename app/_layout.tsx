@@ -39,9 +39,12 @@ export default function AppLayout() {
   const theme = useTheme();
 
   const [fontsLoaded, fontError] = useFonts({
-    roboto_regular: require("../assets/fonts/Roboto-Regular.ttf"),
-    roboto_medium: require("../assets/fonts/Roboto-Medium.ttf"),
-    roboto_bold: require("../assets/fonts/Roboto-Bold.ttf"),
+    regular: require("../assets/fonts/OpenSans_SemiCondensed-Regular.ttf"),
+    medium: require("../assets/fonts/OpenSans_SemiCondensed-Medium.ttf"),
+    bold: require("../assets/fonts/OpenSans_SemiCondensed-Bold.ttf"),
+    light: require("../assets/fonts/OpenSans_SemiCondensed-Light.ttf"),
+    semi_bold: require("../assets/fonts/OpenSans_SemiCondensed-SemiBold.ttf"),
+    extra_bold: require("../assets/fonts/OpenSans_SemiCondensed-ExtraBold.ttf"),
     icon_font: require("../assets/fonts/icon_font.ttf"),
   });
 

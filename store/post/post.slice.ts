@@ -6,11 +6,19 @@ import {
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { getPostInitialState, upsertManyPost } from "./post.adapter";
 import { fetchComments, fetchSimilarPosts } from "./post.thunk";
-import { PostResponseParams } from "../../types/response.types";
+import {
+  FulFilledActionParams,
+  HashTagPageResponseParams,
+  HashtagPageRequestParams,
+  HomeFeedResponseParams,
+  PostResponseParams,
+} from "../../types/response.types";
 import {
   PostAdapterParams,
   PostFeedItemIdentfierParams,
 } from "../../types/store.types";
+import { getHashtagPageThunk } from "../hashtag/hashtag.thunk";
+import { ThunkMeta } from "../../types/utility.types";
 
 /**
  * utlity function that takes a single argument of type PostResponseParams
@@ -97,6 +105,15 @@ const postSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(
       getHomeFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getHashtagPageThunk.fulfilled,
       (state, { payload: { posts } }) => {
         upsertManyPost(
           state,

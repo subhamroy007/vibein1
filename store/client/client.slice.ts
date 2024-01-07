@@ -72,12 +72,6 @@ const clientSlice = createSlice({
         noOfUnseenNotifications: 0,
       };
     },
-    setImageFileUrl(
-      state,
-      { payload }: PayloadAction<{ url: string; fileUrl: string }>
-    ) {
-      state.imageCache[payload.url] = payload.fileUrl;
-    },
     setFullScreenActiveState(state, action: PayloadAction<boolean>) {
       state.isFullScreenActive = action.payload;
     },
@@ -202,7 +196,6 @@ export const {
     initHomeFeed,
     initClientInfo,
     initDiscoverFeed,
-    setImageFileUrl,
     setFullScreenActiveState,
   },
 } = clientSlice;

@@ -20,9 +20,6 @@ import { SIZE_24, SIZE_60 } from "../constants";
 import CircleIcon from "./CircleIcon";
 import { useDeviceLayout } from "../hooks/utility.hooks";
 
-const min = 0;
-const max = SIZE_60;
-
 const viewabilityConfig: ViewabilityConfig = {
   minimumViewTime: 150,
   itemVisiblePercentThreshold: 60,
@@ -34,6 +31,7 @@ export type ClassicPostListProps = {
   onRetry: () => void;
   onPostTap: (id: string) => void;
   clampedScrollOffset?: SharedValue<number>;
+  contentOffset?: number;
 };
 
 /**
@@ -45,6 +43,7 @@ export default function ClassicPostList({
   onRetry,
   onPostTap,
   clampedScrollOffset,
+  contentOffset,
 }: ClassicPostListProps) {
   const { width, height } = useDeviceLayout();
 
@@ -54,12 +53,15 @@ export default function ClassicPostList({
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll(event) {
-      if (clampedScrollOffset) {
+      if (clampedScrollOffset && contentOffset) {
         const diff = event.contentOffset.y - prevScrollY.value;
-        const clampedDiff = Math.min(Math.max(diff, min - max), max - min);
+        const clampedDiff = Math.min(
+          Math.max(diff, -contentOffset),
+          contentOffset
+        );
         clampedScrollOffset.value = Math.min(
-          Math.max(clampedScrollOffset.value + clampedDiff, min),
-          max
+          Math.max(clampedScrollOffset.value + clampedDiff, 0),
+          contentOffset
         );
         prevScrollY.value = event.contentOffset.y;
       }
@@ -120,7 +122,7 @@ export default function ClassicPostList({
         styles.footer_component,
       ]}
       onScroll={scrollHandler}
-      contentContainerStyle={{ paddingTop: max - min }}
+      contentContainerStyle={{ paddingTop: contentOffset }}
       viewabilityConfig={viewabilityConfig}
       onViewableItemsChanged={viewableItemsChangedCallback}
     />

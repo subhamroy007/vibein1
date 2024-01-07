@@ -1,3 +1,4 @@
+import { PayloadAction } from "@reduxjs/toolkit";
 import {
   CommentTemplateParams,
   PostTemplateParams,
@@ -92,3 +93,28 @@ export type SimilarPostResponseDataParams = {
 
 export type SimilarPostResponseParams =
   ThunkResponseParams<SimilarPostResponseDataParams>;
+
+export type HashTagPageResponseParams = {
+  hashtag: string;
+  noOfPosts: number;
+  posts: PostResponseParams[];
+};
+
+export type FulFilledActionParams<T, U = void | {}> = PayloadAction<
+  T,
+  string,
+  {
+    arg: ThunkArg<U>;
+    requestId: string;
+    requestStatus: "fulfilled";
+  } & ThunkMeta,
+  never
+>;
+
+export type HashtagPageRequestParams = {
+  hashtag: string;
+};
+
+export type ThunkArg<T> = {
+  requestId: string;
+} & T;

@@ -1,38 +1,39 @@
-import { FlatList, ListRenderItemInfo, StyleSheet, View } from "react-native";
+import { ListRenderItemInfo, StyleSheet, View } from "react-native";
 import { GridPostGroupParams } from "../../types/selector.types";
 import { GridPostGroup } from "./GridPostGroup";
 import { useCallback } from "react";
+import Animated, {
+  SharedValue,
+  useAnimatedScrollHandler,
+} from "react-native-reanimated";
 
 export type GridPostListProps = {
-  postGroups: GridPostGroupParams[];
+  data: string[];
   portrait?: boolean;
   showViews?: boolean;
   showPin?: boolean;
   onPress: (id: string) => void;
   onPreviewPress: (id: string) => void;
+  scrollOffset?: SharedValue<number>;
+  contentOffset?: number;
 };
 
 export default function GridPostList({
-  postGroups,
+  data,
+  scrollOffset,
+  contentOffset,
   ...restProps
 }: GridPostListProps) {
-  // const [isPreviewVisible, setPreviewVisibleState] = useState(false);
-  // const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const postGroups = [];
 
-  // const togglePreviewVisibleState = useCallback(
-  //   () => setPreviewVisibleState((prevState) => !prevState),
-  //   []
-  // );
+  for (let i = 0; i < data.length; i += 3) {
+    const postId1 = data[i];
+    const postId2 = data[i + 1] ? data[i + 1] : "";
+    const postId3 = data[i + 2] ? data[i + 2] : "";
+    const groupId = postId1 + postId2 + postId3;
 
-  // const gridLongPressCallback = useCallback((id: string) => {
-  //   togglePreviewVisibleState();
-  //   setSelectedPostId(id);
-  // }, []);
-
-  // const previewDismissCallback = useCallback(() => {
-  //   togglePreviewVisibleState();
-  //   setSelectedPostId(null);
-  // }, []);
+    postGroups.push({ groupId, posts: data.slice(i, i + 3) });
+  }
 
   const renderItem = useCallback(
     ({ item: { posts } }: ListRenderItemInfo<GridPostGroupParams>) => {
@@ -46,10 +47,16 @@ export default function GridPostList({
     []
   );
 
-  // const postList = postGroups.flatMap((item) => item.posts);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll(event) {
+      if (scrollOffset) {
+        scrollOffset.value = event.contentOffset.y;
+      }
+    },
+  });
 
   return (
-    <FlatList
+    <Animated.FlatList
       data={postGroups}
       keyExtractor={(item) => item.groupId}
       showsVerticalScrollIndicator={false}
@@ -57,6 +64,8 @@ export default function GridPostList({
       renderItem={renderItem}
       ItemSeparatorComponent={itemSeparator}
       extraData={restProps}
+      onScroll={scrollHandler}
+      contentContainerStyle={{ paddingTop: contentOffset ? contentOffset : 0 }}
     />
   );
 }

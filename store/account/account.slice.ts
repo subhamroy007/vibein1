@@ -6,9 +6,15 @@ import {
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { getAccountInitialState, upsertManyAccount } from "./account.adapter";
 import { fetchComments, fetchSimilarPosts } from "../post/post.thunk";
-import { AccountResponseParams } from "../../types/response.types";
+import {
+  AccountResponseParams,
+  FulFilledActionParams,
+  HashTagPageResponseParams,
+  HashtagPageRequestParams,
+} from "../../types/response.types";
 import { AccountAdapterParams } from "../../types/store.types";
 import { fetchReplies } from "../comment/comment.thunks";
+import { getHashtagPageThunk } from "../hashtag/hashtag.thunk";
 
 function tranformToAccountAdapterParams(
   account: AccountResponseParams
@@ -59,6 +65,25 @@ const accountSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(
       getHomeFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        const accounts: AccountAdapterParams[] = [];
+
+        posts.forEach((post) => {
+          accounts.push(tranformToAccountAdapterParams(post.createdBy));
+          if (post.taggedAccounts) {
+            accounts.push(
+              ...post.taggedAccounts.map((taggedAccount) =>
+                tranformToAccountAdapterParams(taggedAccount)
+              )
+            );
+          }
+        });
+
+        upsertManyAccount(state, accounts);
+      }
+    );
+    builder.addCase(
+      getHashtagPageThunk.fulfilled,
       (state, { payload: { posts } }) => {
         const accounts: AccountAdapterParams[] = [];
 
