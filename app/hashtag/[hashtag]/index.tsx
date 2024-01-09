@@ -59,16 +59,24 @@ const HashTagPage = () => {
       {hashtagPageInfo && (
         <View style={[layoutStyle.flex_1, { overflow: "hidden" }]}>
           <GridPostList
-            onPress={() => {
+            onPress={(postId) => {
               router.push({
                 pathname: `hashtag/[hashtag]/classic_feed`,
                 params: {
                   hashtag,
-                  posts: JSON.stringify(hashtagPageInfo.posts),
+                  stringifiedPostList: JSON.stringify(hashtagPageInfo.posts),
                 },
               });
             }}
-            onPreviewPress={() => {}}
+            onPreviewPress={(postId) => {
+              router.push({
+                pathname: `hashtag/[hashtag]/swipable_feed`,
+                params: {
+                  hashtag,
+                  stringifiedPostList: JSON.stringify(hashtagPageInfo.posts),
+                },
+              });
+            }}
             showViews
             data={hashtagPageInfo.posts}
             scrollOffset={scrollOffset}

@@ -1,8 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ThunkState } from "../types/store.types";
 import * as FileSystem from "expo-file-system";
 import { useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { nanoid } from "@reduxjs/toolkit";
+import { useAppDispatch, useAppSelector } from "./storeHooks";
+import { selectPostScreenInfo } from "../store/post-screen/post_screen.selector";
+import {
+  cleanPostScreen,
+  initPostScreen,
+} from "../store/post-screen/post_screen.slice";
+import { getPostScreenThunk } from "../store/post-screen/post_screen.thunk";
 
 export function useDeviceLayout() {
   const { width, height } = useWindowDimensions();
@@ -71,4 +79,33 @@ export function useDownloadImage(url: string, retry: boolean = true) {
   }, [url, retry]);
 
   return { state, urlValue };
+}
+
+export function usePostScreen(url: string, initPosts: string[]) {
+  const screenId = useRef(nanoid()).current;
+
+  const screenInfo = useAppSelector((state) =>
+    selectPostScreenInfo(state, screenId)
+  );
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(initPostScreen({ screenId, initPosts }));
+  }, [initPostScreen]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(cleanPostScreen({ screenId }));
+    };
+  }, []);
+
+  const fetch = useCallback(() => {
+    dispatch(getPostScreenThunk({ url, screenId }));
+  }, [url]);
+
+  return {
+    screenInfo,
+    fetch,
+  };
 }

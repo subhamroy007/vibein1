@@ -118,3 +118,13 @@ export type HashtagPageRequestParams = {
 export type ThunkArg<T> = {
   requestId: string;
 } & T;
+
+export type PostScreenResponseParams = {
+  posts: PostResponseParams[];
+};
+
+export type PostScreenThunkParams = {
+  url: string;
+  screenId: string;
+  queryParams?: { [key: string]: string };
+};

@@ -26,7 +26,7 @@ const viewabilityConfig: ViewabilityConfig = {
 };
 
 export type ClassicPostListProps = {
-  data: PostFeedItemIdentfierParams[];
+  data: string[];
   state: ThunkState;
   onRetry: () => void;
   onPostTap: (id: string) => void;
@@ -69,17 +69,14 @@ export default function ClassicPostList({
   });
 
   const renderItemCallback = useCallback(
-    ({ item, index }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
-      switch (item.type) {
-        case "post":
-          return (
-            <ClassicPost
-              id={item.postId}
-              onPress={onPostTap}
-              focused={index === activePostIndex}
-            />
-          );
-      }
+    ({ item, index }: ListRenderItemInfo<string>) => {
+      return (
+        <ClassicPost
+          id={item}
+          onPress={onPostTap}
+          focused={index === activePostIndex}
+        />
+      );
     },
     [activePostIndex]
   );
@@ -102,7 +99,7 @@ export default function ClassicPostList({
     <Animated.FlatList
       data={data}
       renderItem={renderItemCallback}
-      keyExtractor={(item) => item.postId}
+      keyExtractor={(item) => item}
       keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
       overScrollMode="never"

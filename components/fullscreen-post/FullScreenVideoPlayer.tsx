@@ -75,7 +75,14 @@ export default function FullScreenVideoPlayer({
           layoutStyle.flex_1,
         ]}
       >
-        <RetryableVideo {...restProps} paused={videoPaused} />
+        <RetryableVideo
+          {...restProps}
+          paused={videoPaused}
+          style={[
+            layoutStyle.width_100_percent,
+            layoutStyle.height_100_percent,
+          ]}
+        />
         <LinearGradient
           style={StyleSheet.absoluteFill}
           colors={[COLOR_8, COLOR_15]}

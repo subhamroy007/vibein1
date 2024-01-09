@@ -60,6 +60,7 @@ export function GridPost({
   }, []);
 
   const previewPressCallback = useCallback(() => {
+    togglePreviewVisibleState();
     onPreviewPress(id);
   }, [onPreviewPress, id]);
 

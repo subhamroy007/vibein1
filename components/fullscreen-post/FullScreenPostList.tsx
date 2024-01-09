@@ -26,7 +26,7 @@ const min = 0;
 const max = SIZE_60;
 
 export type FullScreenPostListProps = {
-  data: PostFeedItemIdentfierParams[];
+  data: string[];
   state: ThunkState;
   onRetry: () => void;
   clampedScrollOffset?: SharedValue<number>;
@@ -64,21 +64,18 @@ export default function FullScreenPostList({
   });
 
   const renderItemCallback = useCallback(
-    ({ item, index }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
+    ({ item, index }: ListRenderItemInfo<string>) => {
       if (!listHeight) {
         return null;
       }
 
-      switch (item.type) {
-        case "post":
-          return (
-            <FullScreenPost
-              id={item.postId}
-              postHeight={listHeight}
-              focused={index === activePostIndex && tabFocused === true}
-            />
-          );
-      }
+      return (
+        <FullScreenPost
+          id={item}
+          postHeight={listHeight}
+          focused={index === activePostIndex && tabFocused === true}
+        />
+      );
     },
     [listHeight, activePostIndex, tabFocused]
   );
@@ -119,7 +116,7 @@ export default function FullScreenPostList({
       nestedScrollEnabled
       data={data}
       renderItem={renderItemCallback}
-      keyExtractor={(item) => item.postId}
+      keyExtractor={(item) => item}
       keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
       overScrollMode="never"

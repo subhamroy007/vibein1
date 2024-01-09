@@ -1,10 +1,10 @@
 import { useLocalSearchParams } from "expo-router";
 import AppScreen from "../../../components/AppScreen";
 import Header from "../../../components/Header";
-import ClassicPostList from "../../../components/ClassisPostList";
 import { usePostScreen } from "../../../hooks/utility.hooks";
+import FullScreenPostList from "../../../components/fullscreen-post/FullScreenPostList";
 
-const ClassicFeed = () => {
+const SwipableFeed = () => {
   const { hashtag, stringifiedPostList } = useLocalSearchParams<{
     hashtag: string;
     stringifiedPostList: string;
@@ -14,19 +14,21 @@ const ClassicFeed = () => {
 
   const { fetch, screenInfo } = usePostScreen("/" + hashtag, initPosts);
 
+  if (!screenInfo) {
+    return null;
+  }
+
   return (
-    <AppScreen>
-      <Header title="Posts" />
-      {screenInfo && (
-        <ClassicPostList
-          data={screenInfo.posts}
-          onPostTap={() => {}}
-          onRetry={fetch}
-          state={screenInfo?.state}
-        />
-      )}
+    <AppScreen dark>
+      <FullScreenPostList
+        data={screenInfo.posts}
+        state={screenInfo?.state}
+        onRetry={fetch}
+        tabFocused
+      />
+      <Header title="Posts" transparent floating />
     </AppScreen>
   );
 };
 
-export default ClassicFeed;
+export default SwipableFeed;
