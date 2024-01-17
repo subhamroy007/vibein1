@@ -1,11 +1,14 @@
 import {
+  FlatListProps,
   ListRenderItemInfo,
   Pressable,
+  RefreshControl,
   StyleSheet,
+  View,
   ViewToken,
   ViewabilityConfig,
 } from "react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ClassicPost from "./ClassicPost";
 import Animated, {
   Layout,
@@ -14,11 +17,12 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { layoutStyle } from "../styles";
-import { PostFeedItemIdentfierParams, ThunkState } from "../types/store.types";
+import { ThunkState } from "../types/store.types";
 import AnimatedLaodingIndicator from "./AnimatedLaodingIndicator";
-import { SIZE_24, SIZE_60 } from "../constants";
+import { SIZE_120, SIZE_24, SIZE_60 } from "../constants";
 import CircleIcon from "./CircleIcon";
-import { useDeviceLayout } from "../hooks/utility.hooks";
+import { useLayout } from "@react-native-community/hooks";
+import { Href } from "expo-router/build/link/href";
 
 const viewabilityConfig: ViewabilityConfig = {
   minimumViewTime: 150,
@@ -26,12 +30,17 @@ const viewabilityConfig: ViewabilityConfig = {
 };
 
 export type ClassicPostListProps = {
-  data: string[];
-  state: ThunkState;
-  onRetry: () => void;
-  onPostTap: (id: string) => void;
-  clampedScrollOffset?: SharedValue<number>;
+  data?: string[];
+  scrollOffset?: SharedValue<number>;
   contentOffset?: number;
+  header?: FlatListProps<any>["ListHeaderComponent"];
+  state?: ThunkState;
+  clampedScrollOffset?: SharedValue<number>;
+  postPressRoute?: Href;
+  initRequest?: () => void;
+  paginationRequest?: () => void;
+  enableReresh?: boolean;
+  enablePagination?: boolean;
 };
 
 /**
@@ -40,19 +49,27 @@ export type ClassicPostListProps = {
 export default function ClassicPostList({
   data,
   state,
-  onRetry,
-  onPostTap,
   clampedScrollOffset,
   contentOffset,
+  header,
+  scrollOffset,
+  postPressRoute,
+  enablePagination,
+  enableReresh,
+  initRequest,
+  paginationRequest,
 }: ClassicPostListProps) {
-  const { width, height } = useDeviceLayout();
-
+  const { onLayout, height: listHeight } = useLayout();
+  const [refreshing, setRefreshing] = useState(false);
   const [activePostIndex, setActivePostIndex] = useState(0);
 
   const prevScrollY = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll(event) {
+      if (scrollOffset) {
+        scrollOffset.value = event.contentOffset.y;
+      }
       if (clampedScrollOffset && contentOffset) {
         const diff = event.contentOffset.y - prevScrollY.value;
         const clampedDiff = Math.min(
@@ -73,14 +90,27 @@ export default function ClassicPostList({
       return (
         <ClassicPost
           id={item}
-          onPress={onPostTap}
+          index={index}
           focused={index === activePostIndex}
+          pressRoute={postPressRoute}
         />
       );
     },
-    [activePostIndex]
+    [activePostIndex, postPressRoute]
   );
 
+  const onRefresh = useCallback(() => {
+    if (initRequest) {
+      initRequest();
+      setRefreshing(true);
+    }
+  }, [initRequest]);
+
+  useEffect(() => {
+    if (state !== "loading") {
+      setRefreshing(false);
+    }
+  }, [state]);
   const viewableItemsChangedCallback = useCallback(
     ({
       viewableItems,
@@ -95,8 +125,76 @@ export default function ClassicPostList({
     []
   );
 
+  const calculatedFooter = useMemo(() => {
+    let Footer = undefined;
+
+    if (listHeight && data?.length && paginationRequest && !refreshing) {
+      Footer = (
+        <View
+          style={[
+            { height: SIZE_120 },
+            layoutStyle.align_item_center,
+            layoutStyle.justify_content_center,
+            layoutStyle.align_self_stretch,
+          ]}
+        >
+          {state === "failed" ? (
+            <Pressable onPress={paginationRequest} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          ) : (
+            <AnimatedLaodingIndicator size={SIZE_60} />
+          )}
+        </View>
+      );
+    }
+
+    return Footer;
+  }, [listHeight, state, fetch, data, paginationRequest]);
+
+  const calculatedPlaceHolder = useMemo(() => {
+    let placeHolder = undefined;
+    if (listHeight) {
+      placeHolder = (
+        <View
+          style={[
+            { height: listHeight },
+            layoutStyle.align_item_center,
+            layoutStyle.justify_content_center,
+          ]}
+        >
+          {state === "failed" && (
+            <Pressable onPress={initRequest} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          )}
+          {state === "loading" && <AnimatedLaodingIndicator size={SIZE_60} />}
+        </View>
+      );
+    }
+    return placeHolder;
+  }, [listHeight, state, initRequest]);
+
+  const endReachedCallback = useCallback(() => {
+    if (
+      state !== "loading" &&
+      state !== "idle" &&
+      paginationRequest &&
+      data?.length
+    ) {
+      paginationRequest();
+    }
+  }, [state, paginationRequest, data]);
+
+  useEffect(() => {
+    if (initRequest) {
+      initRequest();
+    }
+  }, [initRequest]);
+
   return (
     <Animated.FlatList
+      onLayout={onLayout}
       data={data}
       renderItem={renderItemCallback}
       keyExtractor={(item) => item}
@@ -105,23 +203,22 @@ export default function ClassicPostList({
       overScrollMode="never"
       itemLayoutAnimation={Layout.duration(300)}
       nestedScrollEnabled
-      ListFooterComponent={
-        state === "loading" ? (
-          <AnimatedLaodingIndicator size={SIZE_60} />
-        ) : state === "failed" ? (
-          <Pressable onPress={onRetry} hitSlop={SIZE_24}>
-            <CircleIcon name="retry" />
-          </Pressable>
-        ) : undefined
-      }
-      ListFooterComponentStyle={[
-        { width, height: 0.2 * height },
-        styles.footer_component,
-      ]}
       onScroll={scrollHandler}
       contentContainerStyle={{ paddingTop: contentOffset }}
       viewabilityConfig={viewabilityConfig}
       onViewableItemsChanged={viewableItemsChangedCallback}
+      ListHeaderComponent={header}
+      ListFooterComponent={enablePagination ? calculatedFooter : undefined}
+      ListEmptyComponent={calculatedPlaceHolder}
+      onEndReached={
+        enablePagination && paginationRequest ? endReachedCallback : undefined
+      }
+      onEndReachedThreshold={0.3}
+      refreshControl={
+        enableReresh && initRequest ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ) : undefined
+      }
     />
   );
 }

@@ -1,6 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { addOneRequest, getRequestInitialState } from "./request.adapter";
-import { getHashtagPageThunk } from "../hashtag/hashtag.thunk";
 
 const requestSlice = createSlice({
   name: "request",
@@ -17,53 +16,7 @@ const requestSlice = createSlice({
       addOneRequest(state, { ...action.payload, state: "idle" });
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(
-      getHashtagPageThunk.pending,
-      (
-        state,
-        {
-          meta: {
-            arg: { requestId, ...requestParams },
-          },
-        }
-      ) => {
-        const targetRequest = state.entities[requestId];
-
-        if (targetRequest) {
-          targetRequest.state = "loading";
-          targetRequest.startTimestamp = Date.now();
-          targetRequest.requestParams = requestParams;
-        }
-      }
-    );
-    builder.addCase(
-      getHashtagPageThunk.rejected,
-      (state, { payload, meta: { statusCode, requestId } }) => {
-        const targetRequest = state.entities[requestId];
-
-        if (targetRequest) {
-          (targetRequest.error = payload),
-            (targetRequest.statusCode = statusCode),
-            (targetRequest.endTimestamp = Date.now());
-          targetRequest.state = "failed";
-        }
-      }
-    );
-    builder.addCase(
-      getHashtagPageThunk.fulfilled,
-      (state, { payload, meta: { requestId, statusCode } }) => {
-        const targetRequest = state.entities[requestId];
-
-        if (targetRequest) {
-          (targetRequest.responseParams = payload),
-            (targetRequest.statusCode = statusCode),
-            (targetRequest.endTimestamp = Date.now());
-          targetRequest.state = "success";
-        }
-      }
-    );
-  },
+  extraReducers: (builder) => {},
 });
 
 const requestReducer = requestSlice.reducer;

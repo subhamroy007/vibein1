@@ -3,34 +3,35 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
+  RefreshControl,
+  View,
 } from "react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Animated, {
   Layout,
   SharedValue,
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import {
-  PostFeedItemIdentfierParams,
-  ThunkState,
-} from "../../types/store.types";
+import { ThunkState } from "../../types/store.types";
 import FullScreenPost from "./FullScreenPost";
 import FullScreenPlaceHolder from "./FullScreenPlaceHolder";
 import { backgroundStyle, layoutStyle } from "../../styles";
 import { useLayout } from "@react-native-community/hooks";
-import { SIZE_24, SIZE_60 } from "../../constants";
+import { SIZE_24 } from "../../constants";
 import CircleIcon from "../CircleIcon";
 
-const min = 0;
-const max = SIZE_60;
-
 export type FullScreenPostListProps = {
-  data: string[];
-  state: ThunkState;
-  onRetry: () => void;
+  data?: string[];
+  scrollOffset?: SharedValue<number>;
+  contentOffset?: number;
+  state?: ThunkState;
   clampedScrollOffset?: SharedValue<number>;
   tabFocused?: boolean;
+  initRequest?: () => void;
+  paginationRequest?: () => void;
+  enableReresh?: boolean;
+  enablePagination?: boolean;
 };
 
 /**
@@ -39,24 +40,49 @@ export type FullScreenPostListProps = {
 export default function FullScreenPostList({
   data,
   state,
-  onRetry,
   clampedScrollOffset,
+  contentOffset,
+  scrollOffset,
   tabFocused,
+  enablePagination,
+  enableReresh,
+  initRequest,
+  paginationRequest,
 }: FullScreenPostListProps) {
   const [activePostIndex, setActivePostIndex] = useState(0);
 
   const { height: listHeight, onLayout, width: listWidth } = useLayout();
 
+  const [refreshing, setRefreshing] = useState(false);
   const prevScrollY = useSharedValue(0);
+
+  const onRefresh = useCallback(() => {
+    if (initRequest) {
+      initRequest();
+      setRefreshing(true);
+    }
+  }, [initRequest]);
+
+  useEffect(() => {
+    if (state !== "loading") {
+      setRefreshing(false);
+    }
+  }, [state]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll(event) {
-      if (clampedScrollOffset) {
+      if (scrollOffset) {
+        scrollOffset.value = event.contentOffset.y;
+      }
+      if (clampedScrollOffset && contentOffset) {
         const diff = event.contentOffset.y - prevScrollY.value;
-        const clampedDiff = Math.min(Math.max(diff, min - max), max - min);
+        const clampedDiff = Math.min(
+          Math.max(diff, -contentOffset),
+          contentOffset
+        );
         clampedScrollOffset.value = Math.min(
-          Math.max(clampedScrollOffset.value + clampedDiff, min),
-          max
+          Math.max(clampedScrollOffset.value + clampedDiff, 0),
+          contentOffset
         );
         prevScrollY.value = event.contentOffset.y;
       }
@@ -110,8 +136,78 @@ export default function FullScreenPostList({
     [listHeight]
   );
 
+  const calculatedPlaceHolder = useMemo(() => {
+    let placeHolder = undefined;
+    if (listHeight) {
+      placeHolder = (
+        <View
+          style={[
+            { height: listHeight },
+            layoutStyle.align_item_center,
+            layoutStyle.justify_content_center,
+          ]}
+        >
+          {state === "failed" && (
+            <Pressable onPress={initRequest} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          )}
+          {state === "loading" && <FullScreenPlaceHolder />}
+        </View>
+      );
+    }
+    return placeHolder;
+  }, [state, , listHeight, initRequest]);
+
+  const calculatedFooter = useMemo(() => {
+    let Footer = undefined;
+
+    if (listHeight && data?.length && paginationRequest && !refreshing) {
+      Footer = (
+        <View
+          style={[
+            { height: listHeight },
+            layoutStyle.align_item_center,
+            layoutStyle.justify_content_center,
+          ]}
+        >
+          {state === "failed" && (
+            <Pressable onPress={paginationRequest} hitSlop={SIZE_24}>
+              <CircleIcon name="retry" />
+            </Pressable>
+          )}
+          {state === "loading" && <FullScreenPlaceHolder />}
+        </View>
+      );
+    }
+
+    return Footer;
+  }, [listHeight, state, data, paginationRequest, refreshing]);
+
+  const endReachedCallback = useCallback(() => {
+    if (
+      state !== "loading" &&
+      state !== "idle" &&
+      paginationRequest &&
+      data?.length
+    ) {
+      paginationRequest();
+    }
+  }, [state, paginationRequest, data]);
+
+  useEffect(() => {
+    if (initRequest) {
+      initRequest();
+    }
+  }, [initRequest]);
+
   return (
     <Animated.FlatList
+      refreshControl={
+        enableReresh && initRequest ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ) : undefined
+      }
       onLayout={onLayout}
       nestedScrollEnabled
       data={data}
@@ -123,24 +219,15 @@ export default function FullScreenPostList({
       itemLayoutAnimation={Layout.duration(300)}
       pagingEnabled
       getItemLayout={getItemLayoutCallback}
-      ListFooterComponent={
-        state === "success" || state === "idle" ? undefined : state ===
-          "loading" ? (
-          <FullScreenPlaceHolder />
-        ) : (
-          <Pressable onPress={onRetry} hitSlop={SIZE_24}>
-            <CircleIcon name="retry" />
-          </Pressable>
-        )
-      }
+      ListEmptyComponent={listHeight ? calculatedPlaceHolder : undefined}
+      ListFooterComponent={enablePagination ? calculatedFooter : undefined}
       onScroll={scrollHandler}
       onMomentumScrollEnd={onMomentumScrollEndCallback}
-      ListFooterComponentStyle={[
-        { height: listHeight, width: listWidth },
-        layoutStyle.align_item_center,
-        layoutStyle.justify_content_center,
-      ]}
       style={backgroundStyle.background_color_4}
+      onEndReached={
+        enablePagination && paginationRequest ? endReachedCallback : undefined
+      }
+      onEndReachedThreshold={0.3}
     />
   );
 }

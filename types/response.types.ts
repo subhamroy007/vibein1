@@ -6,6 +6,7 @@ import {
   ThunkError,
   ThunkMeta,
 } from "./utility.types";
+import { HashtagAdapterParams } from "./store.types";
 
 /**
  * reprsents the abstract type of response params from a thnuk
@@ -26,6 +27,9 @@ export type AccountResponseParams = {
   username: string;
   profilePictureUrl: string;
   fullname?: string;
+  bio?: string | null;
+  noOfPosts?: number;
+  noOfFollowings?: number;
   noOfFollowers?: number;
   isAvailable?: boolean;
   isActive?: boolean;
@@ -94,10 +98,15 @@ export type SimilarPostResponseDataParams = {
 export type SimilarPostResponseParams =
   ThunkResponseParams<SimilarPostResponseDataParams>;
 
-export type HashTagPageResponseParams = {
+export type HashtagGeneralRouteResponseParams = {
+  hashtag: HashtagAdapterParams;
+  topPosts: PostResponseParams[];
+};
+
+export type HashtagRouteThunkParams = {
+  routeId: string;
   hashtag: string;
-  noOfPosts: number;
-  posts: PostResponseParams[];
+  refresh?: boolean;
 };
 
 export type FulFilledActionParams<T, U = void | {}> = PayloadAction<
@@ -111,10 +120,6 @@ export type FulFilledActionParams<T, U = void | {}> = PayloadAction<
   never
 >;
 
-export type HashtagPageRequestParams = {
-  hashtag: string;
-};
-
 export type ThunkArg<T> = {
   requestId: string;
 } & T;
@@ -127,4 +132,28 @@ export type PostScreenThunkParams = {
   url: string;
   screenId: string;
   queryParams?: { [key: string]: string };
+};
+
+export type LocationScreenResponseParams = {
+  id: string;
+  name: string;
+  fullAddress: string;
+  noOfPosts: number;
+  posts: PostResponseParams[];
+};
+
+export type LocationScreenThunkParams = {
+  locationId: string;
+  screenId: string;
+};
+
+export type AccountRouteResponseParams = {
+  account: AccountResponseParams;
+  posts: PostResponseParams[];
+};
+
+export type AccountRouteThunkParams = {
+  routeId: string;
+  username: string;
+  refresh?: boolean;
 };

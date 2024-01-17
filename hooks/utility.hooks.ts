@@ -11,6 +11,12 @@ import {
   initPostScreen,
 } from "../store/post-screen/post_screen.slice";
 import { getPostScreenThunk } from "../store/post-screen/post_screen.thunk";
+import { selectLocationScreenInfo } from "../store/location-screen/location_screen.selector";
+import {
+  cleanLocationScreen,
+  initLocationScreen,
+} from "../store/location-screen/location_screen.slice";
+import { getLocationScreenThunk } from "../store/location-screen/location_screen.thunk";
 
 export function useDeviceLayout() {
   const { width, height } = useWindowDimensions();
@@ -103,6 +109,35 @@ export function usePostScreen(url: string, initPosts: string[]) {
   const fetch = useCallback(() => {
     dispatch(getPostScreenThunk({ url, screenId }));
   }, [url]);
+
+  return {
+    screenInfo,
+    fetch,
+  };
+}
+
+export function useLocationScreen(locationId: string) {
+  const screenId = useRef(nanoid()).current;
+
+  const screenInfo = useAppSelector((state) =>
+    selectLocationScreenInfo(state, screenId)
+  );
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(initLocationScreen({ screenId }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(cleanLocationScreen({ screenId }));
+    };
+  }, []);
+
+  const fetch = useCallback(() => {
+    dispatch(getLocationScreenThunk({ screenId, locationId }));
+  }, [locationId]);
 
   return {
     screenInfo,

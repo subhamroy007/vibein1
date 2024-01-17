@@ -9,12 +9,12 @@ import {
 import { AccountField } from "../types/utility.types";
 
 export default function useAccountParams(
-  id: string,
+  username: string,
   includeFields?: AccountField[]
 ) {
   const accountSelectotCallback = useCallback(
-    (state: RootState) => selectAccountParams(state, id, includeFields),
-    [id, includeFields]
+    (state: RootState) => selectAccountParams(state, username, includeFields),
+    [username, includeFields]
   );
 
   const storeDispatch = useAppDispatch();
@@ -23,11 +23,11 @@ export default function useAccountParams(
 
   const toggleAccountFollowingStateCallback = useCallback(() => {
     if (accountParams?.isPrivate) {
-      storeDispatch(toggleAccountFollowRequestState(id));
+      storeDispatch(toggleAccountFollowRequestState(username));
     } else {
-      storeDispatch(toggleAccountFollowingState(id));
+      storeDispatch(toggleAccountFollowingState(username));
     }
-  }, [id, storeDispatch, accountParams?.isPrivate]);
+  }, [username, storeDispatch, accountParams?.isPrivate]);
 
   return { accountParams, toggleAccountFollowingStateCallback };
 }

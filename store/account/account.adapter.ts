@@ -4,7 +4,7 @@ import { AccountAdapterParams } from "../../types/store.types";
 const accountAdapter = createEntityAdapter<AccountAdapterParams>({
   selectId: (model) => model.username,
   sortComparer: (account1, account2) =>
-    account1._id.localeCompare(account2._id),
+    account1.username.localeCompare(account2.username),
 });
 
 export const { selectById: selectAccountById } = accountAdapter.getSelectors();

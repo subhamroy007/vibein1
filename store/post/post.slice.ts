@@ -3,22 +3,31 @@ import {
   getForYouPhotosFeedThunk,
   getHomeFeedThunk,
 } from "./../client/client.thunk";
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import {
+  Draft,
+  EntityState,
+  PayloadAction,
+  createSlice,
+} from "@reduxjs/toolkit";
 import { getPostInitialState, upsertManyPost } from "./post.adapter";
 import { fetchComments, fetchSimilarPosts } from "./post.thunk";
-import {
-  FulFilledActionParams,
-  HashTagPageResponseParams,
-  HashtagPageRequestParams,
-  HomeFeedResponseParams,
-  PostResponseParams,
-} from "../../types/response.types";
+import { PostResponseParams } from "../../types/response.types";
 import {
   PostAdapterParams,
   PostFeedItemIdentfierParams,
 } from "../../types/store.types";
-import { getHashtagPageThunk } from "../hashtag/hashtag.thunk";
-import { ThunkMeta } from "../../types/utility.types";
+import { getLocationScreenThunk } from "../location-screen/location_screen.thunk";
+import {
+  getAccountAllPostThunk,
+  getAccountHomeRouteThunk,
+  getAccountMomentsThunk,
+  getAccountPhotosThunk,
+  getAccountTaggedPostThunk,
+} from "../account/account.thunk";
+import {
+  getHashtagGeneralRouteThunk,
+  getHashtagTopPostsRouteThunk,
+} from "../hashtag/hashtag.thunk";
 
 /**
  * utlity function that takes a single argument of type PostResponseParams
@@ -50,6 +59,17 @@ function tranformToPostAdapterParams(
       state: "idle",
     },
   };
+}
+
+function addPostsToStore(
+  state: Draft<EntityState<PostAdapterParams>>,
+  posts: PostResponseParams[]
+) {
+  const entities: PostAdapterParams[] = [];
+  posts.forEach((post) => {
+    entities.push(tranformToPostAdapterParams(post));
+  });
+  upsertManyPost(state, entities);
 }
 
 const postSlice = createSlice({
@@ -113,7 +133,64 @@ const postSlice = createSlice({
       }
     );
     builder.addCase(
-      getHashtagPageThunk.fulfilled,
+      getHashtagGeneralRouteThunk.fulfilled,
+      (state, { payload: { topPosts } }) => {
+        addPostsToStore(state, topPosts);
+      }
+    );
+    builder.addCase(
+      getHashtagTopPostsRouteThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        addPostsToStore(state, posts);
+      }
+    );
+    builder.addCase(
+      getLocationScreenThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getAccountHomeRouteThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getAccountAllPostThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getAccountTaggedPostThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getAccountPhotosThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        upsertManyPost(
+          state,
+          posts.map((post) => tranformToPostAdapterParams(post))
+        );
+      }
+    );
+    builder.addCase(
+      getAccountMomentsThunk.fulfilled,
       (state, { payload: { posts } }) => {
         upsertManyPost(
           state,

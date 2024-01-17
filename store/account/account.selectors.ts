@@ -11,7 +11,7 @@ export const selectAccountParams = createSelector(
     (state: RootState, username: string, includeFields?: AccountField[]) =>
       includeFields,
   ],
-  (state, username, includeFields): AccountAdapterParams | undefined => {
+  (state, username, includeFields) => {
     const account = selectAccountById(state, username);
 
     if (!account) {
@@ -56,6 +56,68 @@ export const selectAccountParams = createSelector(
       data["isFavourite"] = account.isFavourite;
     }
 
+    if (includeFields.includes("bio")) {
+      data["bio"] = account.bio;
+    }
+
+    if (includeFields.includes("follower-count")) {
+      data["noOfFollowers"] = account.noOfFollowers;
+    }
+
+    if (includeFields.includes("following-count")) {
+      data["noOfFollowings"] = account.noOfFollowings;
+    }
+
+    if (includeFields.includes("post-count")) {
+      data["noOfPosts"] = account.noOfPosts;
+    }
+
     return data;
+  }
+);
+
+export const selectAccountHomeRouteParams = createSelector(
+  [
+    (state: RootState) => state.account,
+    (state: RootState, routeId: string) => routeId,
+  ],
+  (state, routeId) => {
+    const route = state.profiles[routeId]?.home;
+    return route;
+  }
+);
+
+export const selectAccountMomentRouteParams = createSelector(
+  [
+    (state: RootState) => state.account,
+    (state: RootState, routeId: string) => routeId,
+  ],
+  (state, routeId) => {
+    const route = state.profiles[routeId]?.moments;
+
+    return route;
+  }
+);
+
+export const selectAccountPhotosRouteParams = createSelector(
+  [
+    (state: RootState) => state.account,
+    (state: RootState, routeId: string) => routeId,
+  ],
+  (state, routeId) => {
+    const route = state.profiles[routeId]?.photos;
+
+    return route;
+  }
+);
+
+export const selectAccountTagsRouteParams = createSelector(
+  [
+    (state: RootState) => state.account,
+    (state: RootState, routeId: string) => routeId,
+  ],
+  (state, routeId) => {
+    const route = state.profiles[routeId]?.taggedPosts;
+    return route;
   }
 );

@@ -6,7 +6,7 @@ const index = () => {
       <Stack.Screen options={{ animation: "none" }} />
       <Redirect
         href={{
-          pathname: "hashtag/trendmoments",
+          pathname: "account/summer",
         }}
       />
     </>

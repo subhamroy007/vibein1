@@ -28,7 +28,7 @@ function tranformToCommentAdapterParams(
   };
 }
 
-const commentSlice = createSlice({
+export const commentSlice = createSlice({
   name: "comment",
   initialState: getCommentInitialState(),
   reducers: {

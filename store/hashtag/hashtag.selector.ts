@@ -2,15 +2,20 @@ import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { selectHashtagByName } from "./hashtag.adapter";
 
-export const selectHashtagPageInfo = createSelector(
-  [(state: RootState) => state, (state: RootState, hashtag: string) => hashtag],
+export const selectHashtagGeneralRoute = createSelector(
+  [(state: RootState) => state, (_: RootState, routeId: string) => routeId],
+  (state, routeId) => {
+    const routeParams = state.hashtag.generalRoutes[routeId];
+
+    return routeParams;
+  }
+);
+
+export const selectHashtagAdapterParams = createSelector(
+  [(state: RootState) => state, (_: RootState, hashtag: string) => hashtag],
   (state, hashtag) => {
-    const hashtagPage = selectHashtagByName(state.hashtag, hashtag);
+    const hashtagParams = state.hashtag.entities[hashtag];
 
-    if (!hashtagPage) {
-      return undefined;
-    }
-
-    return hashtagPage;
+    return hashtagParams;
   }
 );

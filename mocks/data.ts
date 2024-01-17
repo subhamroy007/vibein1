@@ -11,19 +11,19 @@ const post_photo_preview_base_address = `http://${ip_address}:5500/post-photo-pr
 export const getProfilePictureUrl = (index: number) =>
   `${profile_picture_base_address}profile_picture_${index}.jpg`;
 
-const getPostPhotoUrl = (index: number) =>
+export const getPostPhotoUrl = (index: number) =>
   `${post_photo_base_address}post_photo_${index}.jpg`;
 
-const getPostMomentVideoUrl = (index: number) =>
+export const getPostMomentVideoUrl = (index: number) =>
   `${post_moment_video_base_address}moment_video_${index}.mp4`;
 
-const getPostMomentVideoThumbnailUrl = (index: number) =>
+export const getPostMomentVideoThumbnailUrl = (index: number) =>
   `${post_moment_video_thumbnail_base_address}moment_video_thumbnail_${index}.jpg`;
 
-const getPostMomentVideoThumbnailPreviewUrl = (index: number) =>
+export const getPostMomentVideoThumbnailPreviewUrl = (index: number) =>
   `${post_moment_video_thumbnail_preview_base_address}moment_video_thumbnail_preview_${index}.jpg`;
 
-const getPostPhotoPreviewUrl = (index: number) =>
+export const getPostPhotoPreviewUrl = (index: number) =>
   `${post_photo_preview_base_address}post_photo_preview_${index}.jpg`;
 
 export const PHOTOS: PostPhotoParams[] = [

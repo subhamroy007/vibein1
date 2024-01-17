@@ -17,6 +17,8 @@ import { Portal } from "@gorhom/portal";
 import PostPreview from "../preview-post/PostPreview2";
 import RetryableImage from "../RetryableImage";
 import { useBackHandler } from "@react-native-community/hooks";
+import { Href } from "expo-router/build/link/href";
+import { useRouter } from "expo-router";
 
 export type GridPostProps = {
   id: string;
@@ -24,8 +26,8 @@ export type GridPostProps = {
   portrait?: boolean;
   showPin?: boolean;
   showViews?: boolean;
-  onPress: (id: string) => void;
-  onPreviewPress: (id: string) => void;
+  gridPressRoute?: Href;
+  previewPressRoute?: Href;
 };
 
 export function GridPost({
@@ -34,10 +36,12 @@ export function GridPost({
   portrait,
   showPin,
   showViews,
-  onPress,
-  onPreviewPress,
+  gridPressRoute,
+  previewPressRoute,
 }: GridPostProps) {
   const { postParams } = useGridPost(id);
+
+  const router = useRouter();
 
   const [isPreviewVisible, setPreviewVisibleState] = useState(false);
 
@@ -51,8 +55,20 @@ export function GridPost({
   );
 
   const pressCallback = useCallback(() => {
-    onPress(id);
-  }, [id, onPress]);
+    if (gridPressRoute) {
+      if (typeof gridPressRoute === "string") {
+        router.push({
+          pathname: gridPressRoute,
+          params: { selectedPostId: id },
+        });
+      } else {
+        router.push({
+          pathname: gridPressRoute?.pathname,
+          params: { ...gridPressRoute?.params, selectedPostId: id },
+        });
+      }
+    }
+  }, [id, gridPressRoute, router]);
 
   const longPressCallback = useCallback(() => {
     Vibration.vibrate(LONG_PRESS_VIBRATION_DURATION);
@@ -60,9 +76,20 @@ export function GridPost({
   }, []);
 
   const previewPressCallback = useCallback(() => {
-    togglePreviewVisibleState();
-    onPreviewPress(id);
-  }, [onPreviewPress, id]);
+    if (previewPressRoute) {
+      if (typeof previewPressRoute === "string") {
+        router.push({
+          pathname: previewPressRoute,
+          params: { selectedPostId: id },
+        });
+      } else {
+        router.push({
+          pathname: previewPressRoute.pathname,
+          params: { ...previewPressRoute.params, selectedPostId: id },
+        });
+      }
+    }
+  }, [id, previewPressRoute, router]);
 
   useBackHandler(() => {
     if (isPreviewVisible) {

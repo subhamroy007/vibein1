@@ -1,6 +1,13 @@
 import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import AppText from "./AppText";
-import { COLOR_1, COLOR_14, COLOR_5, SIZE_15 } from "../constants";
+import {
+  COLOR_1,
+  COLOR_14,
+  COLOR_16,
+  COLOR_17,
+  COLOR_5,
+  SIZE_15,
+} from "../constants";
 import { borderStyle, layoutStyle } from "../styles";
 
 export type ButtonProps = {
@@ -12,6 +19,7 @@ export type ButtonProps = {
   titleColor?: string;
   outlineColor?: string;
   size?: number;
+  onPress?: () => void;
 };
 
 const Button = ({
@@ -23,19 +31,21 @@ const Button = ({
   titleColor,
   outlineColor,
   size,
+  onPress,
 }: ButtonProps) => {
   const calculatedTitleColor = titleColor
     ? titleColor
     : hideBackground
-    ? COLOR_14
+    ? COLOR_17
     : COLOR_1;
 
   const calculatedTitleSize = size ? size : SIZE_15;
 
-  const calculatedHeight = Math.abs(calculatedTitleSize * 2.3);
+  const calculatedHeight = Math.abs(calculatedTitleSize * 2.2);
 
   return (
     <Pressable
+      onPress={onPress}
       style={[
         style,
         {
@@ -60,7 +70,7 @@ const Button = ({
         borderStyle.border_radius_6,
       ]}
     >
-      <AppText color={calculatedTitleColor} size={SIZE_15}>
+      <AppText color={calculatedTitleColor} size={SIZE_15} weight="semi-bold">
         {title}
       </AppText>
     </Pressable>

@@ -36,6 +36,8 @@ export const SIZE_14 = sizeRelativeToWidth(3.88);
 
 export const SIZE_15 = sizeRelativeToWidth(4.16);
 
+export const SIZE_17 = sizeRelativeToWidth(4.7);
+
 export const SIZE_16 = sizeRelativeToWidth(4.44);
 
 export const SIZE_18 = sizeRelativeToWidth(5);
@@ -88,6 +90,8 @@ export const COLOR_12 = "#1E6ADC";
 export const COLOR_13 = "#F2F2F2";
 export const COLOR_14 = "#404040";
 export const COLOR_15 = "rgba(0, 0, 0, 0.4)";
+export const COLOR_16 = "#AAAAAA";
+export const COLOR_17 = "#666666";
 
 export const PRESSABLE_ANIMATION_DURATION = 150;
 export const PRESSABLE_ANIMATION_RESET_DURATION = 25;

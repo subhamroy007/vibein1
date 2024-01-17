@@ -1,20 +1,24 @@
 import { generatePostObjects } from "../../mocks/posts";
 import {
-  PostScreenResponseParams,
-  PostScreenThunkParams,
+  LocationScreenResponseParams,
+  LocationScreenThunkParams,
 } from "../../types/response.types";
 import { createAppAsyncThunk, delay } from "../../utility";
 
-export const getPostScreenThunk = createAppAsyncThunk<
-  PostScreenResponseParams,
-  PostScreenThunkParams
+export const getLocationScreenThunk = createAppAsyncThunk<
+  LocationScreenResponseParams,
+  LocationScreenThunkParams
 >(
-  "post-screen/request",
-  async ({ url }, thunkApi) => {
+  "location-screen/request",
+  async ({ locationId, screenId }, thunkApi) => {
     const posts = generatePostObjects(24);
 
-    const data: PostScreenResponseParams = {
+    const data: LocationScreenResponseParams = {
       posts,
+      fullAddress: "kandi harisagarpar murshidabad",
+      id: locationId,
+      name: "motijhil park",
+      noOfPosts: 1243,
     };
     await delay(3_000);
     if (Math.random() > 0.9) {

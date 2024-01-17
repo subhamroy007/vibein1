@@ -7,6 +7,7 @@ import replyReducer from "./reply/reply.slice";
 import hashtagReducer from "./hashtag/hashtag.slice";
 import requestReducer from "./request/request.slice";
 import postScreenReducer from "./post-screen/post_screen.slice";
+import locationScreenReducer from "./location-screen/location_screen.slice";
 
 const appDataStore = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const appDataStore = configureStore({
     hashtag: hashtagReducer,
     request: requestReducer,
     postScreen: postScreenReducer,
+    locationScreen: locationScreenReducer,
   },
 });
 

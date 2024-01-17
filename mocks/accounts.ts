@@ -49,6 +49,86 @@ const fullnames = [
   "Bhavin Bhanushali 🇮🇳",
 ];
 
+const bios = [
+  `#arusquad
+snap: aryanshiiiii
+Himachal || INDORE 📍`,
+
+  `Be a miracle. ✨`,
+
+  `📍Mumbai
+1.8M on Snapchat
+Mgmt: @castingbeans
+Mail: castingbeanstalents@gmail.com`,
+
+  `Authenticity is power💫
+#12thFail streaming on @disneyplushotstar
+`,
+
+  `not adulting today
+`,
+
+  `Coffee addict, occasional poet, forever grooving & an intuitive actor.
+Twitter: tamannaahspeaks`,
+
+  `Managed by @svfbrands
+📍Kolkata
+📩 priyankamitra06@gmail.com`,
+
+  `Here to stay ♾
+Growing and glowing ✨
+Managed by @madify.official
+`,
+
+  `@thriftxpayal
+@s8ul.esports CC
+Managed by - @8bit_creatives
+`,
+
+  `Mumbai, India📍
+Snapchat: navika_k
+Managed by: @spatel2209`,
+
+  `🌱 Podcast @kindnesswithamy
+📈 Director @meatlessmeetmore
+🍀 Ambassador @genv_eng`,
+
+  `For inquiries - aliyahamidi0@gmail.com
+Tap on link in bio to watch my latest music videos`,
+
+  `Ssup peaches?
+It’d be great to watch sunsets together 🏜️
+.`,
+
+  `Live life to the fullest..🗽
+Fashion • Lifestyle • Creator
+MGMT @mrmayankm
+Snapchat : Gima_ashi`,
+
+  `Air hugs :)
+Live and let Live♥️`,
+
+  `#Dimple #Anupamaa
+DEL | BOM📍
+For collaborations`,
+
+  `Magnificently cursed ✨
+Archie in Half Ca, Mahi in Sisters, Akanksha in Hostel daze
+& the biggest Taylor Swift fan you might know.`,
+
+  `You probably mispronounced my name:)
+✨Your reel life shinchan✨
+Managed by: @monkentertainment
+Tumhaara dil📍`,
+
+  `👉DANCER 👈,a simple person 💃,want'$ to be something DIFFERENT`,
+
+  `📍Delhi
+Backup account: @kanishkasss_03
+Business queries : kanishkasharmabusiness@gmail.com
+YouTube👇🏻`,
+];
+
 export const generateAccountObject = () => {
   const account: AccountResponseParams = {
     _id: nanoid(),
@@ -61,10 +141,15 @@ export const generateAccountObject = () => {
     isFollowed: false,
     isFollowing: Math.random() < 0.5 ? true : false,
     isPrivate: false,
+    fullname: fullnames[getRandom(fullnames.length - 1)],
+    bio: bios[getRandom(bios.length - 1)],
+    isFavourite: false,
+    isFollowRequestPending: false,
+    isMemoryHidden: false,
+    noOfFollowers: getRandom(1000000, 100),
+    noOfFollowings: getRandom(200, 5),
+    noOfPosts: getRandom(100, 9),
   };
-
-  const fullname = fullnames[getRandom(fullnames.length - 1)];
-  account["fullname"] = fullname;
 
   return account;
 };

@@ -27,15 +27,25 @@ import CommentSection from "./CommentSection";
 import PostSendSection from "./post_send_section/PostSendSection";
 import Album from "./Album/Album";
 import ClassicPostVideoPlayer from "./ClassicPostVideoPlayer";
+import { Href } from "expo-router/build/link/href";
+import { useRouter } from "expo-router";
 
 export type PostProps = {
   id: string;
-  onPress: (id: string) => void;
   focused: boolean;
+  pressRoute?: Href;
+  index: number;
 };
 
-export default function ClassicPost({ id, onPress, focused }: PostProps) {
+export default function ClassicPost({
+  id,
+  pressRoute,
+  focused,
+  index,
+}: PostProps) {
   const { postParams, togglePostLikeStateCallback } = usePost(id);
+
+  const router = useRouter();
 
   const [isTagPortalOpen, setTagPortalOpen] = useState(false);
 
@@ -51,8 +61,20 @@ export default function ClassicPost({ id, onPress, focused }: PostProps) {
   }, [postParams?.isLiked, togglePostLikeStateCallback]);
 
   const singleTapCallback = useCallback(() => {
-    onPress(id);
-  }, [id, onPress]);
+    if (pressRoute) {
+      if (typeof pressRoute === "string") {
+        router.push({
+          pathname: pressRoute,
+          params: { selectedPostIndex: index },
+        });
+      } else {
+        router.push({
+          pathname: pressRoute?.pathname,
+          params: { ...pressRoute?.params, selectedPostIndex: index },
+        });
+      }
+    }
+  }, [pressRoute, router, index]);
 
   const [isMoreOptionPortalOpen, setMoreOptionPortalState] = useState(false);
 

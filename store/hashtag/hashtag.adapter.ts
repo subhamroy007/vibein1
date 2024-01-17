@@ -1,11 +1,5 @@
 import { createEntityAdapter } from "@reduxjs/toolkit";
-
-export type HashtagAdapterParams = {
-  name: string;
-  noOfPosts: number;
-  posts: string[];
-  previewUrl: string;
-};
+import { HashtagAdapterParams } from "../../types/store.types";
 
 const hashtagAdapter = createEntityAdapter<HashtagAdapterParams>({
   selectId: (model) => model.name,

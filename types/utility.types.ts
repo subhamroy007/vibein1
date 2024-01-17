@@ -98,7 +98,11 @@ export type AccountField =
   | "is-followed"
   | "fullname"
   | "is-private"
-  | "is-favourite";
+  | "is-favourite"
+  | "bio"
+  | "follower-count"
+  | "following-count"
+  | "post-count";
 
 /**
  * represents the error object returned by the thunk in case of the promise is rejected
@@ -113,7 +117,7 @@ export type ThunkError = {
  */
 export type ThunkMeta = {
   statusCode: number;
-  requestTimestamp: string;
+  requestTimestamp: number;
 };
 
 export type AsyncThunkConfig = {

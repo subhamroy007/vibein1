@@ -22,14 +22,14 @@ export const getHomeFeedThunk = createAppAsyncThunk(
         { errorCode: 1000, message: "something went wrong" },
         {
           statusCode: 400,
-          requestTimestamp: new Date().toUTCString(),
+          requestTimestamp: Date.now(),
         }
       );
     }
 
     return thunkApi.fulfillWithValue(data, {
       statusCode: 200,
-      requestTimestamp: new Date().toUTCString(),
+      requestTimestamp: Date.now(),
     });
   }
 );
@@ -46,14 +46,14 @@ export const getForYouMomentFeedThunk = createAppAsyncThunk(
         { errorCode: 1000, message: "something went wrong" },
         {
           statusCode: 400,
-          requestTimestamp: new Date().toUTCString(),
+          requestTimestamp: Date.now(),
         }
       );
     }
 
     return thunkApi.fulfillWithValue(data, {
       statusCode: 200,
-      requestTimestamp: new Date().toUTCString(),
+      requestTimestamp: Date.now(),
     });
   }
 );
@@ -70,14 +70,14 @@ export const getForYouPhotosFeedThunk = createAppAsyncThunk(
         { errorCode: 1000, message: "something went wrong" },
         {
           statusCode: 400,
-          requestTimestamp: new Date().toUTCString(),
+          requestTimestamp: Date.now(),
         }
       );
     }
 
     return thunkApi.fulfillWithValue(data, {
       statusCode: 200,
-      requestTimestamp: new Date().toUTCString(),
+      requestTimestamp: Date.now(),
     });
   }
 );

@@ -1,14 +1,15 @@
 import { View } from "react-native";
 import { layoutStyle } from "../../styles";
 import { GridPost } from "./GridPost";
+import { Href } from "expo-router/build/link/href";
 
 export type GridPostGroupProps = {
   posts: string[];
   portrait?: boolean;
   showPin?: boolean;
   showViews?: boolean;
-  onPress: (id: string) => void;
-  onPreviewPress: (id: string) => void;
+  gridPressRoute?: Href;
+  previewPressRoute?: Href;
 };
 
 export function GridPostGroup({ posts, ...restProps }: GridPostGroupProps) {

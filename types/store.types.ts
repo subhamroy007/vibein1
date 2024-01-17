@@ -1,3 +1,4 @@
+import { Dictionary, EntityState } from "@reduxjs/toolkit";
 import { AccountResponseParams } from "./response.types";
 import {
   CommentTemplateParams,
@@ -62,10 +63,84 @@ export type PostAdapterParams = PostTemplateParams<string> &
   CommentSectionStoreParams &
   SimilarPostSectionStoreParams;
 
+//-------------------------------------------------------------------------------------------------------------------
+
+export type HashtagAdapterParams = {
+  name: string;
+  noOfPosts: number;
+  previewUrl: string;
+  isFollowing: boolean;
+};
+
+export type HashtagGeneralRouteStoreParams = {
+  routeId: string;
+  lastUpdatedAt: number;
+  state: ThunkState;
+  hashtag: string;
+  data: {
+    posts: string[];
+    hasEndReached: boolean;
+  } | null;
+};
+
+export type HashtagStoreParams = EntityState<HashtagAdapterParams> & {
+  generalRoutes: Dictionary<HashtagGeneralRouteStoreParams>;
+};
+//-------------------------------------------------------------------------------------------------------------------
+
 /**
  * represents an account and all the associated parameters
  */
-export type AccountAdapterParams = AccountResponseParams;
+export type AccountAdapterParams = {} & AccountResponseParams;
+
+export type AccountHomeRouteStoreParams = {
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    suggestedAccounts: string[];
+    allPosts: { posts: string[]; hasEndReached: boolean };
+  };
+};
+
+export type AccountTagsRouteStoreParams = {
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    posts: string[];
+    hasEndReached: boolean;
+  };
+};
+
+export type AccountPhotosRouteStoreParams = {
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    posts: string[];
+    hasEndReached: boolean;
+  };
+};
+
+export type AccountMomentsRouteStoreParams = {
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    posts: string[];
+    hasEndReached: boolean;
+  };
+};
+
+export type AccountProfileRouteStoreParams = {
+  routeId: string;
+  username: string;
+  home: AccountHomeRouteStoreParams;
+  taggedPosts: AccountTagsRouteStoreParams;
+  photos: AccountPhotosRouteStoreParams;
+  moments: AccountMomentsRouteStoreParams;
+};
+
+export type AccountStoreParams = EntityState<AccountAdapterParams> & {
+  profiles: Dictionary<AccountProfileRouteStoreParams>;
+};
 
 /**
  * represents the union of different kinds of chat identifiers

@@ -35,7 +35,7 @@ export default function HighlightedText({
           : undefined
       }
       onPress={onPress}
-      weight="regular"
+      weight="semi-bold"
       isMultiline
       color={transparent ? COLOR_1 : undefined}
     >
