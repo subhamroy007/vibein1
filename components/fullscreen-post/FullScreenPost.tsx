@@ -37,6 +37,7 @@ import Option from "../Option";
 import AppButton from "../AppButton";
 import FullScreenAlbum from "./FullScreenAlbum";
 import FullScreenVideoPlayer from "./FullScreenVideoPlayer";
+import { useRouter } from "expo-router";
 
 export default function FullScreenPost({
   id,
@@ -52,6 +53,8 @@ export default function FullScreenPost({
     togglePostLikeStateCallback,
     togglePostSaveStateCallback,
   } = usePost(id);
+
+  const router = useRouter();
 
   const [isTagPortalOpen, setTagPortalOpen] = useState(false);
 
@@ -97,7 +100,12 @@ export default function FullScreenPost({
   const advancedOptionsPressPressCallback = useCallback(() => {}, []);
 
   const updatePressCallback = useCallback(() => {}, []);
-
+  const gotoProifile = useCallback(() => {
+    router.push({
+      pathname: "/account/[username]",
+      params: { username: postParams?.createdBy.username },
+    });
+  }, [router, postParams]);
   if (!postParams) {
     return null;
   }
@@ -151,8 +159,14 @@ export default function FullScreenPost({
             layout={Layout.duration(300)}
           >
             <View style={styles.author_info_container}>
-              <Avatar url={createdBy.profilePictureUrl} />
-              <AppText style={marginStyle.margin_left_9} color={COLOR_1}>
+              <Pressable onPress={gotoProifile}>
+                <Avatar url={createdBy.profilePictureUrl} />
+              </Pressable>
+              <AppText
+                style={marginStyle.margin_left_9}
+                color={COLOR_1}
+                onPress={gotoProifile}
+              >
                 {createdBy.username}
               </AppText>
               <AppButton

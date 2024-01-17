@@ -204,8 +204,12 @@ export default function GridPostList({
     <Animated.FlatList
       itemLayoutAnimation={Layout.duration(300)}
       refreshControl={
-        enableReresh && initRequest ? (
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        enableReresh && initRequest && data?.length ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressViewOffset={contentOffset}
+          />
         ) : undefined
       }
       onLayout={onLayout}

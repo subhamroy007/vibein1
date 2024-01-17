@@ -303,39 +303,6 @@ const accountSlice = createSlice({
       }
     );
     builder.addCase(
-      fetchSimilarPosts.fulfilled,
-      (state, { payload: { posts } }) => {
-        addPostAccountsToStore(state, posts);
-      }
-    );
-    builder.addCase(
-      fetchComments.fulfilled,
-      (state, { payload: { comments } }) => {
-        const accounts: AccountAdapterParams[] = [];
-        comments.forEach((comment) => {
-          accounts.push(tranformToAccountAdapterParams(comment.createdBy));
-          if (comment.replies) {
-            accounts.push(
-              ...comment.replies.map((reply) =>
-                tranformToAccountAdapterParams(reply.createdBy)
-              )
-            );
-          }
-        });
-        upsertManyAccount(state, accounts);
-      }
-    );
-    builder.addCase(
-      fetchReplies.fulfilled,
-      (state, { payload: { replies } }) => {
-        const accounts: AccountAdapterParams[] = [];
-        replies.forEach((reply) => {
-          accounts.push(tranformToAccountAdapterParams(reply.createdBy));
-        });
-        upsertManyAccount(state, accounts);
-      }
-    );
-    builder.addCase(
       getAccountTaggedPostThunk.fulfilled,
       (
         state,
@@ -357,6 +324,7 @@ const accountSlice = createSlice({
               posts: newPostIds,
               hasEndReached: false,
             };
+            targetRoute.lastUpdatedAt = Date.now();
           } else if (requestTimestamp > targetRoute.lastUpdatedAt) {
             targetRoute.data.hasEndReached = Math.random() > 0.5;
             targetRoute.data.posts = [
@@ -421,6 +389,7 @@ const accountSlice = createSlice({
               posts: newPostIds,
               hasEndReached: false,
             };
+            targetRoute.lastUpdatedAt = Date.now();
           } else if (requestTimestamp > targetRoute.lastUpdatedAt) {
             targetRoute.data.hasEndReached = Math.random() > 0.5;
             targetRoute.data.posts = [
@@ -485,6 +454,7 @@ const accountSlice = createSlice({
               posts: newPostIds,
               hasEndReached: false,
             };
+            targetRoute.lastUpdatedAt = Date.now();
           } else if (requestTimestamp > targetRoute.lastUpdatedAt) {
             targetRoute.data.hasEndReached = Math.random() > 0.5;
             targetRoute.data.posts = [

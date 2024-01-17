@@ -101,7 +101,7 @@ const AccountMetadata = ({ username }: { username: string }) => {
         ]}
       >
         <Button
-          title="follow"
+          title={accountParams.isFollowing ? "following" : "follow"}
           width={48}
           onPress={toggleAccountFollowingStateCallback}
         />

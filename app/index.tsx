@@ -6,7 +6,7 @@ const index = () => {
       <Stack.Screen options={{ animation: "none" }} />
       <Redirect
         href={{
-          pathname: "account/summer",
+          pathname: "/tabs/home",
         }}
       />
     </>

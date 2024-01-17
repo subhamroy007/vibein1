@@ -1,4 +1,4 @@
-import { Stack, Tabs } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useCallback, useEffect } from "react";
@@ -14,20 +14,13 @@ import {
   generateAccountObjects,
 } from "../mocks/accounts";
 import Toast from "../components/Toast";
-import {
-  backgroundStyle,
-  borderStyle,
-  layoutStyle,
-  paddingStyle,
-} from "../styles";
+import { backgroundStyle, layoutStyle } from "../styles";
 import {
   initClientInfo,
-  initDiscoverFeed,
   initHomeFeed,
   initInbox,
 } from "../store/client/client.slice";
-import { LogBox, View } from "react-native";
-import BottomTabBar from "../components/BottomTabBar";
+import { LogBox } from "react-native";
 import { generatePostObjects } from "../mocks/posts";
 import { addManyPostToStore } from "../store/post/post.slice";
 
@@ -58,16 +51,7 @@ export default function AppLayout() {
     const oneToOneChatAccounts = generateAccountObjects(10);
     appDataStore.dispatch(addManyAccountToStore(oneToOneChatAccounts));
     appDataStore.dispatch(initClientInfo(generateAccountObject()));
-    appDataStore.dispatch(initHomeFeed({ posts: [] }));
     appDataStore.dispatch(initInbox(oneToOneChatAccounts));
-
-    const discoverFeedPosts = generatePostObjects(10);
-
-    appDataStore.dispatch(addManyPostToStore(discoverFeedPosts));
-    appDataStore.dispatch(
-      addManyAccountToStore(discoverFeedPosts.map((post) => post.createdBy))
-    );
-    appDataStore.dispatch(initDiscoverFeed({ posts: discoverFeedPosts }));
   }, []);
 
   if (!fontsLoaded && !fontError) {

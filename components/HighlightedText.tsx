@@ -2,6 +2,7 @@ import React from "react";
 import AppText from "./AppText";
 import { StyleProp, TextStyle } from "react-native";
 import { COLOR_1, COLOR_14, COLOR_2, COLOR_5 } from "../constants";
+import { useRouter } from "expo-router";
 
 export type HighlightedTextProps = {
   children: string;
@@ -21,6 +22,8 @@ export default function HighlightedText({
   onPress,
 }: HighlightedTextProps) {
   const regex = /(#[A-Za-z0-9]+|@[A-Za-z_\.][\w\.]{2,}|[#@]|.[^#@]+)/g;
+
+  const router = useRouter();
 
   const phases = children.match(regex) || [];
 
@@ -49,6 +52,19 @@ export default function HighlightedText({
               weight="regular"
               color={transparent ? COLOR_2 : COLOR_5}
               key={phase + index}
+              onPress={() => {
+                if (firstChar === "@") {
+                  router.push({
+                    pathname: "/account/[username]",
+                    params: { username: phase.slice(1) },
+                  });
+                } else {
+                  router.push({
+                    pathname: "/hashtag/[hashtag]",
+                    params: { hashtag: phase.slice(1) },
+                  });
+                }
+              }}
             >
               {phase}
             </AppText>

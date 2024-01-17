@@ -175,17 +175,30 @@ export type PostFeedItemIdentfierParams = {
  * represents the data params of the home feed
  */
 export type HomeFeedStoreParams = {
-  memoryAuthors: string[];
-  posts: PostFeedItemIdentfierParams[];
-  thunkInfo: ThunkInfo;
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    feed: PostFeedItemIdentfierParams[];
+    hasEndReached: boolean;
+  };
 };
 
-/**
- * represents the data params of the home feed
- */
-export type DiscoverFeedStoreParams = {
-  posts: string[];
-  thunkInfo: ThunkInfo;
+export type SuggestedPhotosFeedStoreParams = {
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    feed: PostFeedItemIdentfierParams[];
+    hasEndReached: boolean;
+  };
+};
+
+export type SuggestedMomentsFeedStoreParams = {
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    feed: PostFeedItemIdentfierParams[];
+    hasEndReached: boolean;
+  };
 };
 
 /**
@@ -202,22 +215,14 @@ export type LoggedInAccountStoreParams = {
  * represents the entire client store params
  */
 export type ClientStoreParams = {
-  loggedInAccount?: LoggedInAccountStoreParams;
-  theme?: "light" | "dark" | "system";
-  toasterMsg?: { text: string; timestamp: number };
-  homeFeed?: HomeFeedStoreParams;
+  loggedInAccount: LoggedInAccountStoreParams | null;
+  theme: "light" | "dark" | "system";
+  toasterMsg: { text: string; timestamp: number } | null;
+  home: HomeFeedStoreParams;
   foryou: {
-    moments: {
-      posts: PostFeedItemIdentfierParams[];
-      thunkInfo: ThunkInfo;
-    };
-    photos: {
-      posts: PostFeedItemIdentfierParams[];
-      thunkInfo: ThunkInfo;
-    };
+    moments: SuggestedMomentsFeedStoreParams;
+    photos: SuggestedPhotosFeedStoreParams;
   };
-  discoverFeed?: DiscoverFeedStoreParams;
   inbox?: InboxStoreParams;
-  imageCache: { [key: string]: string | undefined };
   isFullScreenActive: boolean;
 };

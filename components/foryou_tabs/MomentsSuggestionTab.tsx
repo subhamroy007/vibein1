@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react";
+import { memo, useCallback } from "react";
 import { useForYouMomentsFeed } from "../../hooks/client.hooks";
 import FullScreenPostList from "../fullscreen-post/FullScreenPostList";
 
@@ -9,15 +9,15 @@ export type MomentsSuggestionTabProps = {
 const Component = ({ focused }: MomentsSuggestionTabProps) => {
   const { fetch, forYouMomentsFeedParams } = useForYouMomentsFeed();
 
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
+  const initRequest = useCallback(() => fetch(true), []);
   return (
     <FullScreenPostList
-      data={forYouMomentsFeedParams.posts}
-      onRetry={fetch}
-      state={forYouMomentsFeedParams.thunkInfo.state}
+      data={forYouMomentsFeedParams.data.feed}
+      enablePagination
+      enableReresh
+      initRequest={initRequest}
+      paginationRequest={fetch}
+      state={forYouMomentsFeedParams.state}
       tabFocused={focused}
     />
   );

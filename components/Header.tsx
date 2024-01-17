@@ -1,25 +1,39 @@
-import { Pressable, StyleSheet } from "react-native";
-import Animated from "react-native-reanimated";
+import { Pressable, StyleSheet, View } from "react-native";
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import {
   backgroundStyle,
   borderStyle,
   layoutStyle,
-  marginStyle,
   paddingStyle,
 } from "../styles";
-import { COLOR_1, SIZE_20, SIZE_24, SIZE_54 } from "../constants";
+import { COLOR_1, SIZE_18, SIZE_20, SIZE_24, SIZE_54 } from "../constants";
 import AppText from "./AppText";
 import Icon from "./Icon";
 import { useNavigation } from "expo-router";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 
 export type HeaderProps = {
   floating?: boolean;
+  floatOffset?: SharedValue<number>;
   transparent?: boolean;
   title?: string;
+  ItemLeft?: ReactNode;
+  ItemRight?: ReactNode;
+  ItemMiddle?: ReactNode;
 };
 
-const Header = ({ floating, transparent, title }: HeaderProps) => {
+const Header = ({
+  floating,
+  floatOffset,
+  transparent,
+  title,
+  ItemLeft,
+  ItemMiddle,
+  ItemRight,
+}: HeaderProps) => {
   const navigation = useNavigation();
 
   const backIconPressCallback = useCallback(() => {
@@ -28,32 +42,69 @@ const Header = ({ floating, transparent, title }: HeaderProps) => {
     }
   }, [navigation]);
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: floatOffset ? -floatOffset.value : 0 }],
+    };
+  }, []);
+
   return (
     <Animated.View
       style={[
+        animatedStyle,
         styles.container,
         transparent ? undefined : borderStyle.border_bottom_width_hairline,
         floating ? layoutStyle.position_absolute : undefined,
         transparent ? undefined : backgroundStyle.background_color_1,
       ]}
     >
-      <Pressable hitSlop={SIZE_24} onPress={backIconPressCallback}>
-        <Icon
-          name="arrow-left"
-          size={SIZE_24}
-          color={transparent ? COLOR_1 : undefined}
-        />
-      </Pressable>
-      {title !== undefined && (
-        <AppText
-          weight="bold"
-          size={SIZE_20}
-          style={marginStyle.margin_left_18}
-          color={transparent ? COLOR_1 : undefined}
-        >
-          {title}
-        </AppText>
-      )}
+      <View
+        style={[
+          { width: "20%" },
+          layoutStyle.align_item_flex_start,
+          layoutStyle.justify_content_center,
+        ]}
+      >
+        {ItemLeft ? (
+          ItemLeft
+        ) : (
+          <Pressable hitSlop={SIZE_24} onPress={backIconPressCallback}>
+            <Icon
+              name="arrow-left"
+              size={SIZE_24}
+              color={transparent ? COLOR_1 : undefined}
+            />
+          </Pressable>
+        )}
+      </View>
+      <View
+        style={[
+          { width: "60%" },
+          layoutStyle.align_item_center,
+          layoutStyle.justify_content_center,
+        ]}
+      >
+        {title !== undefined && (
+          <AppText
+            weight="bold"
+            size={SIZE_18}
+            color={transparent ? COLOR_1 : undefined}
+            isMultiline
+          >
+            {title}
+          </AppText>
+        )}
+        {ItemMiddle && ItemMiddle}
+      </View>
+      <View
+        style={[
+          { width: "20%" },
+          layoutStyle.align_item_flex_end,
+          layoutStyle.justify_content_center,
+        ]}
+      >
+        {ItemRight && ItemRight}
+      </View>
     </Animated.View>
   );
 };
@@ -62,7 +113,6 @@ const styles = StyleSheet.create({
   container: {
     height: SIZE_54,
     ...layoutStyle.flex_direction_row,
-    ...layoutStyle.align_item_center,
     ...paddingStyle.padding_horizontal_12,
     ...borderStyle.border_bottom_color_2,
     ...layoutStyle.width_100_percent,

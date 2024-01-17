@@ -1,5 +1,4 @@
 import {
-  selectDiscoverFeedParams,
   selectForYouMomentsFeedParams,
   selectForYouPhotosFeedParams,
   selectHomeFeedParams,
@@ -32,8 +31,8 @@ export function useForYouMomentsFeed() {
 
   const dispatch = useAppDispatch();
 
-  const fetch = useCallback(() => {
-    dispatch(getForYouMomentFeedThunk());
+  const fetch = useCallback((refresh: boolean = false) => {
+    dispatch(getForYouMomentFeedThunk({ refresh }));
   }, []);
 
   return {
@@ -47,24 +46,12 @@ export function useForYouPhotosFeed() {
 
   const dispatch = useAppDispatch();
 
-  const fetch = useCallback(() => {
-    dispatch(getForYouPhotosFeedThunk());
+  const fetch = useCallback((refresh: boolean = false) => {
+    dispatch(getForYouPhotosFeedThunk({ refresh }));
   }, []);
 
   return {
     forYouPhotosFeedParams,
     fetch,
-  };
-}
-
-export function useDiscoverFeed() {
-  const discoverFeedParams = useAppSelector(selectDiscoverFeedParams);
-
-  const dispatch = useAppDispatch();
-
-  const fetch = useCallback(() => {}, []);
-
-  return {
-    discoverFeedParams,
   };
 }

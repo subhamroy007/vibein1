@@ -17,7 +17,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { layoutStyle } from "../styles";
-import { ThunkState } from "../types/store.types";
+import { PostFeedItemIdentfierParams, ThunkState } from "../types/store.types";
 import AnimatedLaodingIndicator from "./AnimatedLaodingIndicator";
 import { SIZE_120, SIZE_24, SIZE_60 } from "../constants";
 import CircleIcon from "./CircleIcon";
@@ -30,7 +30,7 @@ const viewabilityConfig: ViewabilityConfig = {
 };
 
 export type ClassicPostListProps = {
-  data?: string[];
+  data?: string[] | PostFeedItemIdentfierParams[];
   scrollOffset?: SharedValue<number>;
   contentOffset?: number;
   header?: FlatListProps<any>["ListHeaderComponent"];
@@ -86,18 +86,30 @@ export default function ClassicPostList({
   });
 
   const renderItemCallback = useCallback(
-    ({ item, index }: ListRenderItemInfo<string>) => {
-      return (
-        <ClassicPost
-          id={item}
-          index={index}
-          focused={index === activePostIndex}
-          pressRoute={postPressRoute}
-        />
-      );
+    ({ item, index }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
+      if (item.type === "post") {
+        return (
+          <ClassicPost
+            id={item.postId}
+            index={index}
+            focused={index === activePostIndex}
+            pressRoute={postPressRoute}
+          />
+        );
+      }
+      return null;
     },
     [activePostIndex, postPressRoute]
   );
+
+  const items = useMemo<PostFeedItemIdentfierParams[]>(() => {
+    if (!data) {
+      return [];
+    } else if (typeof data[0] === "string") {
+      return (data as string[]).map((postId) => ({ postId, type: "post" }));
+    }
+    return data as PostFeedItemIdentfierParams[];
+  }, [data]);
 
   const onRefresh = useCallback(() => {
     if (initRequest) {
@@ -195,9 +207,9 @@ export default function ClassicPostList({
   return (
     <Animated.FlatList
       onLayout={onLayout}
-      data={data}
+      data={items}
       renderItem={renderItemCallback}
-      keyExtractor={(item) => item}
+      keyExtractor={(item) => item.postId}
       keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
       overScrollMode="never"
@@ -215,8 +227,12 @@ export default function ClassicPostList({
       }
       onEndReachedThreshold={0.3}
       refreshControl={
-        enableReresh && initRequest ? (
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        enableReresh && initRequest && data?.length ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressViewOffset={contentOffset}
+          />
         ) : undefined
       }
     />

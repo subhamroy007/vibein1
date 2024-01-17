@@ -125,6 +125,13 @@ export default function ClassicPost({
 
   const updatePressCallback = useCallback(() => {}, []);
 
+  const gotoProifile = useCallback(() => {
+    router.push({
+      pathname: "/account/[username]",
+      params: { username: postParams?.createdBy.username },
+    });
+  }, [router, postParams]);
+
   if (!postParams || !clientAccountParams) {
     return null;
   }
@@ -153,7 +160,9 @@ export default function ClassicPost({
           paddingStyle.padding_horizontal_9,
         ]}
       >
-        <Avatar url={createdBy.profilePictureUrl} size={SIZE_30} />
+        <Pressable onPress={gotoProifile}>
+          <Avatar url={createdBy.profilePictureUrl} size={SIZE_30} />
+        </Pressable>
         <View
           style={[
             layoutStyle.align_item_flex_start,
@@ -161,7 +170,7 @@ export default function ClassicPost({
             layoutStyle.flex_1,
           ]}
         >
-          <AppText weight="medium" numberOfLines={1}>
+          <AppText weight="bold" numberOfLines={1} onPress={gotoProifile}>
             {createdBy.username}
           </AppText>
           {taggedLocation && (
@@ -236,7 +245,7 @@ export default function ClassicPost({
       >
         {engagementSummary.noOfLikes > 0 &&
           !advancedOptions.hideEngagementCount && (
-            <AppText weight="medium" style={marginStyle.margin_bottom_3}>
+            <AppText weight="bold" style={marginStyle.margin_bottom_3}>
               {engagementSummary.noOfLikes} likes
             </AppText>
           )}

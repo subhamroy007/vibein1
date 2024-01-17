@@ -14,16 +14,25 @@ import {
 } from "../../types/response.types";
 
 const initialState: ClientStoreParams = {
-  imageCache: {},
   isFullScreenActive: false,
+  loggedInAccount: null,
+  theme: "system",
+  toasterMsg: null,
+  home: {
+    state: "idle",
+    data: { feed: [], hasEndReached: false },
+    lastUpdatedAt: -1,
+  },
   foryou: {
     moments: {
-      posts: [],
-      thunkInfo: { state: "idle", lastRequestError: null, meta: null },
+      state: "idle",
+      data: { feed: [], hasEndReached: false },
+      lastUpdatedAt: -1,
     },
     photos: {
-      posts: [],
-      thunkInfo: { state: "idle", lastRequestError: null, meta: null },
+      state: "idle",
+      data: { feed: [], hasEndReached: false },
+      lastUpdatedAt: -1,
     },
   },
 };
@@ -43,26 +52,21 @@ const clientSlice = createSlice({
     },
     initHomeFeed(
       state,
-      action: PayloadAction<{ posts: PostResponseParams[] }>
+      { payload: { posts } }: PayloadAction<{ posts: PostResponseParams[] }>
     ) {
-      state.homeFeed = {
-        memoryAuthors: [],
-        thunkInfo: { state: "idle", lastRequestError: null, meta: null },
-        posts: action.payload.posts.map((post) => ({
-          type: "post",
-          postId: post._id,
-        })),
+      state.home = {
+        state: "idle",
+        lastUpdatedAt: Date.now(),
+        data: {
+          hasEndReached: false,
+          feed: posts.map((post) => ({
+            type: "post",
+            postId: post._id,
+          })),
+        },
       };
     },
-    initDiscoverFeed(
-      state,
-      action: PayloadAction<{ posts: PostResponseParams[] }>
-    ) {
-      state.discoverFeed = {
-        thunkInfo: { state: "idle", lastRequestError: null, meta: null },
-        posts: action.payload.posts.map((post) => post._id),
-      };
-    },
+
     updateToasterMsg(state, action: PayloadAction<string>) {
       state.toasterMsg = { text: action.payload, timestamp: Date.now() };
     },
@@ -78,110 +82,114 @@ const clientSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getHomeFeedThunk.pending, (state, action) => {
-      if (state.homeFeed) {
-        state.homeFeed.thunkInfo = {
-          lastRequestError: null,
-          meta: null,
-          state: "loading",
-        };
-      }
+      const targetRoute = state.home;
+
+      targetRoute.state = "loading";
     });
     builder.addCase(getHomeFeedThunk.rejected, (state, action) => {
-      if (state.homeFeed) {
-        state.homeFeed.thunkInfo = {
-          lastRequestError: action.payload!,
-          meta: {
-            lastRequestStatusCode: action.meta.statusCode!,
-            lastRequestTimestamp: action.meta.requestTimestamp!,
-          },
-          state: "failed",
-        };
-      }
+      const targetRoute = state.home;
+
+      targetRoute.state = "failed";
     });
-    builder.addCase(getHomeFeedThunk.fulfilled, (state, action) => {
-      if (state.homeFeed) {
-        state.homeFeed.thunkInfo = {
-          lastRequestError: null,
-          meta: {
-            lastRequestStatusCode: action.meta.statusCode!,
-            lastRequestTimestamp: action.meta.requestTimestamp!,
-          },
-          state: "success",
-        };
-        const newFeedItems =
-          action.payload.posts.map<PostFeedItemIdentfierParams>((post) => ({
+    builder.addCase(
+      getHomeFeedThunk.fulfilled,
+      (state, { payload: { posts } }) => {
+        const targetRoute = state.home;
+
+        targetRoute.state = "success";
+
+        targetRoute.lastUpdatedAt = Date.now();
+        targetRoute.data = {
+          hasEndReached: false,
+          feed: posts.map<PostFeedItemIdentfierParams>((post) => ({
             postId: post._id,
             type: "post",
-          }));
-        state.homeFeed.posts = [...newFeedItems];
+          })),
+        };
       }
-    });
+    );
     builder.addCase(getForYouMomentFeedThunk.pending, (state, action) => {
-      state.foryou.moments.thunkInfo = {
-        lastRequestError: null,
-        meta: null,
-        state: "loading",
-      };
+      const targetRoute = state.foryou.moments;
+
+      targetRoute.state = "loading";
     });
     builder.addCase(getForYouMomentFeedThunk.rejected, (state, action) => {
-      state.foryou.moments.thunkInfo = {
-        lastRequestError: action.payload!,
-        meta: {
-          lastRequestStatusCode: action.meta.statusCode!,
-          lastRequestTimestamp: action.meta.requestTimestamp!,
-        },
-        state: "failed",
-      };
+      const targetRoute = state.foryou.moments;
+
+      targetRoute.state = "failed";
     });
-    builder.addCase(getForYouMomentFeedThunk.fulfilled, (state, action) => {
-      state.foryou.moments.thunkInfo = {
-        lastRequestError: null,
-        meta: {
-          lastRequestStatusCode: action.meta.statusCode!,
-          lastRequestTimestamp: action.meta.requestTimestamp!,
-        },
-        state: "success",
-      };
-      const newFeedItems =
-        action.payload.posts.map<PostFeedItemIdentfierParams>((post) => ({
+    builder.addCase(
+      getForYouMomentFeedThunk.fulfilled,
+      (
+        state,
+        {
+          payload: { posts },
+          meta: {
+            requestTimestamp,
+            arg: { refresh },
+          },
+        }
+      ) => {
+        const targetRoute = state.foryou.moments;
+
+        targetRoute.state = "success";
+        const newFeedItems = posts.map<PostFeedItemIdentfierParams>((post) => ({
           postId: post._id,
           type: "post",
         }));
-      state.foryou.moments.posts = [...newFeedItems];
-    });
+        if (refresh || !targetRoute.data.feed.length) {
+          targetRoute.lastUpdatedAt = Date.now();
+          targetRoute.data = { hasEndReached: false, feed: newFeedItems };
+        } else if (requestTimestamp > targetRoute.lastUpdatedAt) {
+          targetRoute.data.hasEndReached = Math.random() > 0.7;
+          targetRoute.data.feed = [
+            ...targetRoute.data.feed,
+            ...(targetRoute.data.hasEndReached ? [] : newFeedItems),
+          ];
+        }
+      }
+    );
     builder.addCase(getForYouPhotosFeedThunk.pending, (state, action) => {
-      state.foryou.photos.thunkInfo = {
-        lastRequestError: null,
-        meta: null,
-        state: "loading",
-      };
+      const targetRoute = state.foryou.photos;
+
+      targetRoute.state = "loading";
     });
     builder.addCase(getForYouPhotosFeedThunk.rejected, (state, action) => {
-      state.foryou.photos.thunkInfo = {
-        lastRequestError: action.payload!,
-        meta: {
-          lastRequestStatusCode: action.meta.statusCode!,
-          lastRequestTimestamp: action.meta.requestTimestamp!,
-        },
-        state: "failed",
-      };
+      const targetRoute = state.foryou.photos;
+
+      targetRoute.state = "failed";
     });
-    builder.addCase(getForYouPhotosFeedThunk.fulfilled, (state, action) => {
-      state.foryou.photos.thunkInfo = {
-        lastRequestError: null,
-        meta: {
-          lastRequestStatusCode: action.meta.statusCode!,
-          lastRequestTimestamp: action.meta.requestTimestamp!,
-        },
-        state: "success",
-      };
-      const newFeedItems =
-        action.payload.posts.map<PostFeedItemIdentfierParams>((post) => ({
+    builder.addCase(
+      getForYouPhotosFeedThunk.fulfilled,
+      (
+        state,
+        {
+          payload: { posts },
+          meta: {
+            requestTimestamp,
+            arg: { refresh },
+          },
+        }
+      ) => {
+        const targetRoute = state.foryou.photos;
+
+        targetRoute.state = "success";
+        const newFeedItems = posts.map<PostFeedItemIdentfierParams>((post) => ({
           postId: post._id,
           type: "post",
         }));
-      state.foryou.photos.posts = [...newFeedItems];
-    });
+        if (refresh || !targetRoute.data.feed.length) {
+          targetRoute.lastUpdatedAt = Date.now();
+          targetRoute.data = { hasEndReached: false, feed: newFeedItems };
+        } else if (requestTimestamp > targetRoute.lastUpdatedAt) {
+          targetRoute.data.hasEndReached = Math.random() > 0.7;
+          targetRoute.data.feed = [
+            ...targetRoute.data.feed,
+            ...(targetRoute.data.hasEndReached ? [] : newFeedItems),
+          ];
+        }
+      }
+    );
   },
 });
 
@@ -195,7 +203,6 @@ export const {
     initInbox,
     initHomeFeed,
     initClientInfo,
-    initDiscoverFeed,
     setFullScreenActiveState,
   },
 } = clientSlice;

@@ -13,7 +13,10 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import { ThunkState } from "../../types/store.types";
+import {
+  PostFeedItemIdentfierParams,
+  ThunkState,
+} from "../../types/store.types";
 import FullScreenPost from "./FullScreenPost";
 import FullScreenPlaceHolder from "./FullScreenPlaceHolder";
 import { backgroundStyle, layoutStyle } from "../../styles";
@@ -22,7 +25,7 @@ import { SIZE_24 } from "../../constants";
 import CircleIcon from "../CircleIcon";
 
 export type FullScreenPostListProps = {
-  data?: string[];
+  data?: string[] | PostFeedItemIdentfierParams[];
   scrollOffset?: SharedValue<number>;
   contentOffset?: number;
   state?: ThunkState;
@@ -55,6 +58,15 @@ export default function FullScreenPostList({
 
   const [refreshing, setRefreshing] = useState(false);
   const prevScrollY = useSharedValue(0);
+
+  const items = useMemo<PostFeedItemIdentfierParams[]>(() => {
+    if (!data) {
+      return [];
+    } else if (typeof data[0] === "string") {
+      return (data as string[]).map((postId) => ({ postId, type: "post" }));
+    }
+    return data as PostFeedItemIdentfierParams[];
+  }, [data]);
 
   const onRefresh = useCallback(() => {
     if (initRequest) {
@@ -90,18 +102,22 @@ export default function FullScreenPostList({
   });
 
   const renderItemCallback = useCallback(
-    ({ item, index }: ListRenderItemInfo<string>) => {
+    ({ item, index }: ListRenderItemInfo<PostFeedItemIdentfierParams>) => {
       if (!listHeight) {
         return null;
       }
 
-      return (
-        <FullScreenPost
-          id={item}
-          postHeight={listHeight}
-          focused={index === activePostIndex && tabFocused === true}
-        />
-      );
+      if (item.type === "post") {
+        return (
+          <FullScreenPost
+            id={item.postId}
+            postHeight={listHeight}
+            focused={index === activePostIndex && tabFocused === true}
+          />
+        );
+      }
+
+      return null;
     },
     [listHeight, activePostIndex, tabFocused]
   );
@@ -204,15 +220,15 @@ export default function FullScreenPostList({
   return (
     <Animated.FlatList
       refreshControl={
-        enableReresh && initRequest ? (
+        enableReresh && initRequest && data?.length ? (
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         ) : undefined
       }
       onLayout={onLayout}
       nestedScrollEnabled
-      data={data}
+      data={items}
       renderItem={renderItemCallback}
-      keyExtractor={(item) => item}
+      keyExtractor={(item) => item.postId}
       keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
       overScrollMode="never"
