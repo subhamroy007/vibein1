@@ -2,9 +2,11 @@ import {
   getHomeFeedThunk,
   getForYouMomentFeedThunk,
   getForYouPhotosFeedThunk,
+  getInboxChatsThunk,
 } from "./client.thunk";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
+  ChatItemIdentifierParams,
   ClientStoreParams,
   PostFeedItemIdentfierParams,
 } from "../../types/store.types";
@@ -35,21 +37,17 @@ const initialState: ClientStoreParams = {
       lastUpdatedAt: -1,
     },
   },
+  inbox: {
+    state: "idle",
+    lastUpdatedAt: Date.now(),
+    data: { hasEndReached: false, chats: [] },
+  },
 };
 
 const clientSlice = createSlice({
   name: "client",
   initialState,
   reducers: {
-    initInbox(state, action: PayloadAction<AccountResponseParams[]>) {
-      state.inbox = {
-        thunkInfo: { state: "idle", lastRequestError: null, meta: null },
-        chats: action.payload.map((item) => ({
-          type: "one-to-one",
-          username: item.username,
-        })),
-      };
-    },
     initHomeFeed(
       state,
       { payload: { posts } }: PayloadAction<{ posts: PostResponseParams[] }>
@@ -190,6 +188,37 @@ const clientSlice = createSlice({
         }
       }
     );
+    builder.addCase(
+      getInboxChatsThunk.fulfilled,
+      (
+        state,
+        {
+          payload: { chats },
+          meta: {
+            arg: { refresh },
+          },
+        }
+      ) => {
+        state.inbox.state = "success";
+        const newChats = chats.map<ChatItemIdentifierParams>((chat) => ({
+          type: "one-to-one",
+          chatId: chat.id,
+        }));
+        if (refresh || !state.inbox.data.chats.length) {
+          state.inbox.lastUpdatedAt = Date.now();
+          state.inbox.data.hasEndReached = false;
+          state.inbox.data.chats = newChats;
+        } else {
+          state.inbox.data.chats = [...state.inbox.data.chats, ...newChats];
+        }
+      }
+    );
+    builder.addCase(getInboxChatsThunk.pending, (state) => {
+      state.inbox.state = "loading";
+    });
+    builder.addCase(getInboxChatsThunk.rejected, (state) => {
+      state.inbox.state = "failed";
+    });
   },
 });
 
@@ -200,7 +229,6 @@ export default clientReducer;
 export const {
   actions: {
     updateToasterMsg,
-    initInbox,
     initHomeFeed,
     initClientInfo,
     setFullScreenActiveState,

@@ -8,21 +8,11 @@ import { Portal, PortalProvider } from "@gorhom/portal";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import appDataStore from "../store";
-import { addManyAccountToStore } from "../store/account/account.slice";
-import {
-  generateAccountObject,
-  generateAccountObjects,
-} from "../mocks/accounts";
+import { generateAccountObject } from "../mocks/accounts";
 import Toast from "../components/Toast";
 import { backgroundStyle, layoutStyle } from "../styles";
-import {
-  initClientInfo,
-  initHomeFeed,
-  initInbox,
-} from "../store/client/client.slice";
+import { initClientInfo } from "../store/client/client.slice";
 import { LogBox } from "react-native";
-import { generatePostObjects } from "../mocks/posts";
-import { addManyPostToStore } from "../store/post/post.slice";
 
 LogBox.ignoreLogs(["The `redirect` prop"]);
 
@@ -48,10 +38,7 @@ export default function AppLayout() {
   }, [fontsLoaded, fontError]);
 
   useEffect(() => {
-    const oneToOneChatAccounts = generateAccountObjects(10);
-    appDataStore.dispatch(addManyAccountToStore(oneToOneChatAccounts));
     appDataStore.dispatch(initClientInfo(generateAccountObject()));
-    appDataStore.dispatch(initInbox(oneToOneChatAccounts));
   }, []);
 
   if (!fontsLoaded && !fontError) {

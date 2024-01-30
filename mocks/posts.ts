@@ -2,6 +2,8 @@ import { nanoid } from "@reduxjs/toolkit";
 import { MOMENT_VIDEOS, PHOTOS } from "./data";
 import {
   AccountResponseParams,
+  ChatResponseParams,
+  MessageResponseParams,
   PostResponseParams,
 } from "../types/response.types";
 import { getDate, getRandom } from ".";
@@ -170,4 +172,50 @@ export const generatePostObjects = (
     posts.push(generatePostObject(type));
   }
   return posts;
+};
+
+export const generateMessageObject = (): MessageResponseParams => {
+  return {
+    id: nanoid(),
+    likes: [],
+    createdAt: new Date().toUTCString(),
+    createdBy: generateAccountObject(),
+    body: {
+      text: "Hi, are u free tonight",
+    },
+  };
+};
+
+export const generateMessageObjects = (size: number) => {
+  const messages: MessageResponseParams[] = [];
+
+  for (let i = 0; i < size; i++) {
+    messages.push(generateMessageObject());
+  }
+  return messages;
+};
+
+export const generateChatObject = (): ChatResponseParams => {
+  const account = generateAccountObject();
+
+  return {
+    id: account._id,
+    recentMessages: generateMessageObjects(8),
+    receipient: {
+      account: generateAccountObject(),
+      lastActiveAt: new Date().toUTCString(),
+    },
+    noOfUnseenMessages: getRandom(10, 0) > 7 ? 0 : getRandom(300, 1),
+    joinedAt: new Date().toUTCString(),
+  };
+};
+
+export const generateChatObjects = (size: number) => {
+  const chats: ChatResponseParams[] = [];
+
+  for (let i = 0; i < size; i++) {
+    chats.push(generateChatObject());
+  }
+
+  return chats;
 };

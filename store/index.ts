@@ -8,6 +8,8 @@ import hashtagReducer from "./hashtag/hashtag.slice";
 import requestReducer from "./request/request.slice";
 import postScreenReducer from "./post-screen/post_screen.slice";
 import locationScreenReducer from "./location-screen/location_screen.slice";
+import chatReducer from "./chat/chat.slice";
+import messageReducer from "./message/message.slice";
 
 const appDataStore = configureStore({
   reducer: {
@@ -20,6 +22,8 @@ const appDataStore = configureStore({
     request: requestReducer,
     postScreen: postScreenReducer,
     locationScreen: locationScreenReducer,
+    chat: chatReducer,
+    message: messageReducer,
   },
 });
 

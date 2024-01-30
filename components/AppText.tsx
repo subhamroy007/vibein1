@@ -49,9 +49,9 @@ export default function AppText({
 
   const textSize = size ? size : SIZE_13;
 
-  const textHeight = isMultiline
-    ? PixelRatio.roundToNearestPixel(1.5 * textSize)
-    : textSize;
+  const textHeight = PixelRatio.roundToNearestPixel(
+    (isMultiline ? 1.5 : 1.2) * textSize
+  );
 
   textStyle.push({
     fontSize: textSize,

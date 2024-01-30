@@ -145,22 +145,21 @@ export type AccountStoreParams = EntityState<AccountAdapterParams> & {
 /**
  * represents the union of different kinds of chat identifiers
  */
-export type ChatItemIdentifierParams =
-  | {
-      type: "one-to-one";
-      username: string;
-    }
-  | {
-      type: "group";
-      groupId: string;
-    };
+export type ChatItemIdentifierParams = {
+  type: "group" | "one-to-one";
+  chatId: string;
+};
 
 /**
  * represents the data of the inbox page
  */
 export type InboxStoreParams = {
-  chats: ChatItemIdentifierParams[];
-  thunkInfo: ThunkInfo;
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    chats: ChatItemIdentifierParams[];
+    hasEndReached: boolean;
+  };
 };
 
 /**
@@ -223,6 +222,54 @@ export type ClientStoreParams = {
     moments: SuggestedMomentsFeedStoreParams;
     photos: SuggestedPhotosFeedStoreParams;
   };
-  inbox?: InboxStoreParams;
+  inbox: InboxStoreParams;
   isFullScreenActive: boolean;
+};
+
+export type ChatAdapterParams = {
+  id: string;
+  receipient: {
+    username: string;
+    lastActiveAt?: number;
+  };
+  recentMessages: string[];
+  joinedAt?: number;
+  noOfUnseenMessages: number;
+};
+
+export type ChatWindowStoreParams = {
+  routeId: string;
+  chatId: string;
+  state: ThunkState;
+  lastUpdatedAt: number;
+  data: {
+    sections: { date: string; messages: string[] }[];
+    hasEndReached: boolean;
+  };
+};
+
+export type ChatStoreParams = EntityState<ChatAdapterParams> & {
+  chatWindows: Dictionary<ChatWindowStoreParams>;
+};
+
+export type MessageMediaAttachmentParams = {
+  url: string;
+  width: number;
+  height: number;
+} & (
+  | { type: "photo" }
+  | { type: "video"; duration: number; previewUrl: string }
+);
+
+export type MessageAdapterParams = {
+  id: string;
+  body: {
+    text?: string;
+    attachment?: {
+      media?: MessageMediaAttachmentParams[];
+    };
+  };
+  createdAt: number;
+  createdBy: string;
+  likes: string[];
 };

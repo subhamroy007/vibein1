@@ -23,6 +23,7 @@ export type HeaderProps = {
   ItemLeft?: ReactNode;
   ItemRight?: ReactNode;
   ItemMiddle?: ReactNode;
+  hideBack?: boolean;
 };
 
 const Header = ({
@@ -33,6 +34,7 @@ const Header = ({
   ItemLeft,
   ItemMiddle,
   ItemRight,
+  hideBack,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -67,7 +69,7 @@ const Header = ({
       >
         {ItemLeft ? (
           ItemLeft
-        ) : (
+        ) : hideBack ? undefined : (
           <Pressable hitSlop={SIZE_24} onPress={backIconPressCallback}>
             <Icon
               name="arrow-left"
@@ -87,7 +89,7 @@ const Header = ({
         {title !== undefined && (
           <AppText
             weight="bold"
-            size={SIZE_18}
+            size={SIZE_20}
             color={transparent ? COLOR_1 : undefined}
             isMultiline
           >

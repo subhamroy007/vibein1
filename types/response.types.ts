@@ -6,7 +6,10 @@ import {
   ThunkError,
   ThunkMeta,
 } from "./utility.types";
-import { HashtagAdapterParams } from "./store.types";
+import {
+  HashtagAdapterParams,
+  MessageMediaAttachmentParams,
+} from "./store.types";
 
 /**
  * reprsents the abstract type of response params from a thnuk
@@ -156,4 +159,36 @@ export type AccountRouteThunkParams = {
   routeId: string;
   username: string;
   refresh?: boolean;
+};
+
+export type MessageResponseParams = {
+  id: string;
+  body: {
+    text?: string;
+    attachment?: {
+      media?: MessageMediaAttachmentParams[];
+    };
+  };
+  createdAt: string;
+  createdBy: AccountResponseParams;
+  likes: AccountResponseParams[];
+};
+
+export type ChatResponseParams = {
+  id: string;
+  receipient: {
+    account: AccountResponseParams;
+    lastActiveAt?: string;
+  };
+  recentMessages: MessageResponseParams[];
+  joinedAt?: string;
+  noOfUnseenMessages: number;
+};
+
+export type ChatsRouteResponseParams = {
+  chats: ChatResponseParams[];
+};
+
+export type ChatWindowResponseParams = {
+  messages: MessageResponseParams[];
 };

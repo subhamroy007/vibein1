@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AsyncThunkConfig } from "./types/utility.types";
+import { MessageResponseParams } from "./types/response.types";
 
 export function formatTimeDifference(utcDateString: string): string {
   const utcDate = new Date(utcDateString);
@@ -53,4 +54,56 @@ export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+export function formatDate(timestamp: number): string {
+  const date = new Date(timestamp);
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 86400000); // Subtract a day in milliseconds
+
+  if (date.getDate() === today.getDate()) {
+    // Today
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  } else if (date.getDate() === yesterday.getDate()) {
+    // Yesterday
+    return "Yesterday";
+  } else {
+    // Other dates
+    const year = date.getFullYear().toString().slice(-2); // Two-digit year
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-indexed
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  }
+}
+
+export function groupMessagesByDate(messages: MessageResponseParams[]) {
+  const sections: {
+    date: string;
+    messages: string[];
+  }[] = [];
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 86400000); // Subtract a day in milliseconds
+
+  messages.sort((a, b) => {
+    // Sort messages in descending order by timestamp
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  let currentDateSection: { date: string; messages: string[] } | undefined;
+
+  for (const message of messages) {
+    const date = new Date(message.createdAt);
+    const formattedDate = formatDate(date.getTime()); // Use the formatDate function from previous response
+
+    if (!currentDateSection || currentDateSection.date !== formattedDate) {
+      currentDateSection = { date: formattedDate, messages: [] };
+      sections.push(currentDateSection);
+    }
+
+    currentDateSection.messages.push(message.id);
+  }
+
+  return sections;
 }

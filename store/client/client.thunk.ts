@@ -1,5 +1,6 @@
-import { generatePostObjects } from "../../mocks/posts";
+import { generateChatObjects, generatePostObjects } from "../../mocks/posts";
 import {
+  ChatsRouteResponseParams,
   HomeFeedResponseParams,
   PostScreenResponseParams,
 } from "../../types/response.types";
@@ -63,6 +64,30 @@ export const getForYouPhotosFeedThunk = createAppAsyncThunk<
   const posts = generatePostObjects(12, "photo");
 
   const data: PostScreenResponseParams = { posts };
+  await delay(3_000);
+  if (Math.random() > 0.9) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp: Date.now(),
+      }
+    );
+  }
+
+  return thunkApi.fulfillWithValue(data, {
+    statusCode: 200,
+    requestTimestamp: Date.now(),
+  });
+});
+
+export const getInboxChatsThunk = createAppAsyncThunk<
+  ChatsRouteResponseParams,
+  { refresh?: boolean }
+>("client/inbox-chats", async (_, thunkApi) => {
+  const chats = generateChatObjects(18);
+
+  const data: ChatsRouteResponseParams = { chats };
   await delay(3_000);
   if (Math.random() > 0.9) {
     return thunkApi.rejectWithValue(

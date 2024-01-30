@@ -2,6 +2,7 @@ import {
   getForYouMomentFeedThunk,
   getForYouPhotosFeedThunk,
   getHomeFeedThunk,
+  getInboxChatsThunk,
 } from "./../client/client.thunk";
 import {
   EntityState,
@@ -36,6 +37,7 @@ import {
   getHashtagGeneralRouteThunk,
   getHashtagTopPostsRouteThunk,
 } from "../hashtag/hashtag.thunk";
+import { getChatMessagesThunk } from "../chat/chat.thunk";
 
 function tranformToAccountAdapterParams(
   account: AccountResponseParams
@@ -495,6 +497,48 @@ const accountSlice = createSlice({
         if (targetRoute) {
           targetRoute.state = "failed";
         }
+      }
+    );
+    builder.addCase(
+      getInboxChatsThunk.fulfilled,
+      (state, { payload: { chats } }) => {
+        const newAccounts = chats
+          .map((chat) => {
+            const accounts = [
+              tranformToAccountAdapterParams(chat.receipient.account),
+            ];
+            accounts.push(
+              ...chat.recentMessages
+                .map((message) => {
+                  return [
+                    tranformToAccountAdapterParams(message.createdBy),
+                    ...message.likes.map((account) =>
+                      tranformToAccountAdapterParams(account)
+                    ),
+                  ];
+                })
+                .flat()
+            );
+            return accounts;
+          })
+          .flat();
+        upsertManyAccount(state, newAccounts);
+      }
+    );
+    builder.addCase(
+      getChatMessagesThunk.fulfilled,
+      (state, { payload: { messages } }) => {
+        const newAccounts = messages
+          .map((message) => {
+            return [
+              tranformToAccountAdapterParams(message.createdBy),
+              ...message.likes.map((account) =>
+                tranformToAccountAdapterParams(account)
+              ),
+            ];
+          })
+          .flat();
+        upsertManyAccount(state, newAccounts);
       }
     );
   },

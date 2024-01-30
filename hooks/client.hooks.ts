@@ -2,6 +2,7 @@ import {
   selectForYouMomentsFeedParams,
   selectForYouPhotosFeedParams,
   selectHomeFeedParams,
+  selectInboxParams,
 } from "../store/client/client.selector";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
@@ -9,6 +10,7 @@ import {
   getHomeFeedThunk,
   getForYouMomentFeedThunk,
   getForYouPhotosFeedThunk,
+  getInboxChatsThunk,
 } from "../store/client/client.thunk";
 
 export function useHomeFeed() {
@@ -52,6 +54,21 @@ export function useForYouPhotosFeed() {
 
   return {
     forYouPhotosFeedParams,
+    fetch,
+  };
+}
+
+export function useInbox() {
+  const inboxParams = useAppSelector(selectInboxParams);
+
+  const dispatch = useAppDispatch();
+
+  const fetch = useCallback((refresh: boolean = false) => {
+    dispatch(getInboxChatsThunk({ refresh }));
+  }, []);
+
+  return {
+    inboxParams,
     fetch,
   };
 }
