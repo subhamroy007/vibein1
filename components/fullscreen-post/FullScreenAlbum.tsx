@@ -1,5 +1,5 @@
 import Animated, { runOnJS } from "react-native-reanimated";
-import { PostPhotoParams } from "../../types/utility.types";
+import { OutdatedPhotoParams1 } from "../../types/utility.types";
 import { layoutStyle } from "../../styles";
 import {
   NativeScrollEvent,
@@ -17,7 +17,7 @@ import Carosol from "../Carosol/Carosol";
 import { LinearGradient } from "expo-linear-gradient";
 
 export type FullScreenAlbumProps = {
-  photos: PostPhotoParams[];
+  photos: OutdatedPhotoParams1[];
   onDoubleTap: () => void;
 };
 

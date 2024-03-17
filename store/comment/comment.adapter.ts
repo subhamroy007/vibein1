@@ -2,9 +2,8 @@ import { createEntityAdapter } from "@reduxjs/toolkit";
 import { CommentAdapterParams } from "../../types/store.types";
 
 const commentAdapter = createEntityAdapter<CommentAdapterParams>({
-  selectId: (model) => model._id,
-  sortComparer: (comment1, comment2) =>
-    comment1._id.localeCompare(comment2._id),
+  selectId: (model) => model.id,
+  sortComparer: (comment1, comment2) => comment1.id.localeCompare(comment2.id),
 });
 
 export const { selectById: selectCommentById } = commentAdapter.getSelectors();

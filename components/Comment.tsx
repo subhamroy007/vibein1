@@ -66,7 +66,7 @@ export default function Comment({ id, onReply }: CommentProps) {
       ]}
       onLongPress={toggleMoreOptionPortal}
     >
-      <Avatar url={createdBy.profilePictureUrl} />
+      <Avatar url={createdBy.profilePictureUri} />
       <View style={[layoutStyle.flex_1, marginStyle.margin_horizontal_6]}>
         <AppText>{createdBy.username}</AppText>
         <HighlightedText>{content}</HighlightedText>

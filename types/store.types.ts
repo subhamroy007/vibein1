@@ -2,9 +2,17 @@ import { Dictionary, EntityState } from "@reduxjs/toolkit";
 import { AccountResponseParams } from "./response.types";
 import {
   CommentTemplateParams,
+  PostGeneralParams,
+  PostVideoParams,
+  PhotoWithPreview,
   PostTemplateParams,
   ReplyTemplateParams,
   ThunkError,
+  AudioWithTitle,
+  AudioWithUri,
+  SearchParams,
+  AccountSearchParams,
+  HashTagSearchParams,
 } from "./utility.types";
 
 /**
@@ -59,9 +67,39 @@ export type SimilarPostSectionStoreParams = {
 /**
  * represents a post and all the associated parameters
  */
-export type PostAdapterParams = PostTemplateParams<string> &
+export type OutdatedParam23 = PostTemplateParams<string> &
   CommentSectionStoreParams &
   SimilarPostSectionStoreParams;
+
+export type PostPhotoAccountTagAdapterParams = {
+  account: string;
+  position: [number, number];
+};
+
+export type PostPhotoAdapterParams = {
+  taggedAccounts?: PostPhotoAccountTagAdapterParams[];
+} & PhotoWithPreview;
+
+export type PostAdapterGeneralParams<T extends {}> = PostGeneralParams<
+  {
+    author: string;
+  } & T
+>;
+
+export type PhotoPostAdapterParams = PostAdapterGeneralParams<{
+  photos: PostPhotoAdapterParams[];
+  usedAudio?: AudioWithUri | null;
+}>;
+
+export type MomentPostAdapterParams = PostAdapterGeneralParams<{
+  video: PostVideoParams;
+  taggedAccounts?: string[];
+  usedAudio?: AudioWithTitle | null;
+}>;
+
+export type PostAdapterParams =
+  | ({ type: "photo-post" } & PhotoPostAdapterParams)
+  | ({ type: "moment-post" } & MomentPostAdapterParams);
 
 //-------------------------------------------------------------------------------------------------------------------
 
@@ -146,7 +184,7 @@ export type AccountStoreParams = EntityState<AccountAdapterParams> & {
  * represents the union of different kinds of chat identifiers
  */
 export type ChatItemIdentifierParams = {
-  type: "group" | "one-to-one";
+  type: "group-solid" | "direct";
   chatId: string;
 };
 
@@ -156,9 +194,11 @@ export type ChatItemIdentifierParams = {
 export type InboxStoreParams = {
   state: ThunkState;
   lastUpdatedAt: number;
-  data: {
-    chats: ChatItemIdentifierParams[];
+  chats: ChatItemIdentifierParams[];
+  nextPageInfo: {
     hasEndReached: boolean;
+    nextId?: string;
+    nextTimestamp?: string;
   };
 };
 
@@ -204,11 +244,29 @@ export type SuggestedMomentsFeedStoreParams = {
  * represents the logged in account informations
  */
 export type LoggedInAccountStoreParams = {
-  _id: string;
+  id: string;
   username: string;
-  profilePictureUrl: string;
+  profilePictureUri: string;
   noOfUnseenNotifications: number;
 };
+
+export type PageDataRouteParams<T> = {
+  data: {
+    items: T[];
+    hasEndReached: boolean;
+    endCursor: string;
+  };
+  isLoading: boolean;
+  createdAt: number;
+  failedToRefresh: boolean;
+  error: any | null;
+};
+
+export type PostPageDataRouteParams = PageDataRouteParams<PostItemIdentifier>;
+
+export type PostSuggestionsDataRouteParams = {
+  seed: PostItemIdentifier;
+} & PostPageDataRouteParams;
 
 /**
  * represents the entire client store params
@@ -216,60 +274,107 @@ export type LoggedInAccountStoreParams = {
 export type ClientStoreParams = {
   loggedInAccount: LoggedInAccountStoreParams | null;
   theme: "light" | "dark" | "system";
-  toasterMsg: { text: string; timestamp: number } | null;
-  home: HomeFeedStoreParams;
+  notification: { msg: string; dispatchedAt: number };
+  home: RefreshablePostDataRouteParams;
   foryou: {
-    moments: SuggestedMomentsFeedStoreParams;
-    photos: SuggestedPhotosFeedStoreParams;
+    moments: RefreshablePostDataRouteParams;
+    photos: RefreshablePostDataRouteParams;
   };
   inbox: InboxStoreParams;
-  isFullScreenActive: boolean;
+  isDarkScreenFocused: boolean;
+  isMediaMuted: boolean;
+  explore: {
+    feed: RefreshablePostDataRouteParams;
+    post_suggestions: Dictionary<PostSuggestionsDataRouteParams>;
+  };
+  searchSection: {
+    quickSearch: BasicDataRouteParams<Dictionary<SearchParams[]>>;
+    fullSearch: {
+      searchPhase: string;
+      accountSearchResults: BasicDataRouteParams<SearchParams[] | null>;
+      hashtagSearchResults: BasicDataRouteParams<SearchParams[] | null>;
+      postSearchResults: PostDataRouteParams;
+    } | null;
+    searchHistory: SearchParams[];
+  };
 };
+
+export type PageData<T> = {
+  items: T[];
+  hasEndReached: boolean;
+  endCursor: string;
+};
+
+export type BasicDataRouteParams<T> = {
+  data: T;
+  error: any | null;
+  isLoading: boolean;
+};
+
+export type RefreshablePostDataRouteParams =
+  RefreshableDataRouteParams<PageData<PostItemIdentifier> | null>;
+
+export type PostDataRouteParams =
+  BasicDataRouteParams<PageData<PostItemIdentifier> | null>;
+
+export type RefreshableDataRouteParams<T> = {
+  failedToRefresh: boolean;
+} & BasicDataRouteParams<T>;
+
+export type PostItemIdentifier = {
+  type: "photo-post" | "moment-post";
+  id: string;
+};
+
+//-----------------------------------------------------inbox store types------------------------------------------------------------
 
 export type ChatAdapterParams = {
   id: string;
   receipient: {
     username: string;
-    lastActiveAt?: number;
+    lastActiveAt?: string;
+    typing: boolean;
+    isMember: boolean;
+    isMessageRequestRestricted: boolean;
   };
-  recentMessages: string[];
-  joinedAt?: number;
-  noOfUnseenMessages: number;
-};
-
-export type ChatWindowStoreParams = {
-  routeId: string;
-  chatId: string;
-  state: ThunkState;
-  lastUpdatedAt: number;
-  data: {
-    sections: { date: string; messages: string[] }[];
+  messages: {
+    data: string[];
+    state: ThunkState;
     hasEndReached: boolean;
+    endCursor: string;
+    totalCount: number;
   };
-};
-
-export type ChatStoreParams = EntityState<ChatAdapterParams> & {
-  chatWindows: Dictionary<ChatWindowStoreParams>;
+  joinedAt?: string;
+  muted: boolean;
+  noOfUnseenMessages: number;
+  state: ThunkState;
 };
 
 export type MessageMediaAttachmentParams = {
   url: string;
   width: number;
   height: number;
-} & (
-  | { type: "photo" }
-  | { type: "video"; duration: number; previewUrl: string }
-);
+} & ({ type: "photo" } | { type: "video"; duration: number; poster: string });
+
+export type MessageAttachmentParams = {
+  type: "media";
+  media: MessageMediaAttachmentParams[];
+};
 
 export type MessageAdapterParams = {
   id: string;
   body: {
     text?: string;
-    attachment?: {
-      media?: MessageMediaAttachmentParams[];
-    };
+    attachment?: MessageAttachmentParams;
   };
-  createdAt: number;
-  createdBy: string;
-  likes: string[];
+  createdAt: string;
+  author: string;
+  reactions: { reactionEmoji: string; author: string }[];
+  seenByReceipient: boolean;
+  state: ThunkState;
+};
+
+export type ChatStoreParams = {
+  chats: EntityState<ChatAdapterParams>;
+  messages: EntityState<MessageAdapterParams>;
 };

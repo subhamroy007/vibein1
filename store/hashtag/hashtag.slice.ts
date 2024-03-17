@@ -61,7 +61,7 @@ const hashtagSlice = createSlice({
         if (targetRoute) {
           targetRoute.state = "success";
           targetRoute.lastUpdatedAt = Date.now();
-          const newPostIds = payload.topPosts.map((post) => post._id);
+          const newPostIds = payload.topPosts.map((post) => post.id);
           targetRoute.data = {
             posts: newPostIds,
             hasEndReached: false,
@@ -120,7 +120,7 @@ const hashtagSlice = createSlice({
           requestTimestamp > targetRoute.lastUpdatedAt
         ) {
           targetRoute.state = "success";
-          const newPostIds = payload.posts.map((post) => post._id);
+          const newPostIds = payload.posts.map((post) => post.id);
           targetRoute.data.hasEndReached = Math.random() > 0.8;
           targetRoute.data.posts = [
             ...targetRoute.data.posts,

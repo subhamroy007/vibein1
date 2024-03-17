@@ -28,7 +28,7 @@ export const selectReplyParams = createSelector(
     const result: ReplySelectorParams = {
       ...reply,
       createdBy: author,
-      isClientAuthorOfReply: author._id === client._id,
+      isClientAuthorOfReply: author.id === client.id,
     };
     return result;
   }

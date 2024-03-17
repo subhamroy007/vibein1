@@ -26,11 +26,11 @@ import {
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
 import { Image } from "expo-image";
 import RoundIconfrom "./RoundIcon";
-import { PostPhotoParams } from "../types/utility.types";
+import { OutdatedPhotoParams1 } from "../types/utility.types";
 import { ThunkState } from "../types/store.types";
 import { LinearGradient } from "expo-linear-gradient";
 
-function findAspectRatio(photos: PostPhotoParams[]) {
+function findAspectRatio(photos: OutdatedPhotoParams1[]) {
   let aspectRatio = photos[0].aspectRatio;
   let ratio = photos[0].width / photos[0].height;
   photos.forEach((photo) => {
@@ -44,14 +44,14 @@ function findAspectRatio(photos: PostPhotoParams[]) {
 }
 
 export type AlbumProps = {
-  photos: PostPhotoParams[];
+  photos: OutdatedPhotoParams1[];
   onDoubleTap: () => void;
 };
 
 type AlbumphotoProps = {
   containerAspectRatio: string;
   onDoubleTap: () => void;
-} & PostPhotoParams;
+} & OutdatedPhotoParams1;
 
 export function Albumphoto({
   containerAspectRatio,
@@ -260,7 +260,7 @@ export default function Album({ photos, onDoubleTap }: AlbumProps) {
             style={[
               styles.carosol_dot,
               index === photoIndex
-                ? backgroundStyle.background_color_5
+                ? backgroundStyle.background_ocean_blue
                 : backgroundStyle.background_color_1,
             ]}
             key={photo.url + index}

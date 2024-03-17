@@ -1,5 +1,5 @@
 import Animated from "react-native-reanimated";
-import { PostMomentVideoParams } from "../types/utility.types";
+import { OutdatedVideoParams } from "../types/utility.types";
 import { useSpringAnimation } from "../hooks/animation.hooks";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { layoutStyle } from "../styles";
@@ -7,9 +7,10 @@ import { useDeviceLayout } from "../hooks/utility.hooks";
 import { AnimatedIcon } from "./Icon";
 import { COLOR_6, SIZE_42 } from "../constants";
 import RetryableVideo from "./RetryableVideo";
+import { useWindowDimensions } from "react-native";
 
 export type ClassicPostVideoPlayerProps = {
-  video: PostMomentVideoParams;
+  video: OutdatedVideoParams;
   onDoubleTap: () => void;
   onTap: () => void;
   focused: boolean;
@@ -18,9 +19,10 @@ export type ClassicPostVideoPlayerProps = {
 const ClassicPostVideoPlayer = ({
   onDoubleTap,
   onTap,
-  ...restProps
+  focused,
+  video,
 }: ClassicPostVideoPlayerProps) => {
-  const { width: screenWidth } = useDeviceLayout();
+  const { width: screenWidth } = useWindowDimensions();
 
   const {
     animatedStyle: animatedHeartIconStyle,
@@ -53,7 +55,9 @@ const ClassicPostVideoPlayer = ({
         ]}
       >
         <RetryableVideo
-          {...restProps}
+          focused={focused}
+          url={video.url}
+          poster={video.thumbnail.url}
           paused={false}
           style={[
             layoutStyle.width_100_percent,

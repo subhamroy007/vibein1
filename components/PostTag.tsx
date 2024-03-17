@@ -26,7 +26,7 @@ export default function PostTaggedAccount({ id }: { id: string }) {
     return null;
   }
   const {
-    profilePictureUrl,
+    profilePictureUri,
     username,
     fullname,
     hasRequestedToFollow,
@@ -43,7 +43,7 @@ export default function PostTaggedAccount({ id }: { id: string }) {
         layoutStyle.flex_direction_row,
       ]}
     >
-      <Avatar url={profilePictureUrl} size={SIZE_54} />
+      <Avatar url={profilePictureUri} size={SIZE_54} />
       <View
         style={[
           layoutStyle.align_item_flex_start,

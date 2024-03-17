@@ -91,7 +91,7 @@ export default function CommentListItem({ id, onReply }: CommentProps) {
   return (
     <View>
       <View style={styles.root_container}>
-        <Avatar url={createdBy.profilePictureUrl} />
+        <Avatar url={createdBy.profilePictureUri} />
         <View style={styles.content_container}>
           <AppText style={marginStyle.margin_top_3}>
             {createdBy.username}

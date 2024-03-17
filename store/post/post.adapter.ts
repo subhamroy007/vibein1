@@ -1,9 +1,9 @@
 import { createEntityAdapter } from "@reduxjs/toolkit";
-import { PostAdapterParams } from "../../types/store.types";
+import { OutdatedParam23 } from "../../types/store.types";
 
-const postAdapter = createEntityAdapter<PostAdapterParams>({
-  selectId: (model) => model._id,
-  sortComparer: (post1, post2) => post1._id.localeCompare(post2._id),
+const postAdapter = createEntityAdapter<OutdatedParam23>({
+  selectId: (model) => model.id,
+  sortComparer: (post1, post2) => post1.id.localeCompare(post2.id),
 });
 
 export const { selectById: selectPostById } = postAdapter.getSelectors();

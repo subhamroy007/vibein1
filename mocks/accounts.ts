@@ -2,6 +2,7 @@ import { nanoid } from "@reduxjs/toolkit";
 import { getProfilePictureUrl } from "./data";
 import { AccountResponseParams } from "../types/response.types";
 import { getRandom } from ".";
+import { AccountField, AccountParams } from "../types/utility.types";
 
 const usernames = [
   "bhavin_333",
@@ -13,7 +14,7 @@ const usernames = [
   "hardiksharma.a",
   "shambhavi1997",
   "payalgamingg",
-  "_bachuuuu",
+  "_rajat",
   "_itz_shinu_",
   "vans_hika8142",
   "nandini_jaiswal_29",
@@ -28,7 +29,7 @@ const usernames = [
 
 const fullnames = [
   "Krish Patel",
-  "ᴹᴿ°᭄ⓩⒶⒾⒹ❣",
+  "dipti sharma❣",
   "patel_dhaval_005",
   "patel_dhaval_00Ethesham Ahmed Khan5",
   "ptl_jayshri_🍁",
@@ -38,7 +39,7 @@ const fullnames = [
   "Vanshika kamboj",
   "Medico",
   "Payal Gaming",
-  "_bachuuuu",
+  "anewsa patidar",
   "Shambhavi Singh",
   "Hardik Sharma",
   "Himansh Kohli",
@@ -129,36 +130,149 @@ Business queries : kanishkasharmabusiness@gmail.com
 YouTube👇🏻`,
 ];
 
-export const generateAccountObject = () => {
+export const generateAccountObject = (includeFields?: AccountField[]) => {
   const account: AccountResponseParams = {
-    _id: nanoid(),
-    username: usernames[getRandom(usernames.length - 1)],
-    profilePictureUrl: getProfilePictureUrl(getRandom(40)),
-    isActive: true,
-    hasRequestedToFollow: false,
-    isAvailable: true,
-    isBlocked: false,
-    isFollowed: false,
-    isFollowing: Math.random() < 0.5 ? true : false,
-    isPrivate: false,
-    fullname: fullnames[getRandom(fullnames.length - 1)],
-    bio: bios[getRandom(bios.length - 1)],
-    isFavourite: false,
-    isFollowRequestPending: false,
-    isMemoryHidden: false,
-    noOfFollowers: getRandom(1000000, 100),
-    noOfFollowings: getRandom(200, 5),
-    noOfPosts: getRandom(100, 9),
+    id: nanoid(10),
+    username: usernames[getRandom(usernames.length - 1)] + nanoid(6),
+    profilePictureUri: getProfilePictureUrl(getRandom(40)),
   };
+
+  if (includeFields) {
+    if (includeFields.includes("bio")) {
+      account.bio = bios[getRandom(bios.length - 1)];
+    }
+    if (includeFields.includes("fullname")) {
+      account.fullname = fullnames[getRandom(fullnames.length - 1)];
+    }
+    if (includeFields.includes("has-followed-client")) {
+      account.hasFollowedClient = Math.random() > 0.5;
+    }
+    if (includeFields.includes("has-requeste-to-follow-client")) {
+      account.hasRequestedToFollowClient = account.hasFollowedClient
+        ? false
+        : Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-available")) {
+      account.isAvailable = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-blocked")) {
+      account.isBlocked = Math.random() > 0.5;
+    }
+
+    if (includeFields.includes("is-followed")) {
+      account.isFollowed = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-favourite")) {
+      account.isFavourite = account.isFollowed ? Math.random() > 0.5 : false;
+    }
+    if (includeFields.includes("is-memory-hidden")) {
+      account.isMemoryHidden = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-private")) {
+      account.isPrivate = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-requested-to-follow")) {
+      account.isRequestedToFollow = account.isFollowed
+        ? false
+        : Math.random() > 0.5;
+    }
+
+    if (includeFields.includes("no-of-followers")) {
+      account.noOfFollowers = getRandom(1000000, 100);
+    }
+    if (includeFields.includes("no-of-followings")) {
+      account.noOfFollowings = getRandom(700, 5);
+    }
+    if (includeFields.includes("no-of-posts")) {
+      account.noOfPosts = getRandom(100, 9);
+    }
+  }
 
   return account;
 };
 
-export const generateAccountObjects = (size: number) => {
+export const generateAccount = (includeFields?: AccountField[]) => {
+  const account: AccountParams = {
+    id: nanoid(10),
+    username: usernames[getRandom(usernames.length - 1)] + nanoid(6),
+    profilePictureUri: getProfilePictureUrl(getRandom(40)),
+  };
+
+  if (includeFields) {
+    if (includeFields.includes("bio")) {
+      account.bio = bios[getRandom(bios.length - 1)];
+    }
+    if (includeFields.includes("fullname")) {
+      account.fullname = fullnames[getRandom(fullnames.length - 1)];
+    }
+    if (includeFields.includes("has-followed-client")) {
+      account.hasFollowedClient = Math.random() > 0.5;
+    }
+    if (includeFields.includes("has-requeste-to-follow-client")) {
+      account.hasRequestedToFollowClient = account.hasFollowedClient
+        ? false
+        : Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-available")) {
+      account.isAvailable = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-blocked")) {
+      account.isBlocked = Math.random() > 0.5;
+    }
+
+    if (includeFields.includes("is-followed")) {
+      account.isFollowed = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-favourite")) {
+      account.isFavourite = account.isFollowed ? Math.random() > 0.5 : false;
+    }
+    if (includeFields.includes("is-memory-hidden")) {
+      account.isMemoryHidden = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-private")) {
+      account.isPrivate = Math.random() > 0.5;
+    }
+    if (includeFields.includes("is-requested-to-follow")) {
+      account.isRequestedToFollow = account.isFollowed
+        ? false
+        : Math.random() > 0.5;
+    }
+
+    if (includeFields.includes("no-of-followers")) {
+      account.noOfFollowers = getRandom(1000000, 100);
+    }
+    if (includeFields.includes("no-of-followings")) {
+      account.noOfFollowings = getRandom(700, 5);
+    }
+    if (includeFields.includes("no-of-posts")) {
+      account.noOfPosts = getRandom(100, 9);
+    }
+  }
+
+  return account;
+};
+
+export const generateAccounts = (
+  count: number,
+  includeFields?: AccountField[]
+) => {
+  const accounts: AccountParams[] = [];
+
+  for (let i = 0; i < count; i++) {
+    accounts.push(generateAccount(includeFields));
+  }
+
+  return accounts;
+};
+
+export const generateAccountObjects = (
+  size: number,
+  includeFields?: AccountField[]
+) => {
   const accounts: AccountResponseParams[] = [];
 
   for (let i = 0; i < size; i++) {
-    accounts.push(generateAccountObject());
+    accounts.push(generateAccountObject(includeFields));
   }
   return accounts;
 };

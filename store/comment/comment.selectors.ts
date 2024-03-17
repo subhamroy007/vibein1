@@ -27,7 +27,7 @@ export const selectCommentParams = createSelector(
     const result = {
       ...comment,
       createdBy: author,
-      isClientAuthorOfComment: author._id === client._id,
+      isClientAuthorOfComment: author.id === client.id,
     };
     return result;
   }

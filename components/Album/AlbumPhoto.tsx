@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import { PostPhotoParams } from "../../types/utility.types";
+import { OutdatedPhotoParams1 } from "../../types/utility.types";
 import { COLOR_2, SIZE_90 } from "../../constants";
 import { layoutStyle } from "../../styles";
 import { useDeviceLayout } from "../../hooks/utility.hooks";
@@ -7,7 +7,7 @@ import RetryableImage from "../RetryableImage";
 import { useCallback, useState } from "react";
 import { ThunkState } from "../../types/store.types";
 
-type AlbumphotoProps = {} & PostPhotoParams;
+type AlbumphotoProps = {} & OutdatedPhotoParams1;
 
 export function AlbumPhoto({ url, previewUrl }: AlbumphotoProps) {
   const { width: imageWidth } = useDeviceLayout();

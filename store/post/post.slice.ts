@@ -1,9 +1,4 @@
 import {
-  getForYouMomentFeedThunk,
-  getForYouPhotosFeedThunk,
-  getHomeFeedThunk,
-} from "./../client/client.thunk";
-import {
   Draft,
   EntityState,
   PayloadAction,
@@ -11,9 +6,9 @@ import {
 } from "@reduxjs/toolkit";
 import { getPostInitialState, upsertManyPost } from "./post.adapter";
 import { fetchComments, fetchSimilarPosts } from "./post.thunk";
-import { PostResponseParams } from "../../types/response.types";
+import { OutDatedResponseParams2 } from "../../types/response.types";
 import {
-  PostAdapterParams,
+  OutdatedParam23,
   PostFeedItemIdentfierParams,
 } from "../../types/store.types";
 import { getLocationScreenThunk } from "../location-screen/location_screen.thunk";
@@ -30,16 +25,16 @@ import {
 } from "../hashtag/hashtag.thunk";
 
 /**
- * utlity function that takes a single argument of type PostResponseParams
- * and converts it to a type of PostAdapterParams
+ * utlity function that takes a single argument of type OutDatedResponseParams2
+ * and converts it to a type of OutdatedParam23
  * by changing all the other entities in the post (e.g createdBy, taggedAccounts)
  * to its corresponding id references
  * @param post
  * @returns
  */
 function tranformToPostAdapterParams(
-  post: PostResponseParams
-): PostAdapterParams {
+  post: OutDatedResponseParams2
+): OutdatedParam23 {
   return {
     ...post,
     createdBy: post.createdBy.username,
@@ -52,7 +47,7 @@ function tranformToPostAdapterParams(
       meta: null,
       lastRequestError: null,
     },
-    similarPosts: [{ postId: post._id, type: "post" }],
+    similarPosts: [{ postId: post.id, type: "post" }],
     similarPostSectionThunkInfo: {
       lastRequestError: null,
       meta: null,
@@ -62,10 +57,10 @@ function tranformToPostAdapterParams(
 }
 
 function addPostsToStore(
-  state: Draft<EntityState<PostAdapterParams>>,
-  posts: PostResponseParams[]
+  state: Draft<EntityState<OutdatedParam23>>,
+  posts: OutDatedResponseParams2[]
 ) {
-  const entities: PostAdapterParams[] = [];
+  const entities: OutdatedParam23[] = [];
   posts.forEach((post) => {
     entities.push(tranformToPostAdapterParams(post));
   });
@@ -78,7 +73,7 @@ const postSlice = createSlice({
   reducers: {
     addManyPostToStore: (
       state,
-      action: PayloadAction<PostResponseParams[]>
+      action: PayloadAction<OutDatedResponseParams2[]>
     ) => {
       upsertManyPost(
         state,
@@ -123,15 +118,6 @@ const postSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(
-      getHomeFeedThunk.fulfilled,
-      (state, { payload: { posts } }) => {
-        upsertManyPost(
-          state,
-          posts.map((post) => tranformToPostAdapterParams(post))
-        );
-      }
-    );
     builder.addCase(
       getHashtagGeneralRouteThunk.fulfilled,
       (state, { payload: { topPosts } }) => {
@@ -191,24 +177,6 @@ const postSlice = createSlice({
     );
     builder.addCase(
       getAccountMomentsThunk.fulfilled,
-      (state, { payload: { posts } }) => {
-        upsertManyPost(
-          state,
-          posts.map((post) => tranformToPostAdapterParams(post))
-        );
-      }
-    );
-    builder.addCase(
-      getForYouMomentFeedThunk.fulfilled,
-      (state, { payload: { posts } }) => {
-        upsertManyPost(
-          state,
-          posts.map((post) => tranformToPostAdapterParams(post))
-        );
-      }
-    );
-    builder.addCase(
-      getForYouPhotosFeedThunk.fulfilled,
       (state, { payload: { posts } }) => {
         upsertManyPost(
           state,

@@ -19,7 +19,7 @@ function tranformToCommentAdapterParams(
   return {
     ...comment,
     createdBy: comment.createdBy.username,
-    replies: comment.replies ? comment.replies.map((reply) => reply._id) : [],
+    replies: comment.replies ? comment.replies.map((reply) => reply.id) : [],
     replySectionThunkInfo: {
       lastRequestError: null,
       meta: null,
@@ -108,7 +108,7 @@ export const commentSlice = createSlice({
       const targetComment = state.entities[targetCommentId]; //fetch the target comment from the store;
       if (targetComment) {
         targetComment.replies = [
-          ...action.payload.replies.map((reply) => reply._id),
+          ...action.payload.replies.map((reply) => reply.id),
         ];
         targetComment.replySectionThunkInfo = {
           lastRequestError: null,

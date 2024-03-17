@@ -77,9 +77,9 @@ const AccountProfileRoute = () => {
                   case "home-route":
                     return <Icon name="home-outline" color={color} />;
                   case "photos-route":
-                    return <Icon name="album" color={color} />;
+                    return <Icon name="image-outline" color={color} />;
                   case "moments-route":
-                    return <Icon name="play-outlne" color={color} />;
+                    return <Icon name="moment-outline" color={color} />;
                   case "tags-route":
                     return <Icon name="tag-outline" color={color} />;
                 }

@@ -5,7 +5,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { COLOR_1, COLOR_2, COLOR_5, SIZE_48 } from "../constants";
+import { COLOR_1, COLOR_2, OCEAN_BLUE, SIZE_48 } from "../constants";
 import { IconName } from "../types/component.types";
 import Icon from "./Icon";
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
@@ -55,7 +55,7 @@ export default function RoundIcon({
         backgroundColor: backgroundColor
           ? backgroundColor
           : hideOutline
-          ? COLOR_5
+          ? OCEAN_BLUE
           : undefined,
         borderColor: hideOutline
           ? undefined

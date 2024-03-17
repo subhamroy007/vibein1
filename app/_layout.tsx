@@ -4,21 +4,38 @@ import { useFonts } from "expo-font";
 import { useCallback, useEffect } from "react";
 import { ThemeProvider, useTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Portal, PortalProvider } from "@gorhom/portal";
+import { PortalProvider } from "@gorhom/portal";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import appDataStore from "../store";
 import { generateAccountObject } from "../mocks/accounts";
-import Toast from "../components/Toast";
 import { backgroundStyle, layoutStyle } from "../styles";
 import { initClientInfo } from "../store/client/client.slice";
 import { LogBox } from "react-native";
+import { useDarkScreenFocused } from "../hooks/utility.hooks";
 
 LogBox.ignoreLogs(["The `redirect` prop"]);
 
 SplashScreen.preventAutoHideAsync();
 
-export default function AppLayout() {
+const RootLayout = () => {
+  const isDarkScreenFocused = useDarkScreenFocused();
+
+  return (
+    <Stack
+      screenOptions={{
+        animation: "slide_from_right",
+        animationDuration: 300,
+        headerShown: false,
+        statusBarTranslucent: true,
+        statusBarStyle: isDarkScreenFocused ? "light" : "dark",
+        contentStyle: backgroundStyle.background_color_1,
+      }}
+    />
+  );
+};
+
+export default function AppInit() {
   const theme = useTheme();
 
   const [fontsLoaded, fontError] = useFonts({
@@ -54,23 +71,9 @@ export default function AppLayout() {
         >
           <SafeAreaProvider>
             <ThemeProvider value={theme}>
-              <Stack
-                screenOptions={{
-                  animation: "slide_from_right",
-                  animationDuration: 300,
-                  headerShown: false,
-                  statusBarTranslucent: true,
-                  statusBarAnimation: "none",
-                  statusBarHidden: false,
-                  statusBarStyle: "auto",
-                  contentStyle: backgroundStyle.background_color_1,
-                }}
-              />
+              <RootLayout />
             </ThemeProvider>
           </SafeAreaProvider>
-          <Portal>
-            <Toast />
-          </Portal>
         </GestureHandlerRootView>
       </PortalProvider>
     </Provider>

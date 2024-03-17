@@ -9,6 +9,7 @@ import { SIZE_14, SIZE_16, SIZE_90 } from "../../constants";
 import Avatar from "../Avatar";
 import Button from "../Button";
 import HighlightedText from "../HighlightedText";
+import { router } from "expo-router";
 
 const AccountMetadata = ({ username }: { username: string }) => {
   const { accountParams, toggleAccountFollowingStateCallback } =
@@ -26,7 +27,7 @@ const AccountMetadata = ({ username }: { username: string }) => {
         layoutStyle.align_item_center,
       ]}
     >
-      <Avatar url={accountParams.profilePictureUrl} size={SIZE_90} />
+      <Avatar url={accountParams.profilePictureUri} size={SIZE_90} />
       <AppText weight="bold" size={SIZE_14} style={marginStyle.margin_top_12}>
         {accountParams.fullname}
       </AppText>
@@ -101,11 +102,21 @@ const AccountMetadata = ({ username }: { username: string }) => {
         ]}
       >
         <Button
-          title={accountParams.isFollowing ? "following" : "follow"}
+          title={accountParams.isFollowed ? "following" : "follow"}
           width={48}
           onPress={toggleAccountFollowingStateCallback}
         />
-        <Button title="message" width={48} hideBackground />
+        <Button
+          title="message"
+          width={48}
+          hideBackground
+          onPress={() => {
+            router.push({
+              params: { username, chatId: accountParams.id },
+              pathname: "/chat_window",
+            });
+          }}
+        />
       </View>
     </View>
   );

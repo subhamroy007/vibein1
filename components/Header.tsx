@@ -24,6 +24,7 @@ export type HeaderProps = {
   ItemRight?: ReactNode;
   ItemMiddle?: ReactNode;
   hideBack?: boolean;
+  leftAligned?: boolean;
 };
 
 const Header = ({
@@ -35,6 +36,7 @@ const Header = ({
   ItemMiddle,
   ItemRight,
   hideBack,
+  leftAligned,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -62,8 +64,8 @@ const Header = ({
     >
       <View
         style={[
-          { width: "20%" },
-          layoutStyle.align_item_flex_start,
+          { aspectRatio: "1/1" },
+          layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
         ]}
       >
@@ -81,8 +83,10 @@ const Header = ({
       </View>
       <View
         style={[
-          { width: "60%" },
-          layoutStyle.align_item_center,
+          layoutStyle.flex_1,
+          leftAligned
+            ? layoutStyle.align_item_flex_start
+            : layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
         ]}
       >
@@ -100,8 +104,8 @@ const Header = ({
       </View>
       <View
         style={[
-          { width: "20%" },
-          layoutStyle.align_item_flex_end,
+          { aspectRatio: "1/1" },
+          layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
         ]}
       >
@@ -115,7 +119,6 @@ const styles = StyleSheet.create({
   container: {
     height: SIZE_54,
     ...layoutStyle.flex_direction_row,
-    ...paddingStyle.padding_horizontal_12,
     ...borderStyle.border_bottom_color_2,
     ...layoutStyle.width_100_percent,
   },

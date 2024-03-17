@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     ...paddingStyle.padding_horizontal_16,
     ...layoutStyle.align_item_center,
     ...layoutStyle.justify_content_center,
-    ...backgroundStyle.background_color_5,
+    ...backgroundStyle.background_ocean_blue,
     ...borderStyle.border_radius_6,
   },
 });

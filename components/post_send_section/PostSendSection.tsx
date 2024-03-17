@@ -62,7 +62,7 @@ export default function PostSendSection() {
             borderStyle.border_radius_18,
             paddingStyle.padding_horizontal_12,
             paddingStyle.padding_vertical_9,
-            backgroundStyle.background_color_13,
+            backgroundStyle.background_dove_grey,
           ]}
         />
       </View>

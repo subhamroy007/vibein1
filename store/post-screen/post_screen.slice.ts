@@ -39,7 +39,7 @@ const postScreenSlice = createSlice({
         const targetScreen = state.entities[screenId];
         if (targetScreen) {
           targetScreen.state = "success";
-          targetScreen.posts = posts.map((item) => item._id);
+          targetScreen.posts = posts.map((item) => item.id);
         }
       }
     );

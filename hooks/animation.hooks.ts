@@ -1,4 +1,4 @@
-import {
+import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
@@ -8,8 +8,12 @@ import {
 } from "react-native-reanimated";
 import { layoutStyle } from "../styles";
 import { useCallback } from "react";
+import { StyleProp, ViewStyle } from "react-native";
 
-export function useSpringAnimation() {
+export function useSpringAnimation(): [
+  StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>,
+  (value?: number) => void
+] {
   const animatedValue = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -24,16 +28,12 @@ export function useSpringAnimation() {
     };
   });
 
-  const startAnimation = useCallback(() => {
+  const startAnimation = useCallback((value: number = 2.5) => {
     animatedValue.value = 1;
     animatedValue.value = withSequence(
-      // withTiming(1, {
-      //   duration: 50,
-      //   easing: Easing.ease,
-      // }),
       withTiming(2, {
         duration: 400,
-        easing: Easing.elastic(2.5),
+        easing: Easing.elastic(value),
       }),
       withDelay(
         800,
@@ -45,5 +45,5 @@ export function useSpringAnimation() {
     );
   }, []);
 
-  return { animatedStyle, startAnimation };
+  return [animatedStyle, startAnimation];
 }

@@ -1,15 +1,21 @@
 import { StyleSheet } from "react-native";
 import {
+  AQUA_GREEN,
+  CERULEAN_BLUE,
   COLOR_1,
-  COLOR_13,
   COLOR_14,
   COLOR_2,
   COLOR_3,
   COLOR_4,
-  COLOR_5,
-  COLOR_6,
   COLOR_7,
   COLOR_9,
+  DOVE_GREY,
+  EMARELD_GREEN,
+  FOREST_GREEN,
+  LOGO_BLUE,
+  LOGO_GREEN,
+  MINT_GREEN,
+  OCEAN_BLUE,
   SIZE_1,
   SIZE_12,
   SIZE_15,
@@ -27,6 +33,7 @@ import {
   SIZE_8,
   SIZE_9,
   SIZE_90,
+  TEAL_GREEN,
 } from "./constants";
 
 export const layoutStyle = StyleSheet.create({
@@ -35,6 +42,24 @@ export const layoutStyle = StyleSheet.create({
   },
   flex_2: {
     flex: 2,
+  },
+  fill: {
+    width: "100%",
+    height: "100%",
+  },
+  flex_fill: { flex: 1, alignSelf: "stretch" },
+  content_center: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flex_wrap: {
+    flexWrap: "wrap",
+  },
+  flex_nowrap: {
+    flexWrap: "nowrap",
+  },
+  overflow_hidden: {
+    overflow: "hidden",
   },
   align_item_center: {
     alignItems: "center",
@@ -75,6 +100,9 @@ export const layoutStyle = StyleSheet.create({
   align_self_start: {
     alignSelf: "flex-start",
   },
+  align_self_end: {
+    alignSelf: "flex-end",
+  },
   align_self_stretch: {
     alignSelf: "stretch",
   },
@@ -99,11 +127,17 @@ export const borderStyle = StyleSheet.create({
   border_width_hairline: {
     borderWidth: StyleSheet.hairlineWidth,
   },
+  border_width_hairlinex2: {
+    borderWidth: 2 * StyleSheet.hairlineWidth,
+  },
   border_top_width_hairline: {
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   border_bottom_width_hairline: {
     borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  border_bottom_width_hairlinex2: {
+    borderBottomWidth: 2 * StyleSheet.hairlineWidth,
   },
   border_top_radius_12: {
     borderTopLeftRadius: SIZE_12,
@@ -156,11 +190,32 @@ export const backgroundStyle = StyleSheet.create({
   background_color_4: {
     backgroundColor: COLOR_4,
   },
-  background_color_5: {
-    backgroundColor: COLOR_5,
+  background_ocean_blue: {
+    backgroundColor: OCEAN_BLUE,
   },
-  background_color_6: {
-    backgroundColor: COLOR_6,
+  background_cerulean_blue: {
+    backgroundColor: CERULEAN_BLUE,
+  },
+  background_logo_blue: {
+    backgroundColor: LOGO_BLUE,
+  },
+  background_mint_green: {
+    backgroundColor: MINT_GREEN,
+  },
+  background_aqua_green: {
+    backgroundColor: AQUA_GREEN,
+  },
+  background_emareld_green: {
+    backgroundColor: EMARELD_GREEN,
+  },
+  background_teal_green: {
+    backgroundColor: TEAL_GREEN,
+  },
+  background_forest_green: {
+    backgroundColor: FOREST_GREEN,
+  },
+  background_logo_green: {
+    backgroundColor: LOGO_GREEN,
   },
   background_color_7: {
     backgroundColor: COLOR_7,
@@ -168,8 +223,8 @@ export const backgroundStyle = StyleSheet.create({
   background_color_9: {
     backgroundColor: COLOR_9,
   },
-  background_color_13: {
-    backgroundColor: COLOR_13,
+  background_dove_grey: {
+    backgroundColor: DOVE_GREY,
   },
   background_color_14: {
     backgroundColor: COLOR_14,
@@ -180,6 +235,15 @@ export const paddingStyle = StyleSheet.create({
   padding_12: {
     padding: SIZE_12,
   },
+  padding_6: {
+    padding: SIZE_6,
+  },
+  padding_3: {
+    padding: SIZE_3,
+  },
+  padding_horizontal_24: {
+    paddingHorizontal: SIZE_24,
+  },
   padding_horizontal_18: {
     paddingHorizontal: SIZE_18,
   },
@@ -188,6 +252,9 @@ export const paddingStyle = StyleSheet.create({
   },
   padding_horizontal_12: {
     paddingHorizontal: SIZE_12,
+  },
+  padding_left_12: {
+    paddingLeft: SIZE_12,
   },
   padding_horizontal_8: {
     paddingHorizontal: SIZE_8,
@@ -252,6 +319,9 @@ export const marginStyle = StyleSheet.create({
   margin_left_auto: {
     marginLeft: "auto",
   },
+  margin_top_auto: {
+    marginTop: "auto",
+  },
   margin_left_48: {
     marginLeft: SIZE_48,
   },
@@ -276,6 +346,7 @@ export const marginStyle = StyleSheet.create({
   margin_left_6: {
     marginLeft: SIZE_6,
   },
+
   margin_right_6: {
     marginRight: SIZE_6,
   },
@@ -305,6 +376,9 @@ export const marginStyle = StyleSheet.create({
   },
   margin_horizontal_12: {
     marginHorizontal: SIZE_12,
+  },
+  margin_horizontal_24: {
+    marginHorizontal: SIZE_24,
   },
   margin_top_36: {
     marginTop: SIZE_36,

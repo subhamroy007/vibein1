@@ -61,7 +61,7 @@ export default function PostPreview({
         exiting={ZoomOut.duration(300)}
       >
         <View style={styles.header}>
-          <Avatar url={createdBy.profilePictureUrl} size={SIZE_30} />
+          <Avatar url={createdBy.profilePictureUri} size={SIZE_30} />
           <AppText style={marginStyle.margin_left_6} size={SIZE_12}>
             {createdBy.username}
           </AppText>

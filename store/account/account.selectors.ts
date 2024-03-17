@@ -23,25 +23,25 @@ export const selectAccountParams = createSelector(
     }
 
     let data: AccountAdapterParams = {
-      _id: account._id,
+      id: account.id,
       username: account.username,
-      profilePictureUrl: account.profilePictureUrl,
+      profilePictureUri: account.profilePictureUri,
     };
 
     if (includeFields.includes("fullname")) {
       data["fullname"] = account.fullname;
     }
 
-    if (includeFields.includes("has-requested-to-follow")) {
-      data["hasRequestedToFollow"] = account.hasRequestedToFollow;
+    if (includeFields.includes("has-requeste-to-follow-client")) {
+      data["hasRequestedToFollowClient"] = account.hasRequestedToFollowClient;
     }
 
     if (includeFields.includes("is-followed")) {
       data["isFollowed"] = account.isFollowed;
     }
 
-    if (includeFields.includes("is-following")) {
-      data["isFollowing"] = account.isFollowing;
+    if (includeFields.includes("has-followed-client")) {
+      data["hasFollowedClient"] = account.hasFollowedClient;
     }
 
     if (includeFields.includes("no-of-followers")) {
@@ -60,16 +60,24 @@ export const selectAccountParams = createSelector(
       data["bio"] = account.bio;
     }
 
-    if (includeFields.includes("follower-count")) {
-      data["noOfFollowers"] = account.noOfFollowers;
-    }
-
-    if (includeFields.includes("following-count")) {
+    if (includeFields.includes("no-of-followings")) {
       data["noOfFollowings"] = account.noOfFollowings;
     }
 
-    if (includeFields.includes("post-count")) {
+    if (includeFields.includes("no-of-posts")) {
       data["noOfPosts"] = account.noOfPosts;
+    }
+
+    if (includeFields.includes("is-available")) {
+      data["isAvailable"] = account.isAvailable;
+    }
+
+    if (includeFields.includes("is-blocked")) {
+      data["isBlocked"] = account.isBlocked;
+    }
+
+    if (includeFields.includes("is-memory-hidden")) {
+      data["isMemoryHidden"] = account.isMemoryHidden;
     }
 
     return data;

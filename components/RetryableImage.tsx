@@ -1,51 +1,64 @@
-import { Image, ImageProps } from "expo-image";
-import { useDownloadImage } from "../hooks/utility.hooks";
-import { useEffect } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { backgroundStyle } from "../styles";
+import {
+  StyleProp,
+  Image,
+  ImageProps,
+  ImageStyle,
+  NativeSyntheticEvent,
+  ImageErrorEventData,
+} from "react-native";
 
-export type RetryableImageProps = ImageProps & {
+type RetryableImageProps = {
+  hideBackground?: boolean;
+  retry?: boolean;
   source: string;
-  placeholder?: string;
-  onLoadStart?: () => void;
-  onLoad?: () => void;
-  onError?: () => void;
+  style?: ImageProps["style"];
+  resizeMode?: ImageProps["resizeMode"];
+  onError?: ImageProps["onError"];
+  onLoadStart?: ImageProps["onLoadStart"];
 };
 
 export default function RetryableImage({
   source,
-  placeholder,
-  onLoad,
-  onLoadStart,
+  style,
+  resizeMode,
+  hideBackground,
+  retry,
   onError,
   ...restProps
 }: RetryableImageProps) {
-  const { urlValue, state } = useDownloadImage(source);
+  const [retryCount, setRetryCount] = useState(false);
 
-  useEffect(() => {
-    switch (state) {
-      case "loading":
-        if (onLoadStart) {
-          onLoadStart();
-        }
-        break;
-      case "success":
-        if (onLoad) {
-          onLoad();
-        }
-        break;
-      case "failed":
-        if (onError) {
-          onError();
-        }
-        break;
-    }
-  }, [state, onLoad, onLoadStart, onError]);
+  const imageStyle = useMemo<StyleProp<ImageStyle>>(
+    () => [
+      style,
+      hideBackground ? undefined : backgroundStyle.background_dove_grey,
+    ],
+    [style, hideBackground]
+  );
+
+  const errorCallback = useCallback(
+    (event: NativeSyntheticEvent<ImageErrorEventData>) => {
+      if (retry !== false) {
+        setTimeout(() => {
+          setRetryCount((prevState) => !prevState);
+        }, 1200);
+      }
+      if (onError) {
+        onError(event);
+      }
+    },
+    [onError, retry]
+  );
 
   return (
     <Image
       {...restProps}
-      source={{ uri: urlValue ? urlValue : undefined }}
-      placeholder={placeholder}
-      contentFit="cover"
+      source={{ uri: source }}
+      resizeMode={resizeMode ? resizeMode : "cover"}
+      style={[imageStyle, { backgroundColor: "green" }]}
+      onError={errorCallback}
     />
   );
 }

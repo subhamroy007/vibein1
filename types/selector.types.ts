@@ -3,7 +3,11 @@ import {
   CommentSectionStoreParams,
   ReplySectionStoreParams,
 } from "./store.types";
-import { CommentTemplateParams, ReplyTemplateParams } from "./utility.types";
+import {
+  ChatType,
+  CommentTemplateParams,
+  ReplyTemplateParams,
+} from "./utility.types";
 
 /**
  * represents the parameters that is seleted to be returned to the comment selector
@@ -34,3 +38,21 @@ export type GridPostGroupParams = {
   groupId: string;
   posts: string[];
 };
+
+export type InboxDirectChatInfoParams = {
+  id: string;
+  username: string;
+  fullname: string;
+  profilePictureUri: string;
+  canSendMessage: boolean;
+};
+
+export type InboxGroupChatInfoParams = {
+  id: string;
+};
+
+export type InboxChatInfoParams =
+  | ({
+      type: "direct";
+    } & InboxDirectChatInfoParams)
+  | ({ type: "group-solid" } & InboxGroupChatInfoParams);

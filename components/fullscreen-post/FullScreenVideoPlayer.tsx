@@ -16,7 +16,7 @@ import {
   SIZE_42,
 } from "../../constants";
 import RoundIcon from "../RoundIcon";
-import { PostMomentVideoParams } from "../../types/utility.types";
+import { OutdatedVideoParams } from "../../types/utility.types";
 import { ResizeMode, Video } from "expo-av";
 import { useFocusEffect } from "expo-router";
 import { Image } from "expo-image";
@@ -27,14 +27,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import RetryableVideo from "../RetryableVideo";
 
 export type FullScreenVideoPlayerProps = {
-  video: PostMomentVideoParams;
+  video: OutdatedVideoParams;
   onDoubleTap: () => void;
   focused: boolean;
 };
 
 export default function FullScreenVideoPlayer({
   onDoubleTap,
-  ...restProps
+  focused,
+  video,
 }: FullScreenVideoPlayerProps) {
   const [videoPaused, setVideoPaused] = useState(false);
 
@@ -54,7 +55,7 @@ export default function FullScreenVideoPlayer({
       startHeartIconAnimation();
       onDoubleTap();
     })
-    .enabled(restProps.focused)
+    .enabled(focused)
     .runOnJS(true);
 
   const singleTapGesture = Gesture.Tap()
@@ -62,7 +63,7 @@ export default function FullScreenVideoPlayer({
       setVideoPaused((prevState) => !prevState);
       startPlaybackIconAnimation();
     })
-    .enabled(restProps.focused)
+    .enabled(focused)
     .runOnJS(true);
   const complexGesture = Gesture.Exclusive(doubleTapGesture, singleTapGesture);
 
@@ -76,7 +77,10 @@ export default function FullScreenVideoPlayer({
         ]}
       >
         <RetryableVideo
-          {...restProps}
+          focused={focused}
+          resizeMode={ResizeMode.COVER}
+          url={video.url}
+          poster={video.thumbnail.url}
           paused={videoPaused}
           style={[
             layoutStyle.width_100_percent,
@@ -98,7 +102,7 @@ export default function FullScreenVideoPlayer({
           style={animatedHeartIconStyle}
         />
         <RoundIcon
-          name={videoPaused ? "pause" : "play-solid"}
+          name={videoPaused ? "pause" : "play"}
           hideOutline
           backgroundColor={COLOR_9}
           style={animatedPlaybackIconStyle}

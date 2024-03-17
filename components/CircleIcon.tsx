@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import Icon from "./Icon";
 import { IconProps } from "../types/component.types";
-import { COLOR_1, COLOR_2, COLOR_5, COLOR_8, SIZE_48 } from "../constants";
+import { COLOR_1, COLOR_2, OCEAN_BLUE, COLOR_8, SIZE_48 } from "../constants";
 import { layoutStyle } from "../styles";
 
 export type CircleIconProps = IconProps & {
@@ -28,7 +28,7 @@ export default function CircleIcon({
   const containerBackgroundColor = hasBackground
     ? backgroundColor
       ? backgroundColor
-      : COLOR_5
+      : OCEAN_BLUE
     : COLOR_8;
 
   const containerBorderColor = outlineColor ? outlineColor : COLOR_2;

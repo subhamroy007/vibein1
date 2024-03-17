@@ -1,52 +1,35 @@
-import { ReactNode, useCallback } from "react";
-import { backgroundStyle, layoutStyle } from "../styles";
-import { useAppDispatch } from "../hooks/storeHooks";
-import { setFullScreenActiveState } from "../store/client/client.slice";
-import { setStatusBarStyle } from "expo-status-bar";
-import { useFocusEffect } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ReactNode } from "react";
+import { layoutStyle } from "../styles";
 import { View } from "react-native";
+import { useScreenInit } from "../hooks/utility.hooks";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type AppScreenProps = {
   children?: ReactNode;
   dark?: boolean;
+  avoidEdges?: boolean;
 };
 
-const AppScreen = ({ children, dark }: AppScreenProps) => {
-  const dispatch = useAppDispatch();
-  const screenFocusCallback = useCallback(() => {
-    if (dark) {
-      dispatch(setFullScreenActiveState(true));
-      setStatusBarStyle("light");
-    } else {
-      dispatch(setFullScreenActiveState(false));
-      setStatusBarStyle("dark");
-    }
-  }, [dark]);
+const AppScreen = ({ children, dark, avoidEdges }: AppScreenProps) => {
+  useScreenInit(dark);
 
-  useFocusEffect(screenFocusCallback);
+  const { bottom, left, right, top } = useSafeAreaInsets();
 
   return (
-    <SafeAreaView
+    <View
       style={[
-        layoutStyle.flex_1,
-        layoutStyle.align_self_stretch,
-        { overflow: "hidden" },
-        dark
-          ? backgroundStyle.background_color_4
-          : backgroundStyle.background_color_1,
+        layoutStyle.flex_fill,
+        layoutStyle.overflow_hidden,
+        {
+          marginBottom: avoidEdges ? 0 : bottom,
+          marginTop: avoidEdges ? 0 : top,
+          marginLeft: avoidEdges ? 0 : left,
+          marginRight: avoidEdges ? 0 : right,
+        },
       ]}
     >
-      <View
-        style={[
-          layoutStyle.flex_1,
-          layoutStyle.align_self_stretch,
-          { overflow: "hidden" },
-        ]}
-      >
-        {children}
-      </View>
-    </SafeAreaView>
+      {children}
+    </View>
   );
 };
 

@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import Icon from "./Icon";
 import { IconName } from "../types/component.types";
-import { COLOR_1, COLOR_4, COLOR_5, SIZE_36 } from "../constants";
+import { COLOR_1, COLOR_4, OCEAN_BLUE, SIZE_36 } from "../constants";
 import { layoutStyle } from "../styles";
 
 type CircleSolidIconProps = {
@@ -23,7 +23,7 @@ export default function CircleSolidIcon({
 
   const iconSize = iconScale ? containerSize * iconScale : containerSize * 0.6;
 
-  const containerColor = color ? color : COLOR_5;
+  const containerColor = color ? color : OCEAN_BLUE;
 
   return (
     <View

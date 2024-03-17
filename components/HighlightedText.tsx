@@ -1,7 +1,7 @@
 import React from "react";
 import AppText from "./AppText";
 import { StyleProp, TextStyle } from "react-native";
-import { COLOR_1, COLOR_14, COLOR_2, COLOR_5 } from "../constants";
+import { COLOR_1, COLOR_14, COLOR_2, OCEAN_BLUE } from "../constants";
 import { useRouter } from "expo-router";
 
 export type HighlightedTextProps = {
@@ -38,7 +38,7 @@ export default function HighlightedText({
           : undefined
       }
       onPress={onPress}
-      weight="semi-bold"
+      weight="medium"
       isMultiline
       color={transparent ? COLOR_1 : undefined}
     >
@@ -49,8 +49,8 @@ export default function HighlightedText({
           return (
             <AppText
               isMultiline
-              weight="regular"
-              color={transparent ? COLOR_2 : COLOR_5}
+              weight="medium"
+              color={transparent ? COLOR_2 : OCEAN_BLUE}
               key={phase + index}
               onPress={() => {
                 if (firstChar === "@") {

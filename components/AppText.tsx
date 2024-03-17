@@ -7,12 +7,14 @@ import {
   TextStyle,
 } from "react-native";
 import { COLOR_4, SIZE_13 } from "../constants";
+import Animated from "react-native-reanimated";
 
 export type AppTextProps = {
   size?: number;
   color?: string;
   weight?: "bold" | "medium" | "regular" | "semi-bold" | "extra-bold" | "light";
   isMultiline?: boolean;
+  heightMultiplier?: number;
 } & TextProps;
 
 export default function AppText({
@@ -20,6 +22,7 @@ export default function AppText({
   color,
   weight,
   isMultiline,
+  heightMultiplier,
   style,
   ...restProps
 }: AppTextProps) {
@@ -50,7 +53,9 @@ export default function AppText({
   const textSize = size ? size : SIZE_13;
 
   const textHeight = PixelRatio.roundToNearestPixel(
-    (isMultiline ? 1.5 : 1.2) * textSize
+    heightMultiplier
+      ? heightMultiplier * textSize
+      : (isMultiline ? 1.3 : 1.2) * textSize
   );
 
   textStyle.push({
@@ -62,7 +67,7 @@ export default function AppText({
   textStyle.push(style);
 
   return (
-    <Text
+    <Animated.Text
       ellipsizeMode="tail"
       numberOfLines={isMultiline ? undefined : 1}
       style={textStyle}

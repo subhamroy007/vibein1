@@ -53,7 +53,7 @@ const locationScreenSlice = createSlice({
             id: payload.id,
             name: payload.name,
             noOfPosts: payload.noOfPosts,
-            posts: payload.posts.map((post) => post._id),
+            posts: payload.posts.map((post) => post.id),
             previewPhotoUrl: previewUrl,
           };
         }

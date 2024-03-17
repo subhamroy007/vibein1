@@ -134,7 +134,7 @@ export default function CommentBox({
           entering={SlideInLeft.duration(200)}
           exiting={SlideOutLeft.duration(200)}
         >
-          <Avatar url={replyToAccountParams.profilePictureUrl} size={SIZE_24} />
+          <Avatar url={replyToAccountParams.profilePictureUri} size={SIZE_24} />
           <AppText
             color="grey"
             weight="regular"
@@ -152,7 +152,7 @@ export default function CommentBox({
       )}
       <ReactionBox onSelect={emojiSelectCallback} />
       <View style={[styles.comment_box]}>
-        <Avatar url={clientAccountParams.profilePictureUrl} />
+        <Avatar url={clientAccountParams.profilePictureUri} />
         <AppTextInput
           style={styles.text_input}
           placeholder={`write a comment to ${postAuthor}`}
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     ...layoutStyle.align_item_center,
     ...layoutStyle.flex_direction_row,
     ...paddingStyle.padding_horizontal_12,
-    ...backgroundStyle.background_color_13,
+    ...backgroundStyle.background_dove_grey,
     zIndex: 1,
   },
   root_container: {

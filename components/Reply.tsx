@@ -62,7 +62,7 @@ export default function Reply({ id, onReply }: ReplyProps) {
   return (
     <View style={styles.root_container}>
       <Avatar
-        url={createdBy.profilePictureUrl}
+        url={createdBy.profilePictureUri}
         style={styles.avatar}
         size={SIZE_30}
       />

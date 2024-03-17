@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { PostPhotoParams } from "../../types/utility.types";
+import { OutdatedPhotoParams1 } from "../../types/utility.types";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -15,7 +15,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { AnimatedIcon } from "../Icon";
 
 export type AlbumProps = {
-  photos: PostPhotoParams[];
+  photos: OutdatedPhotoParams1[];
   onDoubleTap: () => void;
   onTap: () => void;
 };

@@ -1,6 +1,6 @@
 import { Pressable, PressableProps, StyleSheet } from "react-native";
 import AppText from "./AppText";
-import { COLOR_1, COLOR_4, COLOR_5, SIZE_13 } from "../constants";
+import { COLOR_1, COLOR_4, OCEAN_BLUE, SIZE_13 } from "../constants";
 import { layoutStyle } from "../styles";
 
 export type AppButtonProps = {
@@ -34,7 +34,9 @@ export default function AppButton({
 
   const cornerRadius = gapSize * (capsuled ? 3 : 0.5);
 
-  const calculatedBackgroundColor = backgroundColor ? backgroundColor : COLOR_5;
+  const calculatedBackgroundColor = backgroundColor
+    ? backgroundColor
+    : OCEAN_BLUE;
 
   const calculatedOutlineColor = outlineColor ? outlineColor : COLOR_4;
 

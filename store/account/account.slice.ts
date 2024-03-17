@@ -1,30 +1,28 @@
-import {
-  getForYouMomentFeedThunk,
-  getForYouPhotosFeedThunk,
-  getHomeFeedThunk,
-  getInboxChatsThunk,
-} from "./../client/client.thunk";
+import { getInboxChatsThunk } from "./../client/client.thunk";
 import {
   EntityState,
   PayloadAction,
   createSlice,
   Draft,
+  Update,
 } from "@reduxjs/toolkit";
 import {
+  addManyAccounts,
   getAccountInitialState,
+  updateManyAccount,
   upsertManyAccount,
   upsertOneAccount,
 } from "./account.adapter";
-import { fetchComments, fetchSimilarPosts } from "../post/post.thunk";
 import {
   AccountResponseParams,
-  PostResponseParams,
+  ChatResponseParams,
+  MessageResponseParams,
+  OutDatedResponseParams2,
 } from "../../types/response.types";
 import {
   AccountAdapterParams,
   AccountStoreParams,
 } from "../../types/store.types";
-import { fetchReplies } from "../comment/comment.thunks";
 import { getLocationScreenThunk } from "../location-screen/location_screen.thunk";
 import {
   getAccountAllPostThunk,
@@ -37,7 +35,7 @@ import {
   getHashtagGeneralRouteThunk,
   getHashtagTopPostsRouteThunk,
 } from "../hashtag/hashtag.thunk";
-import { getChatMessagesThunk } from "../chat/chat.thunk";
+import { getChatInfoThunk, getChatMessagesThunk } from "../inbox/chat.thunk";
 
 function tranformToAccountAdapterParams(
   account: AccountResponseParams
@@ -49,7 +47,7 @@ function tranformToAccountAdapterParams(
 
 function addPostAccountsToStore(
   state: Draft<EntityState<AccountAdapterParams>>,
-  posts: PostResponseParams[]
+  posts: OutDatedResponseParams2[]
 ) {
   const accounts: AccountAdapterParams[] = [];
   posts.forEach((post) => {
@@ -60,12 +58,88 @@ function addPostAccountsToStore(
       });
     }
   });
-  upsertManyAccount(state, accounts);
+  const newAccounts: AccountAdapterParams[] = [];
+  const existingAccounts: Update<AccountAdapterParams>[] = [];
+  accounts.forEach((account) => {
+    state.entities[account.username]
+      ? existingAccounts.push({ id: account.username, changes: account })
+      : newAccounts.push(account);
+  });
+  addManyAccounts(state, newAccounts);
+  updateManyAccount(state, existingAccounts);
+}
+
+function addChatsAccountToStore(
+  state: Draft<EntityState<AccountAdapterParams>>,
+  chats: ChatResponseParams[]
+) {
+  const accounts = extractAccountFromChats(chats);
+  const newAccounts: AccountAdapterParams[] = [];
+  const existingAccounts: Update<AccountAdapterParams>[] = [];
+  accounts.forEach((account) => {
+    state.entities[account.username]
+      ? existingAccounts.push({ id: account.username, changes: account })
+      : newAccounts.push(account);
+  });
+  addManyAccounts(state, newAccounts);
+  updateManyAccount(state, existingAccounts);
+}
+
+function addMessagesAccountToStore(
+  state: Draft<EntityState<AccountAdapterParams>>,
+  messages: MessageResponseParams[]
+) {
+  const accounts = extractAccountFromMessages(messages);
+  const newAccounts: AccountAdapterParams[] = [];
+  const existingAccounts: Update<AccountAdapterParams>[] = [];
+  accounts.forEach((account) => {
+    state.entities[account.username]
+      ? existingAccounts.push({ id: account.username, changes: account })
+      : newAccounts.push(account);
+  });
+  addManyAccounts(state, newAccounts);
+  updateManyAccount(state, existingAccounts);
 }
 
 const accountStoreInitialState: AccountStoreParams = {
   profiles: {},
   ...getAccountInitialState(),
+};
+
+const extractAccountFromMessages = (messages: MessageResponseParams[]) => {
+  return messages
+    .map((message) => {
+      const nestedAccounts = message.reactions.map((reaction) =>
+        tranformToAccountAdapterParams({
+          ...reaction.author,
+        })
+      );
+      nestedAccounts.push(
+        tranformToAccountAdapterParams({
+          ...message.author,
+        })
+      );
+      return nestedAccounts;
+    })
+    .flat();
+};
+
+const extractAccountFromChats = (chats: ChatResponseParams[]) => {
+  return chats
+    .map((chat) => {
+      const nestedAccounts = [
+        tranformToAccountAdapterParams({
+          ...chat.receipient.account,
+        }),
+      ];
+      if (chat.recentMessages) {
+        nestedAccounts.push(
+          ...extractAccountFromMessages(chat.recentMessages.data)
+        );
+      }
+      return nestedAccounts;
+    })
+    .flat();
 };
 
 const accountSlice = createSlice({
@@ -74,24 +148,41 @@ const accountSlice = createSlice({
   reducers: {
     addManyAccountToStore: (
       state,
-      action: PayloadAction<AccountResponseParams[]>
+      { payload: accounts }: PayloadAction<AccountResponseParams[]>
     ) => {
-      upsertManyAccount(
-        state,
-        action.payload.map((account) => tranformToAccountAdapterParams(account))
-      );
+      const newAccounts: AccountAdapterParams[] = [];
+      const existingAccounts: Update<AccountAdapterParams>[] = [];
+      accounts.forEach((account) => {
+        state.entities[account.username]
+          ? existingAccounts.push({
+              id: account.username,
+              changes: account,
+            })
+          : newAccounts.push(account);
+      });
+      addManyAccounts(state, newAccounts);
+      updateManyAccount(state, existingAccounts);
     },
     toggleAccountFollowingState: (state, action: PayloadAction<string>) => {
       const targetAccountId = action.payload;
       const targetAccount = state.entities[targetAccountId];
       if (targetAccount) {
-        if (targetAccount.isFollowing !== undefined) {
+        if (targetAccount.isFollowed !== undefined) {
           if (targetAccount.noOfFollowers !== undefined) {
-            targetAccount.noOfFollowers = targetAccount.isFollowing
+            targetAccount.noOfFollowers = targetAccount.isFollowed
               ? targetAccount.noOfFollowers - 1
               : targetAccount.noOfFollowers + 1;
           }
-          targetAccount.isFollowing = !targetAccount.isFollowing;
+          targetAccount.isFollowed = !targetAccount.isFollowed;
+        }
+      }
+    },
+    toggleAccountBlockState: (state, action: PayloadAction<string>) => {
+      const targetAccountId = action.payload;
+      const targetAccount = state.entities[targetAccountId];
+      if (targetAccount) {
+        if (targetAccount.isBlocked !== undefined) {
+          targetAccount.isBlocked = !targetAccount.isBlocked;
         }
       }
     },
@@ -99,9 +190,9 @@ const accountSlice = createSlice({
       const targetAccountId = action.payload;
       const targetAccount = state.entities[targetAccountId];
       if (targetAccount) {
-        if (targetAccount.hasRequestedToFollow !== undefined) {
-          targetAccount.hasRequestedToFollow =
-            !targetAccount.hasRequestedToFollow;
+        if (targetAccount.isRequestedToFollow !== undefined) {
+          targetAccount.isRequestedToFollow =
+            !targetAccount.isRequestedToFollow;
         }
       }
     },
@@ -151,14 +242,14 @@ const accountSlice = createSlice({
     ) {
       state.profiles[routeId] = undefined;
     },
+    addAccountFromChats: (
+      state,
+      { payload }: PayloadAction<ChatResponseParams[]>
+    ) => {
+      addChatsAccountToStore(state, payload);
+    },
   },
   extraReducers: (builder) => {
-    builder.addCase(
-      getHomeFeedThunk.fulfilled,
-      (state, { payload: { posts } }) => {
-        addPostAccountsToStore(state, posts);
-      }
-    );
     builder.addCase(
       getHashtagGeneralRouteThunk.fulfilled,
       (state, { payload: { topPosts } }) => {
@@ -195,7 +286,7 @@ const accountSlice = createSlice({
           targetRoute.state = "success";
           targetRoute.data.allPosts = {
             hasEndReached: false,
-            posts: posts.map((post) => post._id),
+            posts: posts.map((post) => post.id),
           };
           targetRoute.lastUpdatedAt = Date.now();
           targetRoute.data.suggestedAccounts = [];
@@ -255,7 +346,7 @@ const accountSlice = createSlice({
             ...targetRoute.data.allPosts.posts,
             ...(targetRoute.data.allPosts.hasEndReached
               ? []
-              : posts.map((post) => post._id)),
+              : posts.map((post) => post.id)),
           ];
         }
       }
@@ -292,18 +383,7 @@ const accountSlice = createSlice({
         }
       }
     );
-    builder.addCase(
-      getForYouMomentFeedThunk.fulfilled,
-      (state, { payload: { posts } }) => {
-        addPostAccountsToStore(state, posts);
-      }
-    );
-    builder.addCase(
-      getForYouPhotosFeedThunk.fulfilled,
-      (state, { payload: { posts } }) => {
-        addPostAccountsToStore(state, posts);
-      }
-    );
+
     builder.addCase(
       getAccountTaggedPostThunk.fulfilled,
       (
@@ -320,7 +400,7 @@ const accountSlice = createSlice({
         const targetRoute = state.profiles[routeId]?.taggedPosts;
         if (targetRoute) {
           targetRoute.state = "success";
-          const newPostIds = posts.map((post) => post._id);
+          const newPostIds = posts.map((post) => post.id);
           if (refresh || !targetRoute.data.posts.length) {
             targetRoute.data = {
               posts: newPostIds,
@@ -385,7 +465,7 @@ const accountSlice = createSlice({
         const targetRoute = state.profiles[routeId]?.moments;
         if (targetRoute) {
           targetRoute.state = "success";
-          const newPostIds = posts.map((post) => post._id);
+          const newPostIds = posts.map((post) => post.id);
           if (refresh || !targetRoute.data.posts.length) {
             targetRoute.data = {
               posts: newPostIds,
@@ -450,7 +530,7 @@ const accountSlice = createSlice({
         const targetRoute = state.profiles[routeId]?.photos;
         if (targetRoute) {
           targetRoute.state = "success";
-          const newPostIds = posts.map((post) => post._id);
+          const newPostIds = posts.map((post) => post.id);
           if (refresh || !targetRoute.data.posts.length) {
             targetRoute.data = {
               posts: newPostIds,
@@ -501,46 +581,19 @@ const accountSlice = createSlice({
     );
     builder.addCase(
       getInboxChatsThunk.fulfilled,
-      (state, { payload: { chats } }) => {
-        const newAccounts = chats
-          .map((chat) => {
-            const accounts = [
-              tranformToAccountAdapterParams(chat.receipient.account),
-            ];
-            accounts.push(
-              ...chat.recentMessages
-                .map((message) => {
-                  return [
-                    tranformToAccountAdapterParams(message.createdBy),
-                    ...message.likes.map((account) =>
-                      tranformToAccountAdapterParams(account)
-                    ),
-                  ];
-                })
-                .flat()
-            );
-            return accounts;
-          })
-          .flat();
-        upsertManyAccount(state, newAccounts);
+      (state, { payload: { data } }) => {
+        addChatsAccountToStore(state, data);
       }
     );
     builder.addCase(
       getChatMessagesThunk.fulfilled,
-      (state, { payload: { messages } }) => {
-        const newAccounts = messages
-          .map((message) => {
-            return [
-              tranformToAccountAdapterParams(message.createdBy),
-              ...message.likes.map((account) =>
-                tranformToAccountAdapterParams(account)
-              ),
-            ];
-          })
-          .flat();
-        upsertManyAccount(state, newAccounts);
+      (state, { payload: { data } }) => {
+        addMessagesAccountToStore(state, data);
       }
     );
+    builder.addCase(getChatInfoThunk.fulfilled, (state, { payload }) => {
+      addChatsAccountToStore(state, [payload]);
+    });
   },
 });
 
@@ -553,7 +606,9 @@ export const {
     addManyAccountToStore,
     toggleAccountFollowingState,
     toggleAccountFollowRequestState,
+    toggleAccountBlockState,
     initAccountProfileRoute,
     removeAccountProfileRoute,
+    addAccountFromChats,
   },
 } = accountSlice;

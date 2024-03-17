@@ -1,9 +1,13 @@
-import { Pressable, StyleSheet, Vibration, View } from "react-native";
-import { useGridPost } from "../../hooks/post.hooks";
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from "react-native";
 import {
   COLOR_1,
-  LONG_PRESS_VIBRATION_DURATION,
-  POST_GRID_WIDTH,
+  GRID_WIDTHx3,
   SIZE_11,
   SIZE_15,
   SIZE_6,
@@ -12,40 +16,34 @@ import { backgroundStyle, layoutStyle } from "../../styles";
 import Icon from "../Icon";
 import AppText from "../AppText";
 import { formatNumber } from "../../utility";
-import { useCallback, useState } from "react";
-import { Portal } from "@gorhom/portal";
-import PostPreview from "../preview-post/PostPreview2";
-import RetryableImage from "../RetryableImage";
-import { useBackHandler } from "@react-native-community/hooks";
-import { Href } from "expo-router/build/link/href";
-import { useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import { PostItemIdentifier } from "../../types/store.types";
+import { useAppSelector } from "../../hooks/storeHooks";
+import { selectPostPreview } from "../../store/post-store/post.selectors";
+import Photo from "../Photo";
 
 export type GridPostProps = {
-  id: string;
-  first: boolean;
+  index: number;
+  onPress: (item: PostItemIdentifier, index: number) => void;
   portrait?: boolean;
   showPin?: boolean;
   showViews?: boolean;
-  gridPressRoute?: Href;
-  previewPressRoute?: Href;
+  item: PostItemIdentifier;
 };
 
 export function GridPost({
-  id,
-  first,
   portrait,
   showPin,
   showViews,
-  gridPressRoute,
-  previewPressRoute,
+  index,
+  onPress,
+  item,
 }: GridPostProps) {
-  const { postParams } = useGridPost(id);
-
-  const router = useRouter();
+  const post = useAppSelector((state) => selectPostPreview(state, item.id));
 
   const [isPreviewVisible, setPreviewVisibleState] = useState(false);
 
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(true);
 
   const imageLoadCallback = useCallback(() => setImageLoaded(true), []);
 
@@ -55,118 +53,90 @@ export function GridPost({
   );
 
   const pressCallback = useCallback(() => {
-    if (gridPressRoute) {
-      if (typeof gridPressRoute === "string") {
-        router.push({
-          pathname: gridPressRoute,
-          params: { selectedPostId: id },
-        });
-      } else {
-        router.push({
-          pathname: gridPressRoute?.pathname,
-          params: { ...gridPressRoute?.params, selectedPostId: id },
-        });
-      }
-    }
-  }, [id, gridPressRoute, router]);
+    onPress(item, index);
+  }, [item, index]);
 
-  const longPressCallback = useCallback(() => {
-    Vibration.vibrate(LONG_PRESS_VIBRATION_DURATION);
-    togglePreviewVisibleState();
-  }, []);
+  // const longPressCallback = useCallback(() => {
+  //   Vibration.vibrate(LONG_PRESS_VIBRATION_DURATION);
+  //   togglePreviewVisibleState();
+  // }, []);
 
-  const previewPressCallback = useCallback(() => {
-    if (previewPressRoute) {
-      if (typeof previewPressRoute === "string") {
-        router.push({
-          pathname: previewPressRoute,
-          params: { selectedPostId: id },
-        });
-      } else {
-        router.push({
-          pathname: previewPressRoute.pathname,
-          params: { ...previewPressRoute.params, selectedPostId: id },
-        });
-      }
-    }
-  }, [id, previewPressRoute, router]);
+  // useBackHandler(() => {
+  //   if (isPreviewVisible) {
+  //     togglePreviewVisibleState();
+  //     return true;
+  //   }
+  //   return false;
+  // });
 
-  useBackHandler(() => {
-    if (isPreviewVisible) {
-      togglePreviewVisibleState();
-      return true;
-    }
-    return false;
-  });
+  const rootContainerCachedStyle = useMemo<StyleProp<ViewStyle>>(
+    () => [
+      {
+        aspectRatio: portrait ? "9/16" : "1/1",
+        width: GRID_WIDTHx3,
+      },
+      backgroundStyle.background_dove_grey,
+    ],
+    [portrait]
+  );
 
-  if (!postParams) {
+  if (!post) {
     return null;
   }
 
   return (
-    <>
-      <Pressable
-        delayLongPress={200}
-        onPress={pressCallback}
-        onLongPress={longPressCallback}
-        style={[
-          {
-            aspectRatio: portrait ? "9/16" : "1/1",
-            marginLeft: first ? 0 : 3 * StyleSheet.hairlineWidth,
-          },
-          styles.root_container,
-        ]}
-      >
-        <RetryableImage
-          source={
-            postParams.postType === "photo"
-              ? postParams.previewUrl
-              : postParams.thumbnailPreviewUrl
-          }
-          style={styles.image}
-          onLoad={imageLoadCallback}
-        />
-        {imageLoaded && (
-          <>
-            {postParams.postType === "photo" && postParams.isAlbum && (
+    <Pressable onPress={pressCallback} style={rootContainerCachedStyle}>
+      <Photo
+        uri={
+          post.type === "photo-post"
+            ? post.firstPhoto.preview
+            : post.video.poster.uri
+        }
+        style={layoutStyle.fill}
+        placeholder={
+          post.type === "photo-post"
+            ? post.firstPhoto.blurhash
+            : post.video.poster.blurhash
+        }
+      />
+      {imageLoaded && (
+        <>
+          {post.type === "photo-post" ? (
+            post.isAlbum && (
               <Icon
-                name="album"
+                name="copy-solid"
                 size={SIZE_15}
                 color={COLOR_1}
                 style={styles.albumIcon}
               />
-            )}
-            {postParams.isPinned && showPin && (
-              <Icon
-                name="pin-solid"
-                size={SIZE_15}
-                color={COLOR_1}
-                style={styles.pinIcon}
-              />
-            )}
-            {postParams.postType === "moment" &&
-              postParams.noOfViews > 0 &&
-              showViews && (
-                <View style={styles.views_container}>
-                  <AppText size={SIZE_11} color={COLOR_1} weight="regular">
-                    {formatNumber(postParams.noOfViews)}
-                  </AppText>
-                  <Icon name="play-outlne" size={SIZE_15} color={COLOR_1} />
-                </View>
-              )}
-          </>
-        )}
-      </Pressable>
-      {isPreviewVisible && (
-        <Portal>
-          <PostPreview
-            id={id}
-            onDismiss={togglePreviewVisibleState}
-            onPress={previewPressCallback}
-          />
-        </Portal>
+            )
+          ) : (
+            <Icon
+              name="moment-solid"
+              size={SIZE_15}
+              color={COLOR_1}
+              style={styles.albumIcon}
+            />
+          )}
+          {post.isPinned && showPin && (
+            <Icon
+              name="pin-solid"
+              size={SIZE_15}
+              color={COLOR_1}
+              style={styles.pinIcon}
+            />
+          )}
+          {post.type === "moment-post" && post.noOfViews > 0 && showViews && (
+            <View style={styles.views_container}>
+              <AppText size={SIZE_11} color={COLOR_1} weight="regular">
+                {formatNumber(post.noOfViews)}
+              </AppText>
+              <Icon name="play" size={SIZE_15} color={COLOR_1} />
+            </View>
+          )}
+        </>
       )}
-    </>
+    </Pressable>
   );
 }
 
@@ -187,13 +157,5 @@ const styles = StyleSheet.create({
     ...layoutStyle.position_absolute,
     bottom: 6,
     right: 6,
-  },
-  root_container: {
-    ...backgroundStyle.background_color_7,
-    width: POST_GRID_WIDTH,
-  },
-  image: {
-    ...layoutStyle.width_100_percent,
-    ...layoutStyle.height_100_percent,
   },
 });

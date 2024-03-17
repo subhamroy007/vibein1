@@ -17,7 +17,25 @@ export const getAccountHomeRouteThunk = createAppAsyncThunk<
 
     const data: AccountRouteResponseParams = {
       posts,
-      account: { ...generateAccountObject(), username },
+      account: {
+        ...generateAccountObject([
+          "bio",
+          "fullname",
+          "has-followed-client",
+          "has-requeste-to-follow-client",
+          "is-blocked",
+          "is-favourite",
+          "is-followed",
+          "is-memory-hidden",
+          "is-private",
+          "is-requested-to-follow",
+          "no-of-followers",
+          "no-of-posts",
+          "no-of-followings",
+          "is-available",
+        ]),
+        username,
+      },
     };
     await delay(3_000);
     if (Math.random() > 0.98) {

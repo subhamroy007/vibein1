@@ -160,7 +160,7 @@ export default function FullScreenPost({
           >
             <View style={styles.author_info_container}>
               <Pressable onPress={gotoProifile}>
-                <Avatar url={createdBy.profilePictureUrl} />
+                <Avatar url={createdBy.profilePictureUri} />
               </Pressable>
               <AppText
                 style={marginStyle.margin_left_9}
@@ -170,7 +170,7 @@ export default function FullScreenPost({
                 {createdBy.username}
               </AppText>
               <AppButton
-                text={createdBy.isFollowing ? "following" : "follow"}
+                text={createdBy.isFollowed ? "following" : "follow"}
                 style={marginStyle.margin_left_9}
                 hasOutline
                 hideBackground
@@ -238,7 +238,7 @@ export default function FullScreenPost({
             )}
           </View>
           <View style={layoutStyle.align_item_center}>
-            <Icon name="comment" color={COLOR_1} />
+            <Icon name="comment-outline" color={COLOR_1} />
             {noOfComments > 0 && (
               <AppText
                 style={marginStyle.margin_top_6}
@@ -250,10 +250,10 @@ export default function FullScreenPost({
             )}
           </View>
 
-          <Icon name="share" color={COLOR_1} />
+          <Icon name="send-outline" color={COLOR_1} />
           <AppPressable hitSlop={SIZE_24} onPress={togglePostSaveStateCallback}>
             <Icon
-              name={isSaved ? "bookmark-solid" : "bookmark-outline"}
+              name={isSaved ? "star-solid" : "star-outline"}
               color={COLOR_1}
             />
           </AppPressable>
@@ -291,12 +291,12 @@ export default function FullScreenPost({
               />
             )}
             <Option
-              icon="explore"
+              icon="info"
               text="Advanced Options"
               onPress={advancedOptionsPressPressCallback}
             />
 
-            <Option icon="edit" onPress={updatePressCallback} text="Edit" />
+            <Option icon="info" onPress={updatePressCallback} text="Edit" />
 
             <Option
               icon={"pin-solid"}
@@ -311,7 +311,7 @@ export default function FullScreenPost({
               onPress={deletePressCallback}
             />
             <Option
-              icon="report"
+              icon="error"
               text="Report"
               color="red"
               onPress={reportPressCallback}

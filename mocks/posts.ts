@@ -1,19 +1,40 @@
+import {
+  PostPhotoAccountTagResponseParams,
+  PostPhotoResponseParams,
+  PostResponseParams,
+} from "./../types/response.types";
 import { nanoid } from "@reduxjs/toolkit";
-import { MOMENT_VIDEOS, PHOTOS } from "./data";
+import {
+  MOMENT_VIDEOS,
+  PHOTOS,
+  getPostMomentVideoThumbnailUrl,
+  getPostMomentVideoUrl,
+  getPostPhotoPreviewUrl,
+  getPostPhotoUrl,
+  photo_hashs,
+  poster_hashs,
+} from "./data";
 import {
   AccountResponseParams,
-  ChatResponseParams,
-  MessageResponseParams,
-  PostResponseParams,
+  MomentPostResponseParams,
+  PhotoPostResponseParams,
+  OutDatedResponseParams2,
 } from "../types/response.types";
 import { getDate, getRandom } from ".";
 import {
-  PostPhotoParams,
+  PostVideoParams,
+  OutdatedPhotoParams1,
+  PhotoWithPreview,
   PostTemplateCommonParams,
 } from "../types/utility.types";
-import { generateAccountObject, generateAccountObjects } from "./accounts";
+import {
+  generateAccount,
+  generateAccountObject,
+  generateAccountObjects,
+  generateAccounts,
+} from "./accounts";
 
-const captions = [
+export const captions = [
   `🌺🌺🌺
 
 Styled by @riechamallick
@@ -104,7 +125,7 @@ Team - @greenlight__media`,
 
 export const generatePostObject = (
   type?: "photo" | "moment"
-): PostResponseParams => {
+): OutDatedResponseParams2 => {
   const noOfViews = getRandom(400000);
 
   const noOfLikes = getRandom(noOfViews);
@@ -112,7 +133,7 @@ export const generatePostObject = (
   const noOfComments = getRandom(noOfLikes);
 
   const commonParams: PostTemplateCommonParams<AccountResponseParams> = {
-    _id: nanoid(),
+    id: nanoid(),
     advancedOptions: {
       commentSetting: "all",
       disableCirculation: false,
@@ -144,7 +165,7 @@ export const generatePostObject = (
   if (postTypeIdentifier === 1) {
     const noOfPhotos = getRandom(10, 1);
 
-    const photos: PostPhotoParams[] = [];
+    const photos: OutdatedPhotoParams1[] = [];
 
     for (let i = 0; i < noOfPhotos; i++) {
       photos.push(PHOTOS[getRandom(PHOTOS.length - 1)]);
@@ -167,55 +188,166 @@ export const generatePostObjects = (
   size: number,
   type?: "photo" | "moment"
 ) => {
-  const posts: PostResponseParams[] = [];
+  const posts: OutDatedResponseParams2[] = [];
   for (let i = 0; i < size; i++) {
     posts.push(generatePostObject(type));
   }
   return posts;
 };
 
-export const generateMessageObject = (): MessageResponseParams => {
+export const generatePhotoPost = (): PhotoPostResponseParams => {
+  const photos = generatePhotos(
+    getRandom(Math.random() > 0.6 ? 1 : 10, 1)
+  ).map<PostPhotoResponseParams>((photo) => ({
+    ...photo,
+    taggedAccounts:
+      Math.random() > 0.6
+        ? generateAccounts(getRandom(10, 1), [
+            "fullname",
+            "has-followed-client",
+          ]).map<PostPhotoAccountTagResponseParams>((account) => ({
+            account,
+            position: [getRandom(90, 10), getRandom(90, 10)],
+          }))
+        : undefined,
+  }));
+
   return {
-    id: nanoid(),
-    likes: [],
+    advancedSettings: {
+      commentDisabled: false,
+      hideLikesAndViewsCount: false,
+    },
+    author: generateAccount(["fullname"]),
     createdAt: new Date().toUTCString(),
-    createdBy: generateAccountObject(),
-    body: {
-      text: "Hi, are u free tonight",
+    engagementSummary: {
+      noOfComments: getRandom(100000, 10),
+      noOfLikes: getRandom(1000000, 10),
+      noOfViews: getRandom(1000000, 10),
     },
+    id: nanoid(),
+    metadata: {
+      href: "",
+      isLiked: Math.random() > 0.5,
+      isPinned: Math.random() > 0.5,
+      isSaved: Math.random() > 0.5,
+      isViewed: Math.random() > 0.5,
+    },
+    caption:
+      Math.random() > 0
+        ? captions[getRandom(captions.length - 1, 0)]
+        : undefined,
+    taggedLocation:
+      Math.random() > 0
+        ? { id: nanoid(), name: "kolkata city of joy" }
+        : undefined,
+    usedAudio:
+      Math.random() > 0
+        ? {
+            id: nanoid(),
+            title: "JAILER - Hukum Lyric Video",
+            uri: "",
+            usedSection: [0, 0],
+          }
+        : undefined,
+    photos,
   };
 };
 
-export const generateMessageObjects = (size: number) => {
-  const messages: MessageResponseParams[] = [];
+export const generatePhotos = (count: number): PhotoWithPreview[] => {
+  const photos: PhotoWithPreview[] = [];
 
-  for (let i = 0; i < size; i++) {
-    messages.push(generateMessageObject());
+  for (let i = 0; i < count; i++) {
+    const index = getRandom(30, 1);
+
+    photos.push({
+      uri: getPostPhotoUrl(index),
+      blurhash: photo_hashs[index - 1],
+      preview: getPostPhotoPreviewUrl(index),
+    });
   }
-  return messages;
+
+  return photos;
 };
 
-export const generateChatObject = (): ChatResponseParams => {
-  const account = generateAccountObject();
+export const generateMomentPost = (): MomentPostResponseParams => {
+  return {
+    advancedSettings: {
+      commentDisabled: false,
+      hideLikesAndViewsCount: false,
+    },
+    author: generateAccount(["fullname"]),
+    createdAt: new Date().toUTCString(),
+    engagementSummary: {
+      noOfComments: getRandom(100000, 10),
+      noOfLikes: getRandom(1000000, 10),
+      noOfViews: getRandom(1000000, 10),
+    },
+    id: nanoid(),
+    metadata: {
+      href: "",
+      isLiked: Math.random() > 0.5,
+      isPinned: Math.random() > 0.5,
+      isSaved: Math.random() > 0.5,
+      isViewed: Math.random() > 0.5,
+    },
+    video: generateVideo(),
+    taggedAccounts:
+      Math.random() > 0.6
+        ? generateAccounts(getRandom(10, 1), [
+            "fullname",
+            "has-followed-client",
+          ])
+        : undefined,
+    caption:
+      Math.random() > 0.3
+        ? captions[getRandom(captions.length - 1, 0)]
+        : undefined,
+    taggedLocation:
+      Math.random() > 0.6
+        ? { id: nanoid(), name: "kolkata city of joy" }
+        : undefined,
+    usedAudio:
+      Math.random() > 0
+        ? {
+            id: nanoid(),
+            title: "JAILER - Hukum Lyric Video",
+          }
+        : undefined,
+  };
+};
+
+export const generateVideo = (): PostVideoParams => {
+  const index = getRandom(30, 1);
 
   return {
-    id: account._id,
-    recentMessages: generateMessageObjects(8),
-    receipient: {
-      account: generateAccountObject(),
-      lastActiveAt: new Date().toUTCString(),
+    uri: getPostMomentVideoUrl(index),
+    duration: 0,
+    preview: "",
+    poster: {
+      blurhash: poster_hashs[index - 1],
+      uri: getPostMomentVideoThumbnailUrl(index),
     },
-    noOfUnseenMessages: getRandom(10, 0) > 7 ? 0 : getRandom(300, 1),
-    joinedAt: new Date().toUTCString(),
+    muted: Math.random() > 0.7,
   };
 };
 
-export const generateChatObjects = (size: number) => {
-  const chats: ChatResponseParams[] = [];
+export const generatePost = (count: number, type?: "photos" | "moments") => {
+  const posts: PostResponseParams[] = [];
 
-  for (let i = 0; i < size; i++) {
-    chats.push(generateChatObject());
+  for (let i = 0; i < count; i++) {
+    const postType = !type
+      ? Math.random() > 0.5
+        ? 1
+        : 2
+      : type === "photos"
+      ? 1
+      : 2;
+    if (postType === 1) {
+      posts.push({ type: "photo-post", ...generatePhotoPost() });
+    } else {
+      posts.push({ type: "moment-post", ...generateMomentPost() });
+    }
   }
 
-  return chats;
+  return posts;
 };

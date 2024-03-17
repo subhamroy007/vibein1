@@ -1,15 +1,16 @@
+import { getProfilePictureUrl } from "./../mocks/data";
 import { AppDispatch, RootState } from "../store";
 import { AccountResponseParams } from "./response.types";
 
 /**
  * represents a single photo of a post
  */
-export type PostPhotoParams = {
+export type OutdatedPhotoParams1 = {
   url: string;
   previewUrl: string;
 };
 
-export type PostMomentVideoParams = {
+export type OutdatedVideoParams = {
   url: string;
   thumbnail: {
     url: string;
@@ -37,7 +38,7 @@ export type PostEngagementParams = {
 };
 
 export type PostTemplateCommonParams<T = string | AccountResponseParams> = {
-  _id: string;
+  id: string;
   isPinned: boolean;
   createdAt: string;
   createdBy: T;
@@ -45,7 +46,7 @@ export type PostTemplateCommonParams<T = string | AccountResponseParams> = {
   caption?: string;
   taggedLocation?: {
     name: string;
-    _id: string;
+    id: string;
   };
   taggedAccounts?: T[];
   advancedOptions: PostAdvancedOptionParams;
@@ -63,11 +64,11 @@ export type PostTemplateParams<T = string | AccountResponseParams> =
     (
       | {
           postType: "photo";
-          photos: PostPhotoParams[];
+          photos: OutdatedPhotoParams1[];
         }
       | {
           postType: "moment";
-          video: PostMomentVideoParams;
+          video: OutdatedVideoParams;
         }
     );
 
@@ -75,7 +76,7 @@ export type PostTemplateParams<T = string | AccountResponseParams> =
  * represents a reply template that can be used as adapter type and/or response type
  */
 export type ReplyTemplateParams<T = string | AccountResponseParams> = {
-  _id: string;
+  id: string;
   content: string;
   createdAt: string;
   createdBy: T;
@@ -92,17 +93,22 @@ export type CommentTemplateParams<T = string | AccountResponseParams> = {
 } & ReplyTemplateParams<T>;
 
 export type AccountField =
+  | "has-followed-client"
+  | "has-requeste-to-follow-client"
   | "no-of-followers"
-  | "is-following"
-  | "has-requested-to-follow"
+  | "no-of-followings"
+  | "no-of-posts"
+  | "is-available"
+  | "is-memory-hidden"
   | "is-followed"
+  | "is-requested-to-follow"
   | "fullname"
   | "is-private"
   | "is-favourite"
-  | "bio"
-  | "follower-count"
-  | "following-count"
-  | "post-count";
+  | "is-blocked"
+  | "bio";
+
+export type ChatType = "direct" | "group-solid";
 
 /**
  * represents the error object returned by the thunk in case of the promise is rejected
@@ -138,3 +144,96 @@ export type AsyncThunkConfig = {
   /** type to be passed into the second argument of `rejectWithValue` to finally be merged into `rejectedAction.meta` */
   rejectedMeta: ThunkMeta;
 };
+
+export type PostGeneralParams<T extends {} = {}> = {
+  id: string;
+  createdAt: string;
+  caption?: string;
+  taggedLocation?: LocationWithName;
+  engagementSummary: {
+    noOfLikes: number;
+    noOfComments: number;
+    noOfViews: number;
+  };
+  advancedSettings: {
+    commentDisabled: boolean;
+    hideLikesAndViewsCount: boolean;
+  };
+  metadata: {
+    href: string;
+    isLiked: boolean;
+    isSaved: boolean;
+    isPinned: boolean;
+    isViewed: boolean;
+  };
+} & T;
+
+export type LocationWithName = {
+  id: string;
+  name: string;
+};
+
+export type PhotoWithHash = {
+  uri: string;
+  blurhash: string;
+};
+
+export type PhotoWithPreview = {
+  preview: string;
+} & PhotoWithHash;
+
+export type PostVideoParams = {
+  uri: string;
+  poster: PhotoWithHash;
+  preview: string;
+  duration: number;
+  muted: boolean;
+};
+
+export type AudioWithTitle = {
+  id: string;
+  title: string;
+};
+
+export type AudioWithUri = {
+  uri: string;
+  usedSection: [number, number];
+} & AudioWithTitle;
+
+export type AccountParams = {
+  id: string;
+  username: string;
+  profilePictureUri: string;
+  fullname?: string;
+  bio?: string;
+  noOfPosts?: number;
+  noOfFollowings?: number;
+  noOfFollowers?: number;
+  hasFollowedClient?: boolean;
+  hasRequestedToFollowClient?: boolean;
+  isAvailable?: boolean;
+  isMemoryHidden?: boolean;
+  isPrivate?: boolean;
+  isBlocked?: boolean;
+  isFollowed?: boolean;
+  isRequestedToFollow?: boolean;
+  isFavourite?: boolean;
+};
+
+export type TextSearchParams = {
+  text: string;
+};
+
+export type HashTagSearchParams = {
+  name: string;
+  noOfPosts: number;
+};
+
+export type AccountSearchParams = {
+  category: string;
+} & AccountParams;
+
+export type SearchParams =
+  | ({ type: "text" } & TextSearchParams)
+  | ({ type: "hashtag" } & HashTagSearchParams)
+  | ({ type: "account" } & AccountSearchParams);

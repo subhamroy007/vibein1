@@ -1,15 +1,21 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import {
+  AccountParams,
   CommentTemplateParams,
+  PostGeneralParams,
+  PostVideoParams,
+  PhotoWithPreview,
   PostTemplateParams,
   ReplyTemplateParams,
   ThunkError,
   ThunkMeta,
+  AudioWithTitle,
+  AudioWithUri,
+  SearchParams,
+  AccountSearchParams,
+  HashTagSearchParams,
 } from "./utility.types";
-import {
-  HashtagAdapterParams,
-  MessageMediaAttachmentParams,
-} from "./store.types";
+import { HashtagAdapterParams, MessageAttachmentParams } from "./store.types";
 
 /**
  * reprsents the abstract type of response params from a thnuk
@@ -20,29 +26,44 @@ export type ThunkResponseParams<T = undefined> = {
   meta: ThunkMeta;
 };
 
+export type PageResponseParams<T extends {}> = {
+  data: T[];
+  nextPageInfo: {
+    hasEndReached: boolean;
+    nextId?: string;
+    nextTimestamp?: string;
+  };
+};
+
+export type PageResponseParams2<T extends {}> = {
+  data: T[];
+  hasEndReached: boolean;
+  endCursor: string;
+  totalCount: number;
+};
+
 /**
  * represents the account response data structure
  * most of the fields are optional because other then username and profile picture, other fields
  * may or may not required in different queries
  */
 export type AccountResponseParams = {
-  _id: string;
+  id: string;
   username: string;
-  profilePictureUrl: string;
+  profilePictureUri: string;
   fullname?: string;
   bio?: string | null;
   noOfPosts?: number;
   noOfFollowings?: number;
   noOfFollowers?: number;
+  hasFollowedClient?: boolean;
+  hasRequestedToFollowClient?: boolean;
   isAvailable?: boolean;
-  isActive?: boolean;
-  isBlocked?: boolean;
   isMemoryHidden?: boolean;
-  isFollowing?: boolean;
-  hasRequestedToFollow?: boolean;
   isPrivate?: boolean;
+  isBlocked?: boolean;
   isFollowed?: boolean;
-  isFollowRequestPending?: boolean;
+  isRequestedToFollow?: boolean;
   isFavourite?: boolean;
 };
 
@@ -62,13 +83,13 @@ export type CommentResponseParams = {
 /**
  * represents a single post object that is returned from the server as a post response
  */
-export type PostResponseParams = PostTemplateParams<AccountResponseParams>;
+export type OutDatedResponseParams2 = PostTemplateParams<AccountResponseParams>;
 
 /**
  * represents all the data the is returned from the server as the initial response of home feed request
  */
 export type HomeFeedResponseParams = {
-  posts: PostResponseParams[];
+  posts: OutDatedResponseParams2[];
 };
 
 /**
@@ -95,7 +116,7 @@ export type ReplySectionResponseParams =
  * reprsents the data params of the similar posts requests
  */
 export type SimilarPostResponseDataParams = {
-  posts: PostResponseParams[];
+  posts: OutDatedResponseParams2[];
 };
 
 export type SimilarPostResponseParams =
@@ -103,7 +124,7 @@ export type SimilarPostResponseParams =
 
 export type HashtagGeneralRouteResponseParams = {
   hashtag: HashtagAdapterParams;
-  topPosts: PostResponseParams[];
+  topPosts: OutDatedResponseParams2[];
 };
 
 export type HashtagRouteThunkParams = {
@@ -128,7 +149,7 @@ export type ThunkArg<T> = {
 } & T;
 
 export type PostScreenResponseParams = {
-  posts: PostResponseParams[];
+  posts: OutDatedResponseParams2[];
 };
 
 export type PostScreenThunkParams = {
@@ -142,7 +163,7 @@ export type LocationScreenResponseParams = {
   name: string;
   fullAddress: string;
   noOfPosts: number;
-  posts: PostResponseParams[];
+  posts: OutDatedResponseParams2[];
 };
 
 export type LocationScreenThunkParams = {
@@ -152,7 +173,7 @@ export type LocationScreenThunkParams = {
 
 export type AccountRouteResponseParams = {
   account: AccountResponseParams;
-  posts: PostResponseParams[];
+  posts: OutDatedResponseParams2[];
 };
 
 export type AccountRouteThunkParams = {
@@ -161,34 +182,90 @@ export type AccountRouteThunkParams = {
   refresh?: boolean;
 };
 
+//---------------------------------------------------chat related response types------------------------------------------------
+
 export type MessageResponseParams = {
   id: string;
   body: {
     text?: string;
-    attachment?: {
-      media?: MessageMediaAttachmentParams[];
-    };
+    attachment?: MessageAttachmentParams;
   };
   createdAt: string;
-  createdBy: AccountResponseParams;
-  likes: AccountResponseParams[];
+  author: AccountResponseParams;
+  reactions: {
+    reactionEmoji: string;
+    author: AccountResponseParams;
+  }[];
+  seenByReceipient: boolean;
 };
+
+export type MessagePageResponseParams =
+  PageResponseParams2<MessageResponseParams>;
 
 export type ChatResponseParams = {
   id: string;
   receipient: {
     account: AccountResponseParams;
     lastActiveAt?: string;
+    isMember: boolean;
+    isMessageRequestRestricted: boolean;
   };
-  recentMessages: MessageResponseParams[];
+  recentMessages?: MessagePageResponseParams;
   joinedAt?: string;
+  muted: boolean;
   noOfUnseenMessages: number;
 };
 
-export type ChatsRouteResponseParams = {
-  chats: ChatResponseParams[];
+export type ChatPageResponseParams = PageResponseParams<ChatResponseParams>;
+
+//--------------------------------------------------------------------------------------------------------------------------
+
+//--------------------------------------------------post response params-----------------------------------------------------
+
+export type PostResponseGeneralParams<T extends {}> = PostGeneralParams<
+  {
+    author: AccountParams;
+  } & T
+>;
+
+export type PostPhotoAccountTagResponseParams = {
+  account: AccountParams;
+  position: [number, number];
 };
 
-export type ChatWindowResponseParams = {
-  messages: MessageResponseParams[];
+export type PostPhotoResponseParams = {
+  taggedAccounts?: PostPhotoAccountTagResponseParams[];
+} & PhotoWithPreview;
+
+export type PhotoPostResponseParams = PostResponseGeneralParams<{
+  photos: PostPhotoResponseParams[];
+  usedAudio?: AudioWithUri | null;
+}>;
+
+export type MomentPostResponseParams = PostResponseGeneralParams<{
+  video: PostVideoParams;
+  taggedAccounts?: AccountParams[];
+  usedAudio?: AudioWithTitle | null;
+}>;
+
+export type PostResponseParams =
+  | ({ type: "photo-post" } & PhotoPostResponseParams)
+  | ({ type: "moment-post" } & MomentPostResponseParams);
+
+export type PostPageResponse = {
+  data: PostResponseParams[];
+  hasEndReached: boolean;
+  endCursor: string;
+};
+
+export type QuickSearchResponse = {
+  result: SearchParams[];
+};
+
+export type AccountSearchResponse = {
+  accounts: AccountSearchParams[];
+};
+
+export type HashtagSearchResponse = {
+  hashtags: HashTagSearchParams[];
 };

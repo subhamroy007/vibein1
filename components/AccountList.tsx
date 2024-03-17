@@ -12,10 +12,10 @@ export type AccountListProps = {
 };
 
 export type AccountListItemParams = {
-  _id: string;
+  id: string;
   username: string;
   fullname: string;
-  profilePictureUrl: string;
+  profilePictureUri: string;
 };
 
 export type AccountListStateParams = {
@@ -45,7 +45,7 @@ export function AccountListItem({
           paddingStyle.padding_vertical_6,
         ]}
       >
-        <Avatar url={accountParams.profilePictureUrl} size={SIZE_36} />
+        <Avatar url={accountParams.profilePictureUri} size={SIZE_36} />
         <View style={marginStyle.margin_left_6}>
           <AppText size={SIZE_11}>{accountParams.username}</AppText>
           <AppText size={SIZE_11} color="grey">
@@ -70,7 +70,7 @@ export default function AccountList({
       {state.accounts.map((account) => (
         <AccountListItem
           {...account}
-          key={account._id}
+          key={account.id}
           onAccountSelect={onAccountSelect}
         />
       ))}

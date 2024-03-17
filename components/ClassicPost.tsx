@@ -161,7 +161,7 @@ export default function ClassicPost({
         ]}
       >
         <Pressable onPress={gotoProifile}>
-          <Avatar url={createdBy.profilePictureUrl} size={SIZE_30} />
+          <Avatar url={createdBy.profilePictureUri} size={SIZE_30} />
         </Pressable>
         <View
           style={[
@@ -224,7 +224,7 @@ export default function ClassicPost({
             layoutStyle.justify_content_center,
           ]}
         >
-          <Avatar size={SIZE_24} url={clientAccountParams.profilePictureUrl} />
+          <Avatar size={SIZE_24} url={clientAccountParams.profilePictureUri} />
           <AppText
             color={COLOR_2}
             weight="regular"
@@ -234,7 +234,7 @@ export default function ClassicPost({
           </AppText>
         </View>
         <Pressable hitSlop={SIZE_24} onPress={toggleSendSectionPortalCallback}>
-          <Icon name="share" size={SIZE_27} />
+          <Icon name="send-outline" size={SIZE_27} />
         </Pressable>
       </View>
       <View
@@ -293,15 +293,15 @@ export default function ClassicPost({
                 onPress={addToMemoryPressCallback}
               />
             )}
-            {clientAccountParams._id === createdBy._id ? (
+            {clientAccountParams.id === createdBy.id ? (
               <>
                 <Option
-                  icon="explore"
+                  icon="explore-outline"
                   text="Advanced Options"
                   onPress={advancedOptionsPressPressCallback}
                 />
 
-                <Option icon="edit" onPress={updatePressCallback} text="Edit" />
+                <Option icon="info" onPress={updatePressCallback} text="Edit" />
 
                 <Option
                   icon={"pin-solid"}
@@ -318,7 +318,7 @@ export default function ClassicPost({
               </>
             ) : (
               <Option
-                icon="report"
+                icon="error"
                 text="Report"
                 color="red"
                 onPress={reportPressCallback}

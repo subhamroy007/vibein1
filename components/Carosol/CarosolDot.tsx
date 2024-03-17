@@ -4,7 +4,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { marginStyle } from "../../styles";
 import { StyleSheet } from "react-native";
-import { COLOR_1, COLOR_5, SIZE_2, SIZE_4 } from "../../constants";
+import { COLOR_1, OCEAN_BLUE, SIZE_2, SIZE_4 } from "../../constants";
 
 export function CarosolDot({
   activeIndex,
@@ -31,7 +31,7 @@ export function CarosolDot({
       style={[
         animatedStyle,
         {
-          backgroundColor: index === activeIndex ? COLOR_5 : COLOR_1,
+          backgroundColor: index === activeIndex ? OCEAN_BLUE : COLOR_1,
         },
         styles.dot,
       ]}

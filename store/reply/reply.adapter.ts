@@ -2,8 +2,8 @@ import { createEntityAdapter } from "@reduxjs/toolkit";
 import { ReplyAdapterParams } from "../../types/store.types";
 
 const replyAdapter = createEntityAdapter<ReplyAdapterParams>({
-  selectId: (model) => model._id,
-  sortComparer: (reply1, reply2) => reply1._id.localeCompare(reply2._id),
+  selectId: (model) => model.id,
+  sortComparer: (reply1, reply2) => reply1.id.localeCompare(reply2.id),
 });
 
 export const { selectById: selectReplyById } = replyAdapter.getSelectors();

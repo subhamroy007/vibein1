@@ -44,7 +44,7 @@ export default function CommentPlaceHolder({
       ]}
     >
       <AppAvatar
-        url={clientAccountParams.profilePictureUrl}
+        url={clientAccountParams.profilePictureUri}
         style={type === "reply" ? marginStyle.margin_left_24 : undefined}
         size={type === "reply" ? "extra-small" : "small"}
       />

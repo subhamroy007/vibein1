@@ -5,7 +5,7 @@ import {
   COLOR_14,
   COLOR_16,
   COLOR_17,
-  COLOR_5,
+  OCEAN_BLUE,
   SIZE_15,
 } from "../constants";
 import { borderStyle, layoutStyle } from "../styles";
@@ -55,7 +55,7 @@ const Button = ({
             ? undefined
             : backgroundColor
             ? backgroundColor
-            : COLOR_5,
+            : OCEAN_BLUE,
           borderColor: outlineColor
             ? outlineColor
             : hideBackground
