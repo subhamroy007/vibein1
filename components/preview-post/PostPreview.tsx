@@ -97,7 +97,7 @@ export default function PostPreview({
     return null;
   }
 
-  const { createdBy, isLiked, originalUrl, previewUrl } = postParams;
+  const { author, isLiked, originalUrl, previewUrl } = postParams;
 
   return (
     <AnimatedPressable
@@ -113,9 +113,9 @@ export default function PostPreview({
         style={[styles.content_container, animatedContentContainerStyle]}
       >
         <View style={styles.header}>
-          <Avatar url={createdBy.profilePictureUri} size={SIZE_30} />
+          <Avatar url={author.profilePictureUri} size={SIZE_30} />
           <AppText style={marginStyle.margin_left_6} size={SIZE_12}>
-            {createdBy.username}
+            {author.username}
           </AppText>
         </View>
         <View style={styles.body}>

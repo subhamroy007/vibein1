@@ -319,6 +319,18 @@ export const marginStyle = StyleSheet.create({
   margin_left_auto: {
     marginLeft: "auto",
   },
+  margin_12: {
+    margin: SIZE_12,
+  },
+  margin_vertical_12: {
+    marginVertical: SIZE_12,
+  },
+  margin_vertical_9: {
+    marginVertical: SIZE_9,
+  },
+  margin_vertical_6: {
+    marginVertical: SIZE_6,
+  },
   margin_top_auto: {
     marginTop: "auto",
   },
@@ -418,5 +430,17 @@ export const marginStyle = StyleSheet.create({
   },
   margin_bottom_3: {
     marginBottom: SIZE_3,
+  },
+});
+
+export const text_style = StyleSheet.create({
+  text_align_center: {
+    textAlign: "center",
+  },
+  text_align_vertical_center: {
+    textAlignVertical: "center",
+  },
+  text_align_vertical_top: {
+    textAlignVertical: "top",
   },
 });

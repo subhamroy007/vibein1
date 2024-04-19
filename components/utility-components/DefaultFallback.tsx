@@ -3,15 +3,20 @@ import { View } from "react-native";
 import { shallowEqual } from "react-redux";
 import { layoutStyle } from "../../styles";
 import { COLOR_2, SIZE_90 } from "../../constants";
-import IconCircle from "./icon/IconCircle";
 import Spinner from "./Spinner";
+import PressableIconCircle from "./button/PressableIconCircle";
 
 export type DefaultPlaceHolderProps = {
   height?: number;
   isLoading: boolean;
+  fetch?: () => void;
 };
 
-const DefaultPlaceHolder = ({ isLoading, height }: DefaultPlaceHolderProps) => {
+const DefaultPlaceHolder = ({
+  isLoading,
+  height,
+  fetch,
+}: DefaultPlaceHolderProps) => {
   return (
     <View
       style={[
@@ -19,7 +24,11 @@ const DefaultPlaceHolder = ({ isLoading, height }: DefaultPlaceHolderProps) => {
         { height: height ? height : SIZE_90 },
       ]}
     >
-      {isLoading ? <Spinner /> : <IconCircle name="add" color={COLOR_2} />}
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <PressableIconCircle onPress={fetch} name="add" color={COLOR_2} />
+      )}
     </View>
   );
 };

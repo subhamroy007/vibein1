@@ -16,7 +16,7 @@ const reply_contents = [
 export const generateReplyObject = (): ReplyResponseParams => {
   return {
     id: nanoid(),
-    createdBy: generateAccountObject(),
+    author: generateAccountObject(),
     isLiked: Math.random() < 0.5 ? false : true,
     noOfLikes: getRandom(10000),
     createdAt: getDate(),

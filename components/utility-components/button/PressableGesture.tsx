@@ -13,6 +13,7 @@ const PressableGesture = ({
   onPress,
   onPressIn,
   onPressOut,
+  onCancel,
   children,
   hitSlop,
   enabled,
@@ -34,11 +35,15 @@ const PressableGesture = ({
       event: GestureStateChangeEvent<TapGestureHandlerEventPayload>,
       success: boolean
     ) => {
-      if (onPressOut && event.state !== 3) {
-        onPressOut(event, success);
+      if (event.state !== 3) {
+        if (onPressOut) {
+          onPressOut(event, success);
+        }
+      } else if (onCancel) {
+        onCancel();
       }
     },
-    [onPressOut]
+    [onPressOut, onCancel]
   );
 
   const pressCallback = useCallback(
@@ -65,11 +70,15 @@ const PressableGesture = ({
       event: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>,
       success: boolean
     ) => {
-      if (onPressOut && longPressActivated.current) {
-        onPressOut(event, success);
+      if (longPressActivated.current) {
+        if (onPressOut) {
+          onPressOut(event, success);
+        }
+      } else if (onCancel) {
+        onCancel();
       }
     },
-    [onPressOut]
+    [onPressOut, onCancel]
   );
 
   const longPressCallback = useCallback(
@@ -83,6 +92,7 @@ const PressableGesture = ({
   );
 
   const pressGesture = Gesture.Tap()
+    .maxDuration(onLongPress ? 290 : 30_000)
     .numberOfTaps(1)
     .onStart(pressCallback)
     .onBegin(pressInCallback)
@@ -91,6 +101,7 @@ const PressableGesture = ({
     .hitSlop(hitSlop ? hitSlop : {});
 
   const longPressGesture = Gesture.LongPress()
+    .minDuration(300)
     .onStart(longPressCallback)
     .onBegin(longPressInCallback)
     .onFinalize(longPressOutCallback)

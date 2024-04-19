@@ -1,20 +1,22 @@
 import { useNetInfo } from "@react-native-community/netinfo";
-import { Video as ExpoVideo, ResizeMode } from "expo-av";
+import {
+  Video as ExpoVideo,
+  ResizeMode,
+  VideoReadyForDisplayEvent,
+} from "expo-av";
 import {
   forwardRef,
-  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
 } from "react";
-import { ViewProps } from "react-native";
-import { backgroundStyle, layoutStyle } from "../styles";
+import { StyleSheet, ViewProps } from "react-native";
 import Photo from "./Photo";
 import { useIsFocused } from "../hooks/utility.hooks";
-import { shallowEqual } from "react-redux";
 import { COLOR_1, COLOR_4 } from "../constants";
+import Animated from "react-native-reanimated";
 
 type VideoProps = {
   uri: string;
@@ -30,6 +32,7 @@ type VideoProps = {
   autoPlayOnFocus?: boolean;
   muted?: boolean;
   paused?: boolean;
+  onReady?: (duration: number) => void;
 } & ViewProps;
 
 type VideoRefParams = {
@@ -53,6 +56,7 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
       repeat,
       autoPlayOnFocus,
       muted,
+      onReady,
       ...restProps
     },
     ref
@@ -87,7 +91,10 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
       try {
         setError(null);
         await videoRef.current?.loadAsync({ uri }, { shouldPlay: false });
+        console.log("video loaded");
       } catch (error) {
+        console.error("failed to load video");
+        console.error(error);
         setError(error);
       }
     }, []);
@@ -96,7 +103,15 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
       setError(null);
       setVideoReady(false);
       if (videoRef.current) {
-        await videoRef.current.unloadAsync();
+        videoRef.current
+          .unloadAsync()
+          .then(() => {
+            console.log("video unloaded");
+          })
+          .catch((reason) => {
+            console.error("failed to unload video");
+            console.error(reason);
+          });
       }
     }, []);
 
@@ -113,10 +128,6 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
 
     //use to play or pause the video in case the focused or autoplay prop changes
     useEffect(() => {
-      if (focused && isVideoReady && autoPlayOnFocus !== false) {
-        videoRef.current?.playAsync();
-      }
-
       return () => {
         if (focused && isVideoReady && autoPlayOnFocus !== false) {
           videoRef.current?.stopAsync();
@@ -135,9 +146,15 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
       };
     }, [uri, error, isInternetReachable, isRouteFocused]);
 
-    const videoReadyCallback = useCallback(() => {
-      setVideoReady(true);
-    }, []);
+    const videoReadyCallback = useCallback(
+      ({ status }: VideoReadyForDisplayEvent) => {
+        setVideoReady(true);
+        if (onReady && status && status.isLoaded && status.durationMillis) {
+          onReady(status.durationMillis);
+        }
+      },
+      [onReady]
+    );
 
     const errorCallback = useCallback(
       (error: string) => {
@@ -156,22 +173,32 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
         ? COLOR_1
         : COLOR_4;
     return (
-      <ExpoVideo
-        ref={videoRef}
-        isMuted={muted}
-        resizeMode={contained ? ResizeMode.CONTAIN : ResizeMode.COVER}
-        {...restProps}
-        onReadyForDisplay={videoReadyCallback}
-        onError={errorCallback}
-        style={[
-          { backgroundColor: calculatedBackgroundColor },
-          style ? style : layoutStyle.fill,
-        ]}
-        isLooping={repeat}
-        shouldPlay={!paused}
+      <Animated.View
+        style={[{ backgroundColor: calculatedBackgroundColor }, style]}
       >
-        {poster && <Photo uri={poster.uri} showLoadingRing />}
-      </ExpoVideo>
+        <ExpoVideo
+          ref={videoRef}
+          isMuted={muted}
+          resizeMode={contained ? ResizeMode.CONTAIN : ResizeMode.COVER}
+          {...restProps}
+          onReadyForDisplay={videoReadyCallback}
+          onError={errorCallback}
+          style={StyleSheet.absoluteFill}
+          isLooping={repeat}
+          shouldPlay={
+            !paused && autoPlayOnFocus !== false && focused && isVideoReady
+          }
+        />
+        {(!focused || !isVideoReady) && poster && (
+          <Photo
+            style={StyleSheet.absoluteFill}
+            uri={poster.uri}
+            placeholder={poster.placeholder}
+            showLoadingRing
+          />
+        )}
+        {children}
+      </Animated.View>
     );
   }
 );

@@ -1,5 +1,6 @@
 import { Dimensions, PixelRatio, StyleSheet } from "react-native";
 import { Layout } from "react-native-reanimated";
+import { generateAccount, generateAccounts } from "./mocks/accounts";
 
 export const { width: windowWidth, height: windowHeight } =
   Dimensions.get("window");
@@ -69,7 +70,11 @@ export const SIZE_54 = sizeRelativeToWidth(15);
 
 export const SIZE_60 = sizeRelativeToWidth(16.66);
 
-export const SIZE_70 = sizeRelativeToWidth(20);
+export const SIZE_70 = sizeRelativeToWidth(19.44);
+
+export const SIZE_72 = sizeRelativeToWidth(20);
+
+export const SIZE_84 = sizeRelativeToWidth(23.33);
 
 export const SIZE_90 = sizeRelativeToWidth(25);
 
@@ -111,6 +116,7 @@ export const OCEAN_BLUE = "#3F71F2";
 
 //grey color shades
 export const DOVE_GREY = "#F2F2F2";
+export const GREY_1 = "#606060";
 
 //red color shades
 export const VERMILION_RED = "#E34234";
@@ -137,3 +143,28 @@ export const LINE_WIDTH = StyleSheet.hairlineWidth;
 
 export const TEXT_HIGHLIGHT_FILTER =
   /(#\w+\.?_*)|(@\w\w+\.?_*)|(https?:\/\/[^\s]+)/g;
+
+export const HASHTAG_IDENTIFIER_EXPRESSION = /#[a-zA-Z0-9][a-zA-Z0-9_\.]*/g;
+
+export const MENTION_IDENTIFIER_EXPRESSION = /@[a-zA-Z][a-zA-Z0-9_\.]{2,}/g;
+
+export const HASTAG_AND_MENTION_IDENTIFIER_EXPRESSION =
+  /(#[a-zA-Z0-9][a-zA-Z0-9_\.]*)|(@[a-zA-Z][a-zA-Z0-9_\.]{2,})/g;
+
+export const COMMENT_REPORT_INFO = `Tell us why are you reporting this comment so we can take appropriate actions for it. select one of the following reasons`;
+
+export const COMMENT_REPORT_REASONS = [
+  "Sexual content",
+  "Violent or repulsive content",
+  "Hateful or abusive content",
+  "harasment or bullying",
+  "Harmful or dangerous content",
+  "Misinformation",
+  "Child abuse",
+  "Promotes terrorism",
+  "Spam or misleading",
+];
+
+export const CLIENT_ACCOUNT = generateAccount();
+
+export const SUGGESTED_ACCOUNTS = generateAccounts(40, ["fullname"]);

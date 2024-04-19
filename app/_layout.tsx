@@ -13,6 +13,7 @@ import { backgroundStyle, layoutStyle } from "../styles";
 import { initClientInfo } from "../store/client/client.slice";
 import { LogBox } from "react-native";
 import { useDarkScreenFocused } from "../hooks/utility.hooks";
+import { CLIENT_ACCOUNT } from "../constants";
 
 LogBox.ignoreLogs(["The `redirect` prop"]);
 
@@ -55,7 +56,7 @@ export default function AppInit() {
   }, [fontsLoaded, fontError]);
 
   useEffect(() => {
-    appDataStore.dispatch(initClientInfo(generateAccountObject()));
+    appDataStore.dispatch(initClientInfo(CLIENT_ACCOUNT));
   }, []);
 
   if (!fontsLoaded && !fontError) {

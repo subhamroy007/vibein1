@@ -1,40 +1,20 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
 
-import { AccountAdapterParams } from "../../types/store.types";
 import {
-  InboxChatInfoParams,
-  InboxDirectChatInfoParams,
+  PaginatedDataFetchSelectorParams,
+  SendSectionItemSelectorParams,
+  SendSectionSelectorParams,
 } from "../../types/selector.types";
-import { selectChatById } from "../inbox/chat.adapter";
-import { selectAccountParams } from "../account/account.selectors";
-import { SearchParams } from "../../types/utility.types";
-
-export const selectInboxChatInfo = createSelector(
-  [(state: RootState) => state, (_: RootState, chatId: string) => chatId],
-  (state, chatId) => {
-    const targetChatAdapterParams = selectChatById(state.chat.chats, chatId);
-
-    if (!targetChatAdapterParams) return undefined;
-
-    const receipientAccount = selectAccountParams(
-      state,
-      targetChatAdapterParams.receipient.username,
-      ["fullname"]
-    )!;
-
-    return {
-      ...receipientAccount,
-      canSendMessage:
-        targetChatAdapterParams.receipient.isMember ||
-        !targetChatAdapterParams.receipient.isMessageRequestRestricted,
-    } as InboxDirectChatInfoParams;
-  }
-);
+import {
+  AccountParams,
+  ItemKey,
+  SearchParams,
+} from "../../types/utility.types";
 
 export const selectClientAccountParams = createSelector(
   [(state: RootState) => state],
-  (state): AccountAdapterParams | undefined => {
+  (state): AccountParams | undefined => {
     const accountParams = state.client.loggedInAccount;
 
     if (!accountParams) {
@@ -49,6 +29,29 @@ export const selectHomeFeedParams = createSelector(
   [(state: RootState) => state.client.home],
   (homeFeed) => {
     return homeFeed;
+  }
+);
+
+export const selectHomeFeedMemoryAccountsSection = createSelector(
+  [(state: RootState) => state.client.home.memoryAccounts],
+  (memoryAccounts): PaginatedDataFetchSelectorParams<ItemKey> => {
+    const accouts: ItemKey[] = [];
+
+    if (memoryAccounts.data) {
+      accouts.push(
+        ...memoryAccounts.data.items.map<ItemKey>((item) => ({ key: item.key }))
+      );
+    }
+
+    return {
+      data: memoryAccounts.data
+        ? { hasEndReached: memoryAccounts.data.hasEndReached, items: accouts }
+        : null,
+      error: memoryAccounts.error ? JSON.stringify(memoryAccounts.error) : null,
+      isExpired: memoryAccounts.expiresAt > Date.now(),
+      isLoading: memoryAccounts.isLoading,
+      isPageLoading: memoryAccounts.isPageLoading,
+    };
   }
 );
 
@@ -77,34 +80,6 @@ export const selectDarkScreenFocused = createSelector(
   [(state: RootState) => state.client.isDarkScreenFocused],
   (value) => {
     return value;
-  }
-);
-
-export const selectInboxFilteredChats = createSelector(
-  [
-    (state: RootState) => state,
-    (_: RootState, searchPhase: string) => searchPhase,
-  ],
-  (state, searchPhase) => {
-    const allChats = state.client.inbox.chats.map<InboxChatInfoParams>(
-      (chat) => {
-        const targetChat = selectInboxChatInfo(state, chat.chatId)!;
-        return { type: "direct", ...targetChat };
-      }
-    );
-    if (searchPhase === "") return allChats;
-    return allChats.filter((chat) => {
-      if (chat.type === "direct") {
-        if (!chat.canSendMessage) {
-          return false;
-        }
-        return (
-          chat.username.toLowerCase().includes(searchPhase.toLowerCase()) ||
-          chat.fullname.toLowerCase().includes(searchPhase.toLowerCase())
-        );
-      }
-      return false;
-    });
   }
 );
 
@@ -173,5 +148,96 @@ export const selectPostSearchResult = createSelector(
   [(state: RootState) => state.client.searchSection],
   (state) => {
     return state.fullSearch?.postSearchResults;
+  }
+);
+
+export const selectAccountAndHashtagSearchSection = createSelector(
+  [
+    (state: RootState) => state.client.accountAndHashtagSearchSection,
+    (_: RootState, searchPhase: string) => searchPhase,
+  ],
+  (state, searchPhase) => {
+    let items: SearchParams[] | undefined = undefined;
+    if (searchPhase.startsWith("@")) {
+      const accounts = state.data.accountSection[searchPhase];
+      if (accounts) {
+        items = accounts.map<SearchParams>((account) => ({
+          type: "account",
+          ...account,
+        }));
+      }
+    } else {
+      const hashtags = state.data.hashtagSection[searchPhase];
+      if (hashtags) {
+        items = hashtags.map<SearchParams>((hashtag) => ({
+          type: "hashtag",
+          ...hashtag,
+        }));
+      }
+    }
+
+    return {
+      isLoading: state.isLoading,
+      error: state.error,
+      items,
+    };
+  }
+);
+
+export const selectSendSection = createSelector(
+  [
+    (state: RootState) => state.client,
+    (_: RootState, searchPhase: string | null) => searchPhase,
+  ],
+  (state, searchPhase): SendSectionSelectorParams => {
+    const searchedAccounts = searchPhase
+      ? state.sendSectionSearchResult.data[searchPhase]
+      : undefined;
+
+    let filteredSuggestedAccounts: AccountParams[] | undefined = undefined;
+    if (state.suggestedAccounts) {
+      if (searchPhase) {
+        filteredSuggestedAccounts = state.suggestedAccounts
+          .filter((account) => account.username.startsWith(searchPhase))
+          .slice(0, 20);
+      } else {
+        filteredSuggestedAccounts = state.suggestedAccounts.slice(0, 20);
+      }
+    }
+
+    const items: SendSectionItemSelectorParams[] = [];
+    if (filteredSuggestedAccounts) {
+      items.push(
+        ...filteredSuggestedAccounts.map<SendSectionItemSelectorParams>(
+          (account) => ({
+            type: "one-to-one",
+            id: account.id,
+            name: account.fullname!,
+            secondaryText: account.username,
+            pictureUri: account.profilePictureUri,
+          })
+        )
+      );
+    }
+    if (searchedAccounts) {
+      items.push(
+        ...searchedAccounts.map<SendSectionItemSelectorParams>((account) => ({
+          type: "one-to-one",
+          id: account.id,
+          name: account.fullname!,
+          secondaryText: account.username,
+          pictureUri: account.profilePictureUri,
+        }))
+      );
+    }
+
+    return {
+      isLoading: searchPhase ? state.sendSectionSearchResult.isLoading : false,
+      isError: searchPhase
+        ? state.sendSectionSearchResult.error || false
+        : false,
+      hasSearchResult: searchPhase ? (searchedAccounts ? true : false) : true,
+      items,
+    };
   }
 );

@@ -1,13 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import { borderStyle, layoutStyle } from "../styles";
-import { SIZE_90 } from "../constants";
+import { SIZE_84, SIZE_90 } from "../constants";
 
 export type RingProps = {
   size?: number;
 };
 
 export default function Ring({ size }: RingProps) {
-  const ringSize = size ? size : SIZE_90;
+  const ringSize = size ? size : SIZE_84;
 
   return (
     <View

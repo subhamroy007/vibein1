@@ -43,7 +43,7 @@ export default function PostPreview({
     return null;
   }
 
-  const { createdBy, isLiked, ...restProps } = postParams;
+  const { author, isLiked, ...restProps } = postParams;
 
   return (
     <Pressable
@@ -61,9 +61,9 @@ export default function PostPreview({
         exiting={ZoomOut.duration(300)}
       >
         <View style={styles.header}>
-          <Avatar url={createdBy.profilePictureUri} size={SIZE_30} />
+          <Avatar url={author.profilePictureUri} size={SIZE_30} />
           <AppText style={marginStyle.margin_left_6} size={SIZE_12}>
-            {createdBy.username}
+            {author.username}
           </AppText>
         </View>
         <Pressable style={styles.body} onPress={onPress}>

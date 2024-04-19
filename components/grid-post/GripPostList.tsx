@@ -11,7 +11,7 @@ import { layoutStyle } from "../../styles";
 import { GridPost } from "./GridPost";
 import { GridPostListProps } from "../../types/component.types";
 import GridPlaceHolder from "../utility-components/GridPlaceHolder";
-import DefaultPlaceHolder from "../utility-components/DefaultPlaceHolder";
+import DefaultPlaceHolder from "../utility-components/DefaultFallback";
 import Animated from "react-native-reanimated";
 import DefaultErrorFallback from "../utility-components/DefaultErrorFallback";
 import { useLayout } from "@react-native-community/hooks";

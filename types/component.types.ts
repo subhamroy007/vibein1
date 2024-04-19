@@ -18,6 +18,7 @@ import { AnimateProps, SharedValue } from "react-native-reanimated";
 import { ReactNode } from "react";
 import { HitSlop } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 import { PostItemIdentifier } from "./store.types";
+import { ItemKey } from "./utility.types";
 
 export type IconName =
   | "home-outline"
@@ -107,13 +108,18 @@ export type IconName =
   | "notification-solid"
   | "notification-off-outline"
   | "notification-off-solid"
-  | "share";
+  | "share"
+  | "block"
+  | "location-outline"
+  | "location-solid"
+  | "circle-outline"
+  | "cicle-solid";
 
 export type MultilineTextProps = {
   text: string;
   collapsed?: boolean;
   hightlightColor?: "primary" | "secondary" | string;
-  onPress: () => void;
+  onPress?: () => void;
 } & TextProps;
 
 export type GeneralTextProps = {
@@ -145,6 +151,7 @@ export type PressableGestureProps = {
   onLongPress?: (
     event: GestureStateChangeEvent<TapGestureHandlerEventPayload>
   ) => void;
+  onCancel?: () => void;
   enabled?: boolean;
   children?: ReactNode;
   hitSlop?: HitSlop;
@@ -155,7 +162,8 @@ export type PressableGeneralProps = {
   animateOnLongPress?: boolean;
 } & PressableGestureProps;
 
-export type PressableProps = AnimateProps<ViewProps> & PressableGeneralProps;
+export type PressableProps = AnimateProps<ViewProps> &
+  PressableGeneralProps & { useUnderlay?: boolean };
 
 export type PressableIconProps = PressableGeneralProps &
   AnimateProps<IconProps>;
@@ -196,10 +204,12 @@ export type CapsuleProps = {
 
 export type DataFetchListGeneralProps<T> = {
   isLoading?: boolean;
+  isPageLoading?: boolean;
   isError?: boolean;
   hasEndReached?: boolean;
-  onFetch?: () => void;
-  onRefresh?: () => void;
+  refreshable?: boolean;
+  onEndReach?: () => void;
+  onInit?: () => void;
   data: T[] | null | undefined;
 };
 
@@ -214,8 +224,7 @@ export type SwipablePostListProps = {
   focused: boolean;
 } & DataFetchListGeneralProps<PostItemIdentifier>;
 
-export type ScrollablePostListProps =
-  DataFetchListGeneralProps<PostItemIdentifier>;
+export type ScrollablePostListProps = DataFetchListGeneralProps<ItemKey>;
 
 export type IconProps = TxtProps & GeneralIconProps;
 

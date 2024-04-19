@@ -9,11 +9,16 @@ import {
   fetchSearchedHashtags,
   fetchSearchedPosts,
   fetchHomeFeedPosts,
+  fetchAccountMentions,
+  fetchHashtags,
+  fetchSendSectionAccounts,
+  fetchHomeFeedMemoryAccounts,
 } from "./client.thunk";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
   ChatItemIdentifierParams,
   ClientStoreParams,
+  MemoryAccountStoreParams,
   PostFeedItemIdentfierParams,
   PostItemIdentifier,
 } from "../../types/store.types";
@@ -23,11 +28,26 @@ import {
   OutDatedResponseParams2,
 } from "../../types/response.types";
 import { SEARCH_HISTORY } from "../../mocks/search";
+import { ItemKey } from "../../types/utility.types";
+import { SUGGESTED_ACCOUNTS } from "../../constants";
 
 const initialState: ClientStoreParams = {
   isDarkScreenFocused: false,
   isMediaMuted: true,
   loggedInAccount: null,
+  accountAndHashtagSearchSection: {
+    error: null,
+    isLoading: false,
+    data: { accountSection: {}, hashtagSection: {} },
+    lastSearchedPhase: null,
+  },
+  sendSectionSearchResult: {
+    error: null,
+    isLoading: false,
+    data: {},
+    lastSearchPhase: null,
+  },
+  suggestedAccounts: SUGGESTED_ACCOUNTS,
   theme: "system",
   notification: { msg: "", dispatchedAt: -1 },
   explore: {
@@ -40,10 +60,22 @@ const initialState: ClientStoreParams = {
     post_suggestions: {},
   },
   home: {
-    data: null,
-    error: null,
-    failedToRefresh: false,
-    isLoading: false,
+    memoryAccounts: {
+      createdAt: -1,
+      data: null,
+      error: null,
+      expiresAt: -1,
+      isLoading: false,
+      isPageLoading: false,
+    },
+    posts: {
+      createdAt: -1,
+      data: null,
+      error: null,
+      expiresAt: -1,
+      isLoading: false,
+      isPageLoading: false,
+    },
   },
   foryou: {
     moments: {
@@ -60,10 +92,9 @@ const initialState: ClientStoreParams = {
     },
   },
   inbox: {
-    state: "idle",
-    lastUpdatedAt: Date.now(),
-    chats: [],
-    nextPageInfo: { hasEndReached: false },
+    isLoading: false,
+    data: null,
+    error: null,
   },
   searchSection: {
     quickSearch: { error: null, data: {}, isLoading: false },
@@ -82,19 +113,27 @@ const clientSlice = createSlice({
     toggleMediaMuted: (state) => {
       state.isMediaMuted = !state.isMediaMuted;
     },
+    resetAccountAndHashtagSearchSection: (state) => {
+      state.accountAndHashtagSearchSection.data = {
+        accountSection: {},
+        hashtagSection: {},
+      };
+      state.accountAndHashtagSearchSection.error = null;
+      state.accountAndHashtagSearchSection.isLoading = false;
+      state.accountAndHashtagSearchSection.lastSearchedPhase = null;
+    },
+    resetSendSectionSearchResult: (state) => {
+      state.sendSectionSearchResult.data = {};
+      state.sendSectionSearchResult.error = null;
+      state.sendSectionSearchResult.isLoading = false;
+      state.sendSectionSearchResult.lastSearchPhase = null;
+    },
     initHomeFeed(
       state,
       {
         payload: { posts },
       }: PayloadAction<{ posts: OutDatedResponseParams2[] }>
-    ) {
-      state.home = {
-        data: null,
-        error: null,
-        failedToRefresh: false,
-        isLoading: false,
-      };
-    },
+    ) {},
     initPostSuggestionRoute(
       state,
       { payload }: PayloadAction<PostItemIdentifier>
@@ -109,10 +148,11 @@ const clientSlice = createSlice({
       };
     },
     initInbox: (state, { payload }: PayloadAction<ChatResponseParams[]>) => {
-      state.inbox.chats = payload.map((chat) => ({
-        chatId: chat.id,
-        type: "direct",
-      }));
+      state.inbox.data = {
+        items: payload.map<ItemKey>((item) => ({ key: item.id })),
+        endCursor: "",
+        hasEndReached: true,
+      };
     },
     initFullSearch(state, action: PayloadAction<string>) {
       state.searchSection.fullSearch = {
@@ -141,36 +181,6 @@ const clientSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(
-      fetchHomeFeedPosts.fulfilled,
-      (
-        state,
-        {
-          payload: { data, endCursor, hasEndReached },
-          meta: {
-            arg: { refresh },
-          },
-        }
-      ) => {
-        const homeFeed = state.home;
-        homeFeed.isLoading = false;
-        const newItems = data.map<PostItemIdentifier>((post) => ({
-          id: post.id,
-          type: post.type,
-        }));
-        if (refresh || !homeFeed.data) {
-          homeFeed.data = {
-            endCursor,
-            hasEndReached,
-            items: newItems,
-          };
-        } else {
-          homeFeed.data.endCursor = endCursor;
-          homeFeed.data.hasEndReached = hasEndReached;
-          homeFeed.data.items = [...homeFeed.data.items, ...newItems];
-        }
-      }
-    );
-    builder.addCase(
       fetchHomeFeedPosts.pending,
       (
         state,
@@ -180,10 +190,13 @@ const clientSlice = createSlice({
           },
         }
       ) => {
-        const homeFeed = state.home;
-        homeFeed.isLoading = true;
-        homeFeed.error = null;
-        homeFeed.failedToRefresh = false;
+        const homeFeedPost = state.home.posts;
+        homeFeedPost.error = null;
+        if (refresh) {
+          homeFeedPost.isLoading = true;
+        } else {
+          homeFeedPost.isPageLoading = true;
+        }
       }
     );
     builder.addCase(
@@ -197,11 +210,121 @@ const clientSlice = createSlice({
           payload,
         }
       ) => {
-        const homeFeed = state.home;
-        homeFeed.error = payload;
-        homeFeed.isLoading = false;
+        const homeFeedPost = state.home.posts;
+        homeFeedPost.error = payload;
         if (refresh) {
-          homeFeed.failedToRefresh = true;
+          homeFeedPost.isLoading = false;
+        } else {
+          homeFeedPost.isPageLoading = false;
+        }
+      }
+    );
+    builder.addCase(
+      fetchHomeFeedPosts.fulfilled,
+      (
+        state,
+        {
+          payload: { items, endCursor, hasEndReached },
+          meta: {
+            arg: { refresh },
+          },
+        }
+      ) => {
+        const homeFeedPost = state.home.posts;
+        if (refresh) {
+          homeFeedPost.isLoading = false;
+        } else {
+          homeFeedPost.isPageLoading = false;
+        }
+        const newItems = items.map<ItemKey>((item) => ({
+          key: item.id,
+        }));
+        if (refresh || !homeFeedPost.data) {
+          homeFeedPost.data = {
+            endCursor,
+            hasEndReached,
+            items: newItems,
+          };
+        } else {
+          homeFeedPost.data.endCursor = endCursor;
+          homeFeedPost.data.hasEndReached = hasEndReached;
+          homeFeedPost.data.items = [...homeFeedPost.data.items, ...newItems];
+        }
+      }
+    );
+    builder.addCase(
+      fetchHomeFeedMemoryAccounts.pending,
+      (
+        state,
+        {
+          meta: {
+            arg: { refresh },
+          },
+        }
+      ) => {
+        const memoryAccounts = state.home.memoryAccounts;
+        memoryAccounts.error = null;
+        if (refresh) {
+          memoryAccounts.isLoading = true;
+        } else {
+          memoryAccounts.isPageLoading = true;
+        }
+      }
+    );
+    builder.addCase(
+      fetchHomeFeedMemoryAccounts.rejected,
+      (
+        state,
+        {
+          meta: {
+            arg: { refresh },
+          },
+          payload,
+        }
+      ) => {
+        const memoryAccounts = state.home.memoryAccounts;
+        memoryAccounts.error = payload;
+        if (refresh) {
+          memoryAccounts.isLoading = false;
+        } else {
+          memoryAccounts.isPageLoading = false;
+        }
+      }
+    );
+    builder.addCase(
+      fetchHomeFeedMemoryAccounts.fulfilled,
+      (
+        state,
+        {
+          payload: { items, endCursor, hasEndReached },
+          meta: {
+            arg: { refresh },
+          },
+        }
+      ) => {
+        const memoryAccounts = state.home.memoryAccounts;
+        if (refresh) {
+          memoryAccounts.isLoading = false;
+        } else {
+          memoryAccounts.isPageLoading = false;
+        }
+        const newItems = items.map<MemoryAccountStoreParams>((item) => ({
+          key: item.account.username,
+          poster: item.poster,
+        }));
+        if (refresh || !memoryAccounts.data) {
+          memoryAccounts.data = {
+            endCursor,
+            hasEndReached,
+            items: newItems,
+          };
+        } else {
+          memoryAccounts.data.endCursor = endCursor;
+          memoryAccounts.data.hasEndReached = hasEndReached;
+          memoryAccounts.data.items = [
+            ...memoryAccounts.data.items,
+            ...newItems,
+          ];
         }
       }
     );
@@ -458,37 +581,6 @@ const clientSlice = createSlice({
         }
       }
     );
-    builder.addCase(
-      getInboxChatsThunk.fulfilled,
-      (
-        state,
-        {
-          payload: { data, nextPageInfo },
-          meta: {
-            arg: { refresh },
-          },
-        }
-      ) => {
-        state.inbox.state = "success";
-        const newChats = data.map<ChatItemIdentifierParams>((chat) => ({
-          type: "direct",
-          chatId: chat.id,
-        }));
-        if (refresh || !state.inbox.chats.length) {
-          state.inbox.lastUpdatedAt = Date.now();
-          state.inbox.chats = newChats;
-        } else {
-          state.inbox.chats = [...state.inbox.chats, ...newChats];
-        }
-        state.inbox.nextPageInfo = nextPageInfo;
-      }
-    );
-    builder.addCase(getInboxChatsThunk.pending, (state) => {
-      state.inbox.state = "loading";
-    });
-    builder.addCase(getInboxChatsThunk.rejected, (state) => {
-      state.inbox.state = "failed";
-    });
     builder.addCase(fetchQuickSearchResult.pending, (state, action) => {
       state.searchSection.quickSearch.isLoading = true;
       state.searchSection.quickSearch.error = null;
@@ -594,6 +686,163 @@ const clientSlice = createSlice({
         fullSearch.postSearchResults.isLoading = false;
       }
     });
+    builder.addCase(
+      fetchAccountMentions.pending,
+      (
+        state,
+        {
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        state.accountAndHashtagSearchSection.isLoading = true;
+        state.accountAndHashtagSearchSection.error = null;
+        state.accountAndHashtagSearchSection.lastSearchedPhase = searchPhase;
+      }
+    );
+    builder.addCase(
+      fetchAccountMentions.rejected,
+      (
+        state,
+        {
+          payload,
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        if (
+          state.accountAndHashtagSearchSection.lastSearchedPhase === searchPhase
+        ) {
+          state.accountAndHashtagSearchSection.isLoading = false;
+          state.accountAndHashtagSearchSection.error = payload;
+        }
+      }
+    );
+    builder.addCase(
+      fetchAccountMentions.fulfilled,
+      (
+        state,
+        {
+          payload,
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        state.accountAndHashtagSearchSection.data.accountSection[searchPhase] =
+          payload.accounts;
+        if (
+          state.accountAndHashtagSearchSection.lastSearchedPhase === searchPhase
+        ) {
+          state.accountAndHashtagSearchSection.isLoading = false;
+        }
+      }
+    );
+    builder.addCase(
+      fetchHashtags.pending,
+      (
+        state,
+        {
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        state.accountAndHashtagSearchSection.isLoading = true;
+        state.accountAndHashtagSearchSection.error = null;
+        state.accountAndHashtagSearchSection.lastSearchedPhase = searchPhase;
+      }
+    );
+    builder.addCase(
+      fetchHashtags.rejected,
+      (
+        state,
+        {
+          payload,
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        if (
+          state.accountAndHashtagSearchSection.lastSearchedPhase === searchPhase
+        ) {
+          state.accountAndHashtagSearchSection.isLoading = false;
+          state.accountAndHashtagSearchSection.error = payload;
+        }
+      }
+    );
+    builder.addCase(
+      fetchHashtags.fulfilled,
+      (
+        state,
+        {
+          payload,
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        state.accountAndHashtagSearchSection.data.hashtagSection[searchPhase] =
+          payload.hashtags;
+        if (
+          state.accountAndHashtagSearchSection.lastSearchedPhase === searchPhase
+        ) {
+          state.accountAndHashtagSearchSection.isLoading = false;
+        }
+      }
+    );
+    builder.addCase(
+      fetchSendSectionAccounts.pending,
+      (
+        state,
+        {
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        state.sendSectionSearchResult.isLoading = true;
+        state.sendSectionSearchResult.error = null;
+        state.sendSectionSearchResult.lastSearchPhase = searchPhase;
+      }
+    );
+    builder.addCase(
+      fetchSendSectionAccounts.rejected,
+      (
+        state,
+        {
+          payload,
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        if (state.sendSectionSearchResult.lastSearchPhase === searchPhase) {
+          state.sendSectionSearchResult.isLoading = false;
+          state.sendSectionSearchResult.error = payload;
+        }
+      }
+    );
+    builder.addCase(
+      fetchSendSectionAccounts.fulfilled,
+      (
+        state,
+        {
+          payload,
+          meta: {
+            arg: { searchPhase },
+          },
+        }
+      ) => {
+        if (state.sendSectionSearchResult.lastSearchPhase === searchPhase) {
+          state.sendSectionSearchResult.isLoading = false;
+        }
+        state.sendSectionSearchResult.data[searchPhase] = payload.accounts;
+      }
+    );
   },
 });
 
@@ -612,5 +861,7 @@ export const {
     initFullSearch,
     resetFullSearch,
     toggleMediaMuted,
+    resetAccountAndHashtagSearchSection,
+    resetSendSectionSearchResult,
   },
 } = clientSlice;

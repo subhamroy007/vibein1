@@ -51,7 +51,7 @@ function addPostAccountsToStore(
 ) {
   const accounts: AccountAdapterParams[] = [];
   posts.forEach((post) => {
-    accounts.push(tranformToAccountAdapterParams(post.createdBy));
+    accounts.push(tranformToAccountAdapterParams(post.author));
     if (post.taggedAccounts) {
       post.taggedAccounts.forEach((taggedAccount) => {
         accounts.push(tranformToAccountAdapterParams(taggedAccount));

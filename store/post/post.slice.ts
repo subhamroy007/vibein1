@@ -5,7 +5,6 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import { getPostInitialState, upsertManyPost } from "./post.adapter";
-import { fetchComments, fetchSimilarPosts } from "./post.thunk";
 import { OutDatedResponseParams2 } from "../../types/response.types";
 import {
   OutdatedParam23,
@@ -27,7 +26,7 @@ import {
 /**
  * utlity function that takes a single argument of type OutDatedResponseParams2
  * and converts it to a type of OutdatedParam23
- * by changing all the other entities in the post (e.g createdBy, taggedAccounts)
+ * by changing all the other entities in the post (e.g author, taggedAccounts)
  * to its corresponding id references
  * @param post
  * @returns
@@ -37,7 +36,7 @@ function tranformToPostAdapterParams(
 ): OutdatedParam23 {
   return {
     ...post,
-    createdBy: post.createdBy.username,
+    author: post.author.username,
     taggedAccounts: post.taggedAccounts
       ? post.taggedAccounts.map((account) => account.username)
       : undefined,

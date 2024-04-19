@@ -1,4 +1,7 @@
+import { getRandom } from "../../mocks";
+import { generateAccount, generateAccounts } from "../../mocks/accounts";
 import { generateChatObjects } from "../../mocks/chat.mock";
+import { getPostPhotoPreviewUrl } from "../../mocks/data";
 import { generatePost, generatePostObjects } from "../../mocks/posts";
 import {
   generateAccountsSearch,
@@ -10,7 +13,10 @@ import {
   ChatPageResponseParams,
   HashtagSearchResponse,
   HomeFeedResponseParams,
+  MemoryAccountPaginatedResponse,
+  MemoryAccountResponseParams,
   PostPageResponse,
+  PostPaginatedResponse,
   PostScreenResponseParams,
   QuickSearchResponse,
 } from "../../types/response.types";
@@ -46,21 +52,59 @@ export const getInboxChatsThunk = createAppAsyncThunk<
 });
 
 /**
- * thunk that fetches the data of the home feed for the client
+ * sends request to fetch the home feed posts
  */
 export const fetchHomeFeedPosts = createAppAsyncThunk<
-  PostPageResponse,
+  PostPaginatedResponse,
   { refresh?: boolean }
->("client/homefeed", async (_, thunkApi) => {
-  const posts = generatePost(6);
+>("client/homefeed-posts", async (_, thunkApi) => {
+  const posts = generatePost(6, "photos");
 
-  const data: PostPageResponse = {
-    data: posts,
+  const data: PostPaginatedResponse = {
+    items: posts,
     endCursor: "",
     hasEndReached: false,
   };
   await delay(2_000);
   if (Math.random() > 0.7) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp: Date.now(),
+      }
+    );
+  }
+
+  return thunkApi.fulfillWithValue(data, {
+    statusCode: 200,
+    requestTimestamp: Date.now(),
+  });
+});
+
+/**
+ * sends request to fetch the home feed memory accounts
+ */
+export const fetchHomeFeedMemoryAccounts = createAppAsyncThunk<
+  MemoryAccountPaginatedResponse,
+  { refresh?: boolean }
+>("client/homefeed-memories", async (_, thunkApi) => {
+  const memoryAccounts: MemoryAccountResponseParams[] = [];
+
+  for (let i = 0; i < 10; i++) {
+    memoryAccounts.push({
+      poster: getPostPhotoPreviewUrl(getRandom(30, 1)),
+      account: generateAccount(["memory-info"]),
+    });
+  }
+
+  const data: MemoryAccountPaginatedResponse = {
+    items: memoryAccounts,
+    endCursor: "",
+    hasEndReached: Math.random() > 0.5,
+  };
+  await delay(2_000);
+  if (Math.random() > 1.7) {
     return thunkApi.rejectWithValue(
       { errorCode: 1000, message: "something went wrong" },
       {
@@ -293,3 +337,81 @@ export const fetchSearchedPosts = createAppAsyncThunk<PostPageResponse>(
     });
   }
 );
+
+export const fetchAccountMentions = createAppAsyncThunk<
+  AccountSearchResponse,
+  { searchPhase: string }
+>("client/account-mentions", async (_, thunkApi) => {
+  const accounts = generateAccounts(30, ["fullname"]);
+
+  const output: AccountSearchResponse = {
+    accounts,
+  };
+  await delay(3000);
+  if (Math.random() > 0.5) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp: Date.now(),
+      }
+    );
+  }
+
+  return thunkApi.fulfillWithValue(output, {
+    statusCode: 200,
+    requestTimestamp: Date.now(),
+  });
+});
+
+export const fetchHashtags = createAppAsyncThunk<
+  HashtagSearchResponse,
+  { searchPhase: string }
+>("client/hashtag", async (_, thunkApi) => {
+  const hashtags = generateHashtags(30);
+
+  const output: HashtagSearchResponse = {
+    hashtags,
+  };
+  await delay(3000);
+  if (Math.random() > 0.5) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp: Date.now(),
+      }
+    );
+  }
+
+  return thunkApi.fulfillWithValue(output, {
+    statusCode: 200,
+    requestTimestamp: Date.now(),
+  });
+});
+
+export const fetchSendSectionAccounts = createAppAsyncThunk<
+  AccountSearchResponse,
+  { searchPhase: string }
+>("client/send-section-accounts", async (_, thunkApi) => {
+  const accounts = generateAccounts(10, ["fullname"]);
+
+  const output: AccountSearchResponse = {
+    accounts,
+  };
+  await delay(1400);
+  if (Math.random() > 0.8 || thunkApi.signal.aborted) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp: Date.now(),
+      }
+    );
+  }
+
+  return thunkApi.fulfillWithValue(output, {
+    statusCode: 200,
+    requestTimestamp: Date.now(),
+  });
+});

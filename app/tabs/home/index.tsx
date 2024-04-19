@@ -9,18 +9,18 @@ import Avatar from "../../../components/Avatar";
 import Icon from "../../../components/Icon";
 import StackContainer from "../../../components/StackContainer";
 import ScrollablePostList from "../../../components/scrollable-post/ScrollablePostList";
+import MemoryAccountList from "../../../components/memory-section/MemoryAccountList";
 
 export default function Home() {
   const clientAccount = useAppSelector(selectClientAccountParams);
 
   const { fetchPosts, homeFeed, refresh } = useHomeFeed();
 
-  const clampedScrollOffset = useSharedValue(0);
-
   if (!clientAccount) {
     return null;
   }
 
+  const { memoryAccounts, posts } = homeFeed;
   return (
     <StackContainer>
       <Header
@@ -42,19 +42,16 @@ export default function Home() {
           </Pressable>
         }
       />
+      <MemoryAccountList data={memoryAccounts.data?.items} />
       <ScrollablePostList
-        data={homeFeed.data?.items}
-        isLoading={homeFeed.isLoading}
-        isError={
-          homeFeed.error
-            ? !homeFeed.failedToRefresh
-              ? true
-              : homeFeed.data === null
-            : false
-        }
-        onFetch={fetchPosts}
-        onRefresh={refresh}
-        hasEndReached={homeFeed.data?.hasEndReached}
+        data={posts.data?.items}
+        isLoading={posts.isLoading}
+        isError={posts.error}
+        isPageLoading={posts.isLoading}
+        refreshable
+        onEndReach={fetchPosts}
+        onInit={refresh}
+        hasEndReached={posts.data?.hasEndReached}
       />
     </StackContainer>
   );

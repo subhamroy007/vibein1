@@ -5,15 +5,13 @@ import {
   ViewabilityConfig,
 } from "react-native";
 import { useCallback, useState } from "react";
-import { PostItemIdentifier } from "../../types/store.types";
-import PhotoPost from "./PhotoPost";
-import MomentPost from "./MomentPost";
 import { useLayout } from "@react-native-community/hooks";
 import { ScrollablePostListProps } from "../../types/component.types";
 import { useDataFetchHook } from "../../hooks/utility.hooks";
 import Animated from "react-native-reanimated";
-import DefaultErrorFallback from "../utility-components/DefaultErrorFallback";
-import DefaultPlaceHolder from "../utility-components/DefaultPlaceHolder";
+import { ItemKey } from "../../types/utility.types";
+import ScrollablePost from "./ScrollablePost";
+import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
 
 const viewabilityConfig: ViewabilityConfig = {
   minimumViewTime: 150,
@@ -25,34 +23,30 @@ const ScrollablePostList = ({
   hasEndReached,
   isError,
   isLoading,
-  onFetch,
-  onRefresh,
+  isPageLoading,
+  refreshable,
+  onEndReach,
+  onInit,
 }: ScrollablePostListProps) => {
   const [focusedPostIndex, setFocusedPostIndex] = useState(0);
 
   const { endReachedCallback, refreshCallback, refreshing } = useDataFetchHook(
     data,
     isLoading,
-    onFetch,
-    onRefresh
+    isPageLoading,
+    onEndReach,
+    onInit
   );
 
   const { height, onLayout } = useLayout();
 
   const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<PostItemIdentifier>) => {
+    ({ item, index }: ListRenderItemInfo<ItemKey>) => {
       const preload = Math.abs(index - focusedPostIndex) <= 3;
-      if (item.type === "photo-post") {
-        return <PhotoPost id={item.id} preload={preload} />;
-      } else {
-        return (
-          <MomentPost
-            id={item.id}
-            focused={index === focusedPostIndex}
-            preload={preload}
-          />
-        );
-      }
+      const focused = index === focusedPostIndex;
+      return (
+        <ScrollablePost id={item.key} focused={focused} preload={preload} />
+      );
     },
     [focusedPostIndex]
   );
@@ -74,7 +68,6 @@ const ScrollablePostList = ({
   return (
     <Animated.FlatList
       data={data}
-      keyExtractor={(item) => item.id}
       renderItem={renderItem}
       onLayout={onLayout}
       showsVerticalScrollIndicator={false}
@@ -82,23 +75,28 @@ const ScrollablePostList = ({
       onEndReachedThreshold={0.2}
       onEndReached={hasEndReached !== false ? undefined : endReachedCallback}
       refreshControl={
-        onRefresh && (
+        onInit && refreshable ? (
           <RefreshControl refreshing={refreshing} onRefresh={refreshCallback} />
-        )
+        ) : undefined
       }
       ListEmptyComponent={
-        isError ? (
-          onFetch && <DefaultErrorFallback retry={onFetch} height={height} />
-        ) : (
-          <DefaultPlaceHolder height={height} isLoading={isLoading || false} />
+        onInit && (
+          <DefaultPlaceholder
+            isLoading={isLoading || false}
+            callback={onInit}
+            isError={isError || false}
+            height={height}
+          />
         )
       }
       ListFooterComponent={
-        hasEndReached !== false ? undefined : isError ? (
-          onFetch && <DefaultErrorFallback retry={onFetch} />
-        ) : (
-          <DefaultPlaceHolder isLoading={isLoading || false} />
-        )
+        hasEndReached === false ? (
+          <DefaultPlaceholder
+            isLoading={isLoading || false}
+            callback={endReachedCallback}
+            isError={isError || false}
+          />
+        ) : undefined
       }
       viewabilityConfig={viewabilityConfig}
       onViewableItemsChanged={viewableItemsChangedCallback}

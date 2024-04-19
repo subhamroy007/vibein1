@@ -12,7 +12,6 @@ import {
   AudioWithTitle,
   AudioWithUri,
   SearchParams,
-  AccountSearchParams,
   HashTagSearchParams,
 } from "./utility.types";
 import { HashtagAdapterParams, MessageAttachmentParams } from "./store.types";
@@ -76,7 +75,7 @@ export type ReplyResponseParams = ReplyTemplateParams<AccountResponseParams>;
  * represents a single comment object that is fetched from the server
  * along with other informations, a comment may or may not have some replies sent with it
  */
-export type CommentResponseParams = {
+export type Comment2 = {
   replies?: ReplyResponseParams[];
 } & CommentTemplateParams<AccountResponseParams>;
 
@@ -96,7 +95,7 @@ export type HomeFeedResponseParams = {
  * reprsents the data params of the intial request of a post comment section
  */
 export type CommentSectionResponseDataParams = {
-  comments: CommentResponseParams[];
+  comments: Comment2[];
 };
 
 export type CommentSectionResponseParams =
@@ -252,8 +251,64 @@ export type PostResponseParams =
   | ({ type: "photo-post" } & PhotoPostResponseParams)
   | ({ type: "moment-post" } & MomentPostResponseParams);
 
+export type CommentResponseParams = {
+  id: string;
+  postId: string;
+  repliedTo?: string;
+  text: string;
+  author: AccountParams;
+  createdAt: string;
+  noOfLikes: number;
+  isLiked: boolean;
+  noOfReplies: number;
+  pinned: boolean;
+};
+
+export type MemoryAccountResponseParams = {
+  poster: string;
+  account: AccountParams;
+};
+
+export type GeneralPaginatedResponse<T> = {
+  items: T[];
+  hasEndReached: boolean;
+  endCursor: string;
+};
+
+export type PostPaginatedResponse =
+  GeneralPaginatedResponse<PostResponseParams>;
+
+export type MemoryAccountPaginatedResponse =
+  GeneralPaginatedResponse<MemoryAccountResponseParams>;
+
 export type PostPageResponse = {
   data: PostResponseParams[];
+  hasEndReached: boolean;
+  endCursor: string;
+};
+
+export type AccountPageResponse = PageResponse<AccountParams>;
+
+export type PostLikeAuthor = { likedAt: string } & AccountParams;
+
+export type PageResponse<T> = {
+  items: T[];
+  hasEndReached: boolean;
+  endCursor: string;
+};
+
+export type PostLikeAuthorPageResponse = PageResponse<PostLikeAuthor>;
+
+export type PostLikeSectionResponseParams = {
+  engagementSummary?: {
+    noOfLikes: number;
+    noOfViews: number;
+  };
+  likes: PostLikeAuthorPageResponse;
+};
+
+export type CommentPageResponse = {
+  items: CommentResponseParams[];
   hasEndReached: boolean;
   endCursor: string;
 };
@@ -262,10 +317,46 @@ export type QuickSearchResponse = {
   result: SearchParams[];
 };
 
-export type AccountSearchResponse = {
-  accounts: AccountSearchParams[];
-};
-
 export type HashtagSearchResponse = {
   hashtags: HashTagSearchParams[];
+};
+
+export type AccountSearchResponse = {
+  accounts: AccountParams[];
+};
+
+//---------------------------------------memory related types----------------------------------------
+
+export type MemoryCaptionParams = {
+  text: string;
+  color: string;
+  style: string;
+  scale: number;
+  rotation: number;
+  position: [number, number];
+};
+
+export type MemoryContentParams =
+  | {
+      type: "photo";
+      uri: string;
+      previewUri: string;
+      blurhash: string;
+    }
+  | { type: "video"; uri: string; poster: { uri: string; blurhash: string } };
+
+export type MemoryResponseParams = {
+  id: string;
+  createdAt: string;
+  content: MemoryContentParams;
+  metadata: {
+    isLiked: boolean;
+    isSeen: boolean;
+  };
+  audio?: AudioWithTitle | null;
+};
+
+export type AccountMemoryFetchResponseParams = {
+  memories: MemoryResponseParams[];
+  account: AccountParams;
 };

@@ -41,7 +41,7 @@ export type PostTemplateCommonParams<T = string | AccountResponseParams> = {
   id: string;
   isPinned: boolean;
   createdAt: string;
-  createdBy: T;
+  author: T;
   isUpdated: boolean;
   caption?: string;
   taggedLocation?: {
@@ -79,7 +79,7 @@ export type ReplyTemplateParams<T = string | AccountResponseParams> = {
   id: string;
   content: string;
   createdAt: string;
-  createdBy: T;
+  author: T;
   noOfLikes: number;
   isLiked: boolean;
 };
@@ -106,7 +106,8 @@ export type AccountField =
   | "is-private"
   | "is-favourite"
   | "is-blocked"
-  | "bio";
+  | "bio"
+  | "memory-info";
 
 export type ChatType = "direct" | "group-solid";
 
@@ -218,6 +219,8 @@ export type AccountParams = {
   isFollowed?: boolean;
   isRequestedToFollow?: boolean;
   isFavourite?: boolean;
+  noOfAvailableMemories?: number;
+  noOfUnseenMemories?: number;
 };
 
 export type TextSearchParams = {
@@ -229,11 +232,74 @@ export type HashTagSearchParams = {
   noOfPosts: number;
 };
 
-export type AccountSearchParams = {
-  category: string;
-} & AccountParams;
-
 export type SearchParams =
   | ({ type: "text" } & TextSearchParams)
   | ({ type: "hashtag" } & HashTagSearchParams)
-  | ({ type: "account" } & AccountSearchParams);
+  | ({ type: "account" } & AccountParams);
+
+export type ItemKey = {
+  key: string;
+};
+
+export type SendSectionItemIdentifier = {
+  type: "group" | "one-to-one";
+  id: string;
+  name: string;
+};
+
+export type PostRelatedNotificationParams = {
+  category: "Post";
+  author: AccountParams;
+  postId: string;
+  posterUri: string;
+} & (
+  | {
+      notificationType:
+        | "post-mention"
+        | "post-tag"
+        | "post-like-tagged-account"
+        | "post-like";
+    }
+  | {
+      notificationType:
+        | "post-comment-upload"
+        | "post-comment-upload-tagged-account"
+        | "post-comment-mention"
+        | "post-comment-reply"
+        | "post-comment-like";
+      commentText: string;
+      commentId: string;
+    }
+);
+
+export type MemoryRelatedNotificationParams = {
+  category: "Memory";
+  author: AccountParams;
+  memoryId: string;
+  poster: string;
+} & (
+  | {
+      notificationType:
+        | "memory-like"
+        | "memory-sticker-interaction"
+        | "memory-mention"
+        | "memory-reupload"
+        | "memory-question";
+    }
+  | { notificationType: "memory-reply"; replyText: string }
+);
+
+export type AccountRelatedNotificationParams = {
+  category: "Account";
+  notificationType:
+    | "account-following"
+    | "account-follow-request"
+    | "account-follow-request-accept"
+    | "account-bio-mention";
+  author: AccountParams;
+};
+
+export type NotificationParams =
+  | PostRelatedNotificationParams
+  | MemoryRelatedNotificationParams
+  | AccountRelatedNotificationParams;

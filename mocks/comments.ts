@@ -1,5 +1,5 @@
 import { generateReplyObject, generateReplyObjects } from "./reply";
-import { CommentResponseParams } from "../types/response.types";
+import { Comment2 } from "../types/response.types";
 import { getDate, getRandom } from ".";
 
 const comment_contents = [
@@ -12,7 +12,7 @@ const comment_contents = [
   "check out my telegram channel",
 ];
 
-export const generateCommentObject = (): CommentResponseParams => {
+export const generateCommentObject = (): Comment2 => {
   const noOfReplies = Math.random() > 0.5 ? getRandom(100, 10) : 0;
 
   return {
@@ -29,7 +29,7 @@ export const generateCommentObject = (): CommentResponseParams => {
 };
 
 export const generateCommentObjects = (size: number) => {
-  const comments: CommentResponseParams[] = [];
+  const comments: Comment2[] = [];
   for (let i = 0; i < size; i++) {
     comments.push(generateCommentObject());
   }

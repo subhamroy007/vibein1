@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   selectAccountHomeRouteParams,
   selectAccountMomentRouteParams,
-  selectAccountParams,
   selectAccountPhotosRouteParams,
   selectAccountTagsRouteParams,
 } from "../store/account/account.selectors";
@@ -21,21 +20,9 @@ import {
   initAccountProfileRoute,
   removeAccountProfileRoute,
 } from "../store/account/account.slice";
-
-export function useAccountAdapterParams(
-  username?: string,
-  includeFields?: AccountField[]
-) {
-  const accountSelectotCallback = useCallback(
-    (state: RootState) =>
-      selectAccountParams(state, username ? username : "", includeFields),
-    [username, includeFields]
-  );
-
-  const accountParams = useAppSelector(accountSelectotCallback);
-
-  return accountParams;
-}
+import { AccountSelectorParams } from "../types/selector.types";
+import { selectAccountParams } from "../store/account-store/account.selectors";
+import { deepEqual } from "../utility";
 
 export function useAccountHomeRoute(username: string, routeId: string) {
   const dispatch = useAppDispatch();
@@ -124,4 +111,18 @@ export function useAccountProfileRouteInit(username: string) {
   }, [username]);
 
   return routeId;
+}
+
+export function useAccountSelector(
+  userId: string,
+  includeFields: AccountField[]
+): AccountSelectorParams | undefined {
+  const accountSelectorCallback = useCallback(
+    (state: RootState) => selectAccountParams(state, userId, includeFields),
+    [userId, includeFields]
+  );
+
+  const account = useAppSelector(accountSelectorCallback, deepEqual);
+
+  return account;
 }

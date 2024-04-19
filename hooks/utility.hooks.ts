@@ -3,6 +3,7 @@ import { ThunkState } from "../types/store.types";
 import * as FileSystem from "expo-file-system";
 import {
   PermissionsAndroid,
+  PixelRatio,
   Platform,
   StyleProp,
   ViewStyle,
@@ -39,7 +40,13 @@ import { COLOR_1, COLOR_4, LINE_WIDTH, SIZE_27, SIZE_36 } from "../constants";
 
 import { layoutStyle } from "../styles";
 import Animated, {
+  Extrapolate,
+  interpolate,
+  scrollTo,
+  useAnimatedRef,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withSequence,
   withTiming,
@@ -48,6 +55,7 @@ import {
   GestureStateChangeEvent,
   TapGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
+import { SwipeUpPortalRefParams } from "../components/portals/SwipeUpPortal";
 
 export function useDeviceLayout() {
   const insets = useSafeAreaInsets();
@@ -58,6 +66,7 @@ export function useDeviceLayout() {
     insets,
     width: frame.width,
     height: frame.height,
+    cappedHeight: frame.height - insets.top - insets.bottom,
   };
 }
 
@@ -545,7 +554,7 @@ export function usePressAnimation(
   const startAnimation = useCallback(() => {
     scale.value = 1;
     scale.value = withSequence(
-      withTiming(0.7, { duration: 150 }),
+      withTiming(0.8, { duration: 150 }),
       withTiming(1, { duration: 150 })
     );
   }, []);
@@ -590,23 +599,24 @@ export function usePressAnimation(
 export function useDataFetchHook(
   data?: any[] | null | undefined,
   isLoading?: boolean,
-  onFetch?: () => void,
-  onRefresh?: () => void
+  isPageLoading?: boolean,
+  onEndReach?: () => void,
+  onInit?: () => void
 ) {
   const [refreshing, setRefreshing] = useState(false);
 
   const endReachedCallback = useCallback(() => {
-    if (!isLoading && data && data.length > 0 && onFetch) {
-      onFetch();
+    if (!isLoading && !isPageLoading && data && data.length > 0 && onEndReach) {
+      onEndReach();
     }
-  }, [isLoading, data, onFetch]);
+  }, [isLoading, data, onEndReach]);
 
   const refreshCallback = useCallback(() => {
-    if (onRefresh && !isLoading) {
+    if (onInit && !isLoading && !isPageLoading) {
       setRefreshing(true);
-      onRefresh();
+      onInit();
     }
-  }, [onRefresh, isLoading]);
+  }, [onInit, isLoading]);
 
   useEffect(() => {
     if (!isLoading && refreshing) {
@@ -633,4 +643,118 @@ export function useAutoFetch(
       fetch();
     }
   }, [focused, isRouteFocused, fetch, data]);
+}
+
+export function usePortalAnimatedGesture(height: number) {
+  const portalRef = useRef<SwipeUpPortalRefParams>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+
+  const scrollOffset = useSharedValue(height);
+  const portalPosition = useSharedValue(height);
+  const dragging = useSharedValue(false);
+  const scrollPositionReseting = useSharedValue(false);
+  const portalReleasing = useSharedValue(false);
+
+  const containerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            [0, height],
+            [-height, 0],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+    };
+  }, [height]);
+  const someValue = PixelRatio.roundToNearestPixel(height * 0.7);
+
+  useDerivedValue(() => {
+    if (scrollOffset.value < height) {
+      if (dragging.value) {
+        portalRef.current?.move(
+          interpolate(
+            scrollOffset.value,
+            [0, height],
+            [someValue, 0],
+            Extrapolate.CLAMP
+          )
+        );
+      } else {
+        if (portalPosition.value > 0) {
+          if (!portalReleasing.value) {
+            portalReleasing.value = true;
+            console.log("portal rleasing");
+            scrollTo(scrollRef, 0, height, false);
+            portalRef.current?.release(0);
+          }
+          // scrollTo(
+          //   scrollRef,
+          //   0,
+          //   Math.round(
+          //     interpolate(
+          //       portalPosition.value,
+          //       [0, someValue],
+          //       [height, 0],
+          //       Extrapolate.CLAMP
+          //     )
+          //   ),
+          //   false
+          // );
+        } else {
+          if (!scrollPositionReseting.value) {
+            console.log("reseting scroll position ");
+            scrollPositionReseting.value = true;
+            scrollTo(scrollRef, 0, height, false);
+            console.log("scroll position reset ");
+            scrollPositionReseting.value = false;
+          }
+        }
+      }
+    }
+    if (portalPosition.value === 0 && portalReleasing.value) {
+      console.log("portal released");
+      portalReleasing.value = false;
+    }
+  }, [height, someValue]);
+
+  // useDerivedValue(() => {
+  //   if (
+  //     !dragging.value &&
+  //     scrollOffset.value < height &&
+  //     // portalPosition.value === 0 &&
+  //     !scrollPositionReseting.value
+  //   ) {
+  //     console.log("reseting scroll position ");
+  //     scrollPositionReseting.value = true;
+  //     scrollTo(scrollRef, 0, height, false);
+  //     console.log("scroll position reset ");
+  //     scrollPositionReseting.value = false;
+  //   }
+  // }, [height]);
+
+  const onScroll = useAnimatedScrollHandler(
+    {
+      onScroll(event) {
+        scrollOffset.value = event.contentOffset.y;
+      },
+      onBeginDrag() {
+        dragging.value = true;
+      },
+      onEndDrag() {
+        dragging.value = false;
+      },
+    },
+    [height]
+  );
+
+  return {
+    containerAnimatedStyle,
+    portalRef,
+    scrollRef,
+    onScroll,
+    portalPosition,
+  };
 }

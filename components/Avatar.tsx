@@ -1,6 +1,7 @@
 import { Image, ImageStyle } from "expo-image";
 import { StyleProp } from "react-native";
 import { SIZE_36 } from "../constants";
+import Photo from "./Photo";
 
 export type AvatarProps = {
   url: string;
@@ -12,7 +13,7 @@ export default function Avatar({ url, size, style }: AvatarProps) {
   const avatarSize = size ? size : SIZE_36;
 
   return (
-    <Image
+    <Photo
       style={[
         style,
         {
@@ -21,7 +22,7 @@ export default function Avatar({ url, size, style }: AvatarProps) {
           borderRadius: avatarSize / 2,
         },
       ]}
-      source={url}
+      uri={url}
     />
   );
 }

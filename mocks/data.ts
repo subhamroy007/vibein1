@@ -4,7 +4,6 @@ import {
 } from "../types/utility.types";
 
 const ip_address = "192.168.29.235";
-const local_url = `http://${ip_address}:5500`;
 const remote_url2 = "https://dlmf1r99us238.cloudfront.net";
 const base_url = remote_url2;
 const profile_picture_base_address = `${base_url}/profile-pictures/`;
@@ -13,7 +12,7 @@ const post_moment_video_base_address = `${base_url}/post-moment-videos/`;
 const post_moment_video_thumbnail_base_address = `${base_url}/post-moment-videos-thumbnails/`;
 const post_moment_video_thumbnail_preview_base_address = `${base_url}/post-moment-videos-thumbnail-previews/`;
 const post_photo_preview_base_address = `${base_url}/post-photo-previews/`;
-const post_moment_video_poster_base_address = `${base_url}/moment-video-poster/`;
+const moment_video_poster_base_address = `${base_url}/moment-video-poster/`;
 
 export const photo_hashs = [
   "mNF}4rt8F_Ip_MX8R*NGVsRjn4WBIBV[R%RjIpoLRkRjW;ofaejZ",
@@ -88,7 +87,7 @@ export const getPostPhotoUrl = (index: number) =>
   `${post_photo_base_address}post_photo_${index}.jpg`;
 
 export const getPostMomentVideoUrl = (index: number) =>
-  `${post_moment_video_base_address}moment_video_${index}.mp4`;
+  `${post_moment_video_base_address}moment_video_${index}/master.m3u8`;
 
 export const getPostMomentVideoThumbnailUrl = (index: number) =>
   `${post_moment_video_thumbnail_base_address}moment_video_thumbnail_${index}.jpg`;
@@ -100,7 +99,7 @@ export const getPostPhotoPreviewUrl = (index: number) =>
   `${post_photo_preview_base_address}post_photo_preview_${index}.jpg`;
 
 export const getMomentVideoPosterUri = (index: number) =>
-  `${post_moment_video_poster_base_address}moment_video_poster_${index}.jpg`;
+  `${moment_video_poster_base_address}moment_video_poster_${index}.jpg`;
 
 export const PHOTOS: OutdatedPhotoParams1[] = [
   {

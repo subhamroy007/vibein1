@@ -37,6 +37,7 @@ type PhotoProps = {
   showLoadingRing?: boolean;
   background?: "light" | "dark" | "transparent";
   contained?: boolean;
+  onLoad?: () => void;
 } & ViewProps;
 
 const Photo = ({
@@ -48,6 +49,7 @@ const Photo = ({
   style,
   children,
   contained,
+  onLoad,
   ...restProps
 }: PhotoProps) => {
   const { isInternetReachable } = useNetInfo();
@@ -130,6 +132,8 @@ const Photo = ({
         ]}
         resizeMode={contained ? "contain" : "cover"}
         {...restProps}
+        fadeDuration={0}
+        onLoad={onLoad}
       />
     );
   }

@@ -1,4 +1,5 @@
 import {
+  CommentResponseParams,
   PostPhotoAccountTagResponseParams,
   PostPhotoResponseParams,
   PostResponseParams,
@@ -33,6 +34,7 @@ import {
   generateAccountObjects,
   generateAccounts,
 } from "./accounts";
+import { CLIENT_ACCOUNT } from "../constants";
 
 export const captions = [
   `🌺🌺🌺
@@ -141,7 +143,7 @@ export const generatePostObject = (
       hideEngagementCount: false,
     },
     createdAt: getDate(),
-    createdBy: generateAccountObject(),
+    author: generateAccountObject(),
     engagementSummary: {
       noOfComments: noOfComments,
       noOfLikes: noOfLikes,
@@ -350,4 +352,55 @@ export const generatePost = (count: number, type?: "photos" | "moments") => {
   }
 
   return posts;
+};
+
+export const generateComment = (
+  postId: string,
+  commentId?: string
+): CommentResponseParams => {
+  return {
+    id: nanoid(),
+    pinned: commentId ? false : Math.random() > 0.7,
+    postId,
+    author: generateAccount(),
+    createdAt: new Date().toUTCString(),
+    isLiked: Math.random() > 0.7,
+    noOfLikes: Math.random() > 0.3 ? getRandom(1000, 1) : 0,
+    text: captions[getRandom(captions.length - 1)],
+    repliedTo: commentId,
+    noOfReplies: commentId ? 0 : Math.random() > 0.5 ? 0 : getRandom(1000, 1),
+  };
+};
+
+export const generateComments = (
+  count: number,
+  postId: string,
+  commentId?: string
+): CommentResponseParams[] => {
+  const comments: CommentResponseParams[] = [];
+
+  for (let i = 0; i < count; i++) {
+    comments.push(generateComment(postId, commentId));
+  }
+
+  return comments;
+};
+
+export const generateNewComment = (
+  postId: string,
+  text: string,
+  repliedTo?: string
+): CommentResponseParams => {
+  return {
+    id: nanoid(),
+    author: CLIENT_ACCOUNT,
+    createdAt: new Date().toUTCString(),
+    isLiked: false,
+    noOfLikes: 0,
+    noOfReplies: 0,
+    pinned: false,
+    postId,
+    text,
+    repliedTo,
+  };
 };

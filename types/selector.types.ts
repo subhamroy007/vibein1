@@ -1,38 +1,104 @@
-import { AccountResponseParams } from "./response.types";
 import {
-  CommentSectionStoreParams,
+  CommentListItemIdentifier,
+  MemorySectionParams,
+  PageData,
   ReplySectionStoreParams,
 } from "./store.types";
 import {
-  ChatType,
-  CommentTemplateParams,
-  ReplyTemplateParams,
+  AccountParams,
+  ItemKey,
+  SendSectionItemIdentifier,
 } from "./utility.types";
 
-/**
- * represents the parameters that is seleted to be returned to the comment selector
- */
-export type CommentSelectorParams =
-  CommentTemplateParams<AccountResponseParams> & {
-    isClientAuthorOfComment: boolean;
+export type AccountSelectorParams = {
+  id: string;
+  username: string;
+  profilePictureUri: string;
+  fullname?: string;
+  bio?: string;
+  noOfPosts?: number;
+  noOfFollowings?: number;
+  noOfFollowers?: number;
+  hasFollowedClient?: boolean;
+  hasRequestedToFollowClient?: boolean;
+  isAvailable?: boolean;
+  isMemoryHidden?: boolean;
+  isPrivate?: boolean;
+  isBlocked?: boolean;
+  isFollowed?: boolean;
+  isRequestedToFollow?: boolean;
+  isFavourite?: boolean;
+  memoryInfo?: {
+    hasMemory: boolean;
+    hasUnseenMemory: boolean;
+    isMemoryAvailable: boolean;
   };
+};
 
-/**
- * represents the parameters that is seleted to be returned to the reply selector
- */
-export type ReplySelectorParams = ReplyTemplateParams<AccountResponseParams> & {
-  isClientAuthorOfReply: boolean;
+export type CommentSelectorParams = {
+  id: string;
+  postId: string;
+  repliedTo?: string;
+  text: string;
+  author: AccountParams;
+  createdAt: string;
+  noOfLikes: number;
+  isLiked: boolean;
+  pinned: boolean;
+  noOfUnloadedReplies: number;
+  isAuthor: boolean;
+  isPostAuthor: boolean;
+  isReplyHidden: boolean;
+  isReplyLoading: boolean;
+  hasLoadedReply: boolean;
+};
+
+export type CommentPlaceholderSelectorParams = {
+  id: string;
+  text: string;
+  postId: string;
+  repliedTo?: string;
+  error: any | null;
+  isUploading: boolean;
+  noOfUnloadedReplies: number;
+  isReplyLoading: boolean;
+  author: AccountParams;
+};
+
+export type LikeSectionSelectorParams = {
+  isError: boolean;
+  isLoading: boolean;
+  data: {
+    allLikes: PageData<ItemKey>;
+    filteredAccounts?: ItemKey[];
+    engagementSummary: {
+      noOfLikes: number;
+      noOfViews: number;
+    };
+  } | null;
+};
+
+export type CommentSectionSelectorParams = {
+  isLoading: boolean;
+  isError: boolean;
+  comments: CommentListItemIdentifier[];
+};
+
+export type SendSectionItemSelectorParams = {
+  secondaryText: string;
+  pictureUri: string | [string, string];
+} & SendSectionItemIdentifier;
+
+export type SendSectionSelectorParams = {
+  isLoading: boolean;
+  isError: boolean;
+  hasSearchResult: boolean;
+  items: SendSectionItemSelectorParams[];
 };
 
 export type ReplySectionSelectorParams = {
   noOfReplies: number;
 } & ReplySectionStoreParams;
-
-export type CommentSectionSelectorParams = {
-  isClientAuthorOfPost: boolean;
-  postAuthor: string;
-  commentSection: CommentSectionStoreParams;
-};
 
 export type GridPostGroupParams = {
   groupId: string;
@@ -56,3 +122,24 @@ export type InboxChatInfoParams =
       type: "direct";
     } & InboxDirectChatInfoParams)
   | ({ type: "group-solid" } & InboxGroupChatInfoParams);
+
+export type MemorySectionSelectorParams = {
+  account: AccountParams;
+  memorySection?: MemorySectionParams;
+};
+
+export type GeneralDataFetchSelectorParams<T> = {
+  data: T | null;
+  error: string | null;
+  isLoading: boolean;
+  isExpired: boolean;
+};
+
+export type PageDataSelectorParams<T> = {
+  items: T[];
+  hasEndReached: boolean;
+};
+
+export type PaginatedDataFetchSelectorParams<T> = {
+  isPageLoading: boolean;
+} & GeneralDataFetchSelectorParams<PageDataSelectorParams<T>>;

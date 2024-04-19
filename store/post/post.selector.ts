@@ -15,9 +15,9 @@ export const selectPostParams = createSelector(
       return undefined;
     }
 
-    const author = selectAccountParams(state, post.createdBy, [
+    const author = selectAccountParams(state, post.author, [
       "is-favourite",
-      "is-following",
+      "has-followed-client",
     ]);
 
     if (!author) {
@@ -26,7 +26,7 @@ export const selectPostParams = createSelector(
 
     const postOutput = {
       ...post,
-      createdBy: author,
+      author: author,
     };
 
     return postOutput;
@@ -49,8 +49,8 @@ export const selectPostCommentSection = createSelector(
     }
 
     const output = {
-      author: post.createdBy,
-      isClientAuthorOfPost: client.username === post.createdBy,
+      author: post.author,
+      isClientAuthorOfPost: client.username === post.author,
       comments: post.comments,
       commentSectionThunkInfo: post.commentSectionThunkInfo,
     };
@@ -105,16 +105,14 @@ export const selectPostPreviewParams = createSelector(
       return undefined;
     }
 
-    const { isLiked, createdBy } = post;
-
-    const author = selectAccountParams(state, createdBy);
+    const { isLiked, author } = post;
 
     if (!author) {
       return undefined;
     }
 
     const commonParams = {
-      createdBy: author,
+      author: author,
       isLiked,
     };
 

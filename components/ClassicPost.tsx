@@ -23,7 +23,6 @@ import { useAppSelector } from "../hooks/storeHooks";
 import { selectClientAccountParams } from "../store/client/client.selector";
 import Option from "./Option";
 import Avatar from "./Avatar";
-import CommentSection from "./CommentSection";
 import PostSendSection from "./post_send_section/PostSendSection";
 import Album from "./Album/Album";
 import ClassicPostVideoPlayer from "./ClassicPostVideoPlayer";
@@ -128,7 +127,7 @@ export default function ClassicPost({
   const gotoProifile = useCallback(() => {
     router.push({
       pathname: "/account/[username]",
-      params: { username: postParams?.createdBy.username },
+      params: { username: postParams?.author.username },
     });
   }, [router, postParams]);
 
@@ -138,7 +137,7 @@ export default function ClassicPost({
 
   const {
     createdAt,
-    createdBy,
+    author,
     engagementSummary,
     isLiked,
     isSaved,
@@ -161,7 +160,7 @@ export default function ClassicPost({
         ]}
       >
         <Pressable onPress={gotoProifile}>
-          <Avatar url={createdBy.profilePictureUri} size={SIZE_30} />
+          <Avatar url={author.profilePictureUri} size={SIZE_30} />
         </Pressable>
         <View
           style={[
@@ -171,7 +170,7 @@ export default function ClassicPost({
           ]}
         >
           <AppText weight="bold" numberOfLines={1} onPress={gotoProifile}>
-            {createdBy.username}
+            {author.username}
           </AppText>
           {taggedLocation && (
             <AppText size={SIZE_11} weight="medium" numberOfLines={1}>
@@ -293,7 +292,7 @@ export default function ClassicPost({
                 onPress={addToMemoryPressCallback}
               />
             )}
-            {clientAccountParams.id === createdBy.id ? (
+            {clientAccountParams.id === author.id ? (
               <>
                 <Option
                   icon="explore-outline"
@@ -327,16 +326,7 @@ export default function ClassicPost({
           </View>
         </SwipeUpPortal>
       )}
-      {isCommentSectionPortalOpen && (
-        <SwipeUpPortal
-          onDismiss={toggleCommentSectionPortalCallback}
-          title="Comments"
-          useFullScreen
-          useBreakPoint
-        >
-          <CommentSection id={id} />
-        </SwipeUpPortal>
-      )}
+
       {isSendSectionPortalOpen && (
         <SwipeUpPortal
           onDismiss={toggleSendSectionPortalCallback}

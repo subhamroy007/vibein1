@@ -131,15 +131,13 @@ export default function SwipeUpPortal({
     return true;
   });
 
-  const nativeGestutre = Gesture.Native();
-
   const tapGesture = Gesture.Tap()
     .onStart(() => {
       runOnJS(switchTo)(0);
     })
     .enabled(false);
 
-  const complexGesture = Gesture.Race(nativeGestutre, panGesture, tapGesture);
+  const complexGesture = Gesture.Exclusive(tapGesture, panGesture);
 
   return (
     <Portal hostName="root">
@@ -152,7 +150,6 @@ export default function SwipeUpPortal({
           ]}
         >
           <Animated.View
-            // layout={Layout.duration(400)}
             style={[
               styles.content_container,
               {

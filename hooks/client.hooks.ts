@@ -22,6 +22,7 @@ import {
   fetchSearchedAccounts,
   fetchSearchedHashtags,
   fetchHomeFeedPosts,
+  fetchHomeFeedMemoryAccounts,
 } from "../store/client/client.thunk";
 import {
   initPostSuggestionRoute,
@@ -36,6 +37,10 @@ export function useHomeFeed() {
 
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    dispatch(fetchHomeFeedMemoryAccounts({ refresh: true }));
+  }, []);
+
   const fetchPosts = useCallback((refresh: boolean = false) => {
     dispatch(
       fetchHomeFeedPosts({
@@ -45,8 +50,6 @@ export function useHomeFeed() {
   }, []);
 
   const refresh = useCallback(() => fetchPosts(true), [fetchPosts]);
-
-  useAutoFetch(fetchPosts, homeFeed.data);
 
   return {
     homeFeed,

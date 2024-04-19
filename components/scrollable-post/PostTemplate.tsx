@@ -22,6 +22,8 @@ export type PostTemplate = {
   createdAt: string;
   noOfLikes: number;
   noOfComments: number;
+  onCommentPress: () => void;
+  onLikeCountPress: () => void;
 };
 
 const PostTemplate = ({
@@ -40,6 +42,8 @@ const PostTemplate = ({
   createdAt,
   noOfComments,
   noOfLikes,
+  onCommentPress,
+  onLikeCountPress,
 }: PostTemplate) => {
   return (
     <View>
@@ -64,6 +68,8 @@ const PostTemplate = ({
         createdAt={createdAt}
         noOfComments={noOfComments}
         noOfLikes={noOfLikes}
+        onCommentPress={onCommentPress}
+        onLikeCountPress={onLikeCountPress}
       />
     </View>
   );

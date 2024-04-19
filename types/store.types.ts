@@ -1,5 +1,5 @@
 import { Dictionary, EntityState } from "@reduxjs/toolkit";
-import { AccountResponseParams } from "./response.types";
+import { AccountResponseParams, MemoryResponseParams } from "./response.types";
 import {
   CommentTemplateParams,
   PostGeneralParams,
@@ -11,8 +11,9 @@ import {
   AudioWithTitle,
   AudioWithUri,
   SearchParams,
-  AccountSearchParams,
   HashTagSearchParams,
+  ItemKey,
+  AccountParams,
 } from "./utility.types";
 
 /**
@@ -32,7 +33,7 @@ export type ThunkInfo = {
 /**
  * represents a reply of a comment
  */
-export type ReplyAdapterParams = ReplyTemplateParams<string>;
+export type Datal = ReplyTemplateParams<string>;
 
 /**
  * represents the reply section of a comment
@@ -45,8 +46,7 @@ export type ReplySectionStoreParams = {
 /**
  * represents a comment of a post
  */
-export type CommentAdapterParams = CommentTemplateParams<string> &
-  ReplySectionStoreParams;
+export type Comment1 = CommentTemplateParams<string> & ReplySectionStoreParams;
 
 /**
  * represents the comment section of a post
@@ -71,6 +71,12 @@ export type OutdatedParam23 = PostTemplateParams<string> &
   CommentSectionStoreParams &
   SimilarPostSectionStoreParams;
 
+export type CommentSectionParams = {
+  pending: ItemKey[];
+  uploaded: ItemKey[];
+  fetched: BasicDataRouteParams<PageData<ItemKey> | null>;
+};
+
 export type PostPhotoAccountTagAdapterParams = {
   account: string;
   position: [number, number];
@@ -80,9 +86,18 @@ export type PostPhotoAdapterParams = {
   taggedAccounts?: PostPhotoAccountTagAdapterParams[];
 } & PhotoWithPreview;
 
+export type LikeSectionParams = {
+  allLikes: BasicDataRouteParams<PageData<ItemKey> | null>;
+  searchedLikes: BasicDataRouteParams<Dictionary<ItemKey[]>> & {
+    searchPhase: string | null;
+  };
+};
+
 export type PostAdapterGeneralParams<T extends {}> = PostGeneralParams<
   {
     author: string;
+    commentSection: CommentSectionParams | null;
+    likeSection: LikeSectionParams | null;
   } & T
 >;
 
@@ -100,6 +115,30 @@ export type MomentPostAdapterParams = PostAdapterGeneralParams<{
 export type PostAdapterParams =
   | ({ type: "photo-post" } & PhotoPostAdapterParams)
   | ({ type: "moment-post" } & MomentPostAdapterParams);
+
+export type CommentAdapterParams = {
+  id: string;
+  postId: string;
+  repliedTo?: string;
+  text: string;
+  author: string;
+  createdAt: string;
+  noOfLikes: number;
+  isLiked: boolean;
+  noOfReplies: number;
+  pinned: boolean;
+  isReplyHidden: boolean;
+  replySection: CommentSectionParams | null;
+};
+
+export type CommentPlaceholderParams = {
+  id: string;
+  text: string;
+  postId: string;
+  repliedTo?: string;
+  error: any | null;
+  isUploading: boolean;
+};
 
 //-------------------------------------------------------------------------------------------------------------------
 
@@ -202,6 +241,8 @@ export type InboxStoreParams = {
   };
 };
 
+export type InboxParams = BasicDataRouteParams<PageData<ItemKey> | null>;
+
 /**
  * represents the union of different kinds of post feed item identifiers
  */
@@ -268,19 +309,29 @@ export type PostSuggestionsDataRouteParams = {
   seed: PostItemIdentifier;
 } & PostPageDataRouteParams;
 
+export type SendSectionSearchResultParams = {
+  lastSearchPhase: string | null;
+} & BasicDataRouteParams<Dictionary<AccountParams[]>>;
+
 /**
  * represents the entire client store params
  */
 export type ClientStoreParams = {
   loggedInAccount: LoggedInAccountStoreParams | null;
+  accountAndHashtagSearchSection: BasicDataRouteParams<{
+    accountSection: Dictionary<AccountParams[]>;
+    hashtagSection: Dictionary<HashTagSearchParams[]>;
+  }> & { lastSearchedPhase: string | null };
   theme: "light" | "dark" | "system";
   notification: { msg: string; dispatchedAt: number };
-  home: RefreshablePostDataRouteParams;
+  home: HomeFeedParams;
   foryou: {
     moments: RefreshablePostDataRouteParams;
     photos: RefreshablePostDataRouteParams;
   };
-  inbox: InboxStoreParams;
+  suggestedAccounts?: AccountParams[];
+  sendSectionSearchResult: SendSectionSearchResultParams;
+  inbox: InboxParams;
   isDarkScreenFocused: boolean;
   isMediaMuted: boolean;
   explore: {
@@ -311,6 +362,27 @@ export type BasicDataRouteParams<T> = {
   isLoading: boolean;
 };
 
+export type GeneralDataFetchParams<T> = {
+  data: T | null;
+  error: any | null;
+  isLoading: boolean;
+  createdAt: number;
+  expiresAt: number;
+};
+
+export type PaginatedDataFetchParams<T> = {
+  isPageLoading: boolean;
+} & GeneralDataFetchParams<PageData<T>>;
+
+export type MemoryAccountStoreParams = {
+  poster: string;
+} & ItemKey;
+
+export type HomeFeedParams = {
+  memoryAccounts: PaginatedDataFetchParams<MemoryAccountStoreParams>;
+  posts: PaginatedDataFetchParams<ItemKey>;
+};
+
 export type RefreshablePostDataRouteParams =
   RefreshableDataRouteParams<PageData<PostItemIdentifier> | null>;
 
@@ -326,29 +398,74 @@ export type PostItemIdentifier = {
   id: string;
 };
 
+export type CommentListItemIdentifier = {
+  type: "comment" | "placeholder";
+  isLastReply: boolean;
+} & ItemKey;
+
+export type ReplyDataParams =
+  BasicDataRouteParams<PageData<CommentListItemIdentifier> | null> & {
+    commentId: string;
+    isReplyHidden: boolean;
+    noOfPendingReplies: number;
+  };
+
+export type TopLevelCommentParams =
+  | ({ type: "comment" } & ReplyDataParams)
+  | { type: "placeholder"; id: string };
+
+export type CommentDataParams =
+  BasicDataRouteParams<PageData<TopLevelCommentParams> | null> & {
+    postId: string;
+  };
+
+export type CommentRouteParams = Dictionary<CommentDataParams>;
+
 //-----------------------------------------------------inbox store types------------------------------------------------------------
 
-export type ChatAdapterParams = {
+export type OneToOneChatAdapterParams = {
   id: string;
-  receipient: {
-    username: string;
-    lastActiveAt?: string;
-    typing: boolean;
-    isMember: boolean;
-    isMessageRequestRestricted: boolean;
-  };
-  messages: {
-    data: string[];
-    state: ThunkState;
-    hasEndReached: boolean;
-    endCursor: string;
-    totalCount: number;
-  };
-  joinedAt?: string;
+  sortingTimestamp: number;
   muted: boolean;
   noOfUnseenMessages: number;
-  state: ThunkState;
+  isActiveMember: boolean;
+  receipient: {
+    username: string;
+    lastSeenAt?: string;
+    typing: boolean;
+    isActiveMember: boolean;
+  };
+  allMessages: {
+    pending: ItemKey[];
+    sentAndReceived: ItemKey[];
+    fetched: BasicDataRouteParams<PageData<ItemKey>>;
+  };
 };
+
+export type GroupChatAdapterParams = {
+  id: string;
+  sortingTimestamp: number;
+  muted: boolean;
+  noOfUnseenMessages: number;
+  isActiveMember: boolean;
+  groupPhotoUri?: string;
+  groupName: string;
+  members: {
+    username: string;
+    typing: boolean;
+    isActiveMember: boolean;
+    isAdmin: boolean;
+  }[];
+  allMessages: {
+    pending: ItemKey[];
+    sentAndReceived: ItemKey[];
+    fetched: BasicDataRouteParams<PageData<ItemKey>>;
+  };
+};
+
+export type ChatAdapterParams =
+  | ({ type: "one-to-one" } & OneToOneChatAdapterParams)
+  | ({ type: "group" } & GroupChatAdapterParams);
 
 export type MessageMediaAttachmentParams = {
   url: string;
@@ -378,3 +495,18 @@ export type ChatStoreParams = {
   chats: EntityState<ChatAdapterParams>;
   messages: EntityState<MessageAdapterParams>;
 };
+
+//---------------------------------------memory related store types-----------------------------------------------------
+
+export type MemoryAdapterParams = {
+  views: null;
+  replies: null;
+} & MemoryResponseParams;
+
+//---------------------------------------account related store types---------------------------------------------------
+
+export type MemorySectionParams = BasicDataRouteParams<ItemKey[] | null>;
+
+export type AccountAdapeterParams = {
+  memorySection?: MemorySectionParams;
+} & AccountParams;

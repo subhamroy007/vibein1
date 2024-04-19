@@ -37,10 +37,10 @@ export default function Reply({ id, onReply }: ReplyProps) {
   );
 
   const replyPressCallback = useCallback(() => {
-    if (replyParams?.createdBy) {
-      onReply(id, replyParams.createdBy.username);
+    if (replyParams?.author) {
+      onReply(id, replyParams.author.username);
     }
-  }, [replyParams?.createdBy, onReply]);
+  }, [replyParams?.author, onReply]);
 
   const reportPressCallback = useCallback(() => {}, []);
   const deletePressCallback = useCallback(() => {}, []);
@@ -53,7 +53,7 @@ export default function Reply({ id, onReply }: ReplyProps) {
   const {
     content,
     createdAt,
-    createdBy,
+    author,
     isLiked,
     noOfLikes,
     isClientAuthorOfReply,
@@ -62,12 +62,12 @@ export default function Reply({ id, onReply }: ReplyProps) {
   return (
     <View style={styles.root_container}>
       <Avatar
-        url={createdBy.profilePictureUri}
+        url={author.profilePictureUri}
         style={styles.avatar}
         size={SIZE_30}
       />
       <View style={styles.content_container}>
-        <AppText style={marginStyle.margin_top_3}>{createdBy.username}</AppText>
+        <AppText style={marginStyle.margin_top_3}>{author.username}</AppText>
         <HighlightedText>{content}</HighlightedText>
         <View style={styles.info_container}>
           <AppText color={"grey"} onPress={replyPressCallback} size={SIZE_11}>

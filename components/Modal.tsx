@@ -1,41 +1,54 @@
-import { useLayout } from "@react-native-community/hooks";
+import { useBackHandler, useLayout } from "@react-native-community/hooks";
 import { ReactNode, useCallback, useEffect } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
-import {
-  Gesture,
-  GestureDetector,
-  ScrollView,
-} from "react-native-gesture-handler";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  SlideInDown,
-  SlideOutDown,
   cancelAnimation,
-  useAnimatedRef,
+  runOnJS,
   useAnimatedStyle,
-  useScrollViewOffset,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
-import { LOGO_BLUE, SIZE_18, SIZE_4, SIZE_45, SIZE_70 } from "../constants";
-import AppText from "./AppText";
+import {
+  LOGO_BLUE,
+  SIZE_12,
+  SIZE_18,
+  SIZE_4,
+  SIZE_45,
+  SIZE_70,
+} from "../constants";
 import { Portal } from "@gorhom/portal";
+import { useDeviceLayout } from "../hooks/utility.hooks";
+import Text from "./utility-components/text/Text";
+
+export type ModalProps = {
+  title?: string;
+  children?: ReactNode;
+  onDismiss: () => void;
+  useMaxHeight?: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
+  onPartialOpen?: () => void;
+  partialOpenThreshold?: number;
+};
+
+export type ModalState = "open" | "partial-open" | "close";
 
 const Modal = ({
   children,
   title,
-}: {
-  children: ReactNode;
-  title?: string;
-}) => {
-  const { height: screenHeight } = useWindowDimensions();
+  onDismiss,
+  useMaxHeight,
+  partialOpenThreshold,
+  onClose,
+  onOpen,
+  onPartialOpen,
+}: ModalProps) => {
+  const { height: screenHeight } = useDeviceLayout();
 
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-
-  const scrollOffset = useScrollViewOffset(scrollRef);
-
-  const containerTranslateY = useSharedValue(screenHeight * 0);
-  const containerTranslateYOffset = useSharedValue(screenHeight * 0);
+  const containerTranslateY = useSharedValue(screenHeight);
+  const containerTranslateYOffset = useSharedValue(screenHeight);
 
   const { height: containerHeight, onLayout } = useLayout();
   const animatedContainerStyle = useAnimatedStyle(() => {
@@ -48,31 +61,50 @@ const Modal = ({
     };
   }, []);
 
-  const animateContainer = useCallback(
-    (threshold: number) => {
+  const switchState = useCallback(
+    (state: ModalState) => {
       "worklet";
       if (containerHeight) {
-        const calculatedThreshold = (1 - threshold) * containerHeight;
-
+        let newPosition = 0;
+        if (state === "close") {
+          newPosition = containerHeight;
+        } else if (state === "partial-open" && partialOpenThreshold) {
+          newPosition = Math.round(containerHeight * partialOpenThreshold);
+        }
         containerTranslateY.value = withTiming(
-          calculatedThreshold,
+          newPosition,
           { duration: 400 },
-          () => {
+          (finished) => {
             containerTranslateYOffset.value = containerTranslateY.value;
+            if (finished) {
+              if (state === "open" && onOpen) {
+                runOnJS(onOpen)();
+              } else if (state === "close" && onClose) {
+                runOnJS(onClose)();
+                if (onDismiss) {
+                  runOnJS(onDismiss)();
+                }
+              } else if (onPartialOpen) {
+                runOnJS(onPartialOpen)();
+              }
+            }
           }
         );
       }
     },
-    [containerHeight]
+    [
+      containerHeight,
+      partialOpenThreshold,
+      onDismiss,
+      onClose,
+      onOpen,
+      onPartialOpen,
+    ]
   );
-
-  useEffect(() => {
-    animateContainer(1);
-  }, [animateContainer]);
 
   const tapGesture = Gesture.Tap()
     .onStart(() => {
-      animateContainer(0);
+      switchState("close");
     })
     .enabled(containerHeight > 0);
 
@@ -87,74 +119,107 @@ const Modal = ({
       );
     })
     .onEnd(({ velocityY }) => {
-      if (containerTranslateY.value >= containerHeight / 2) {
-        animateContainer(0);
+      if (Math.abs(velocityY) >= 3000) {
+        switchState(velocityY > 0 ? "close" : "open");
       } else {
-        animateContainer(1);
+        let lowerBound: ModalState = "close";
+        let upperBound: ModalState = "open";
+        let boundary = Math.round(containerHeight * 0.5);
+        if (partialOpenThreshold) {
+          const threshold = Math.round(containerHeight * partialOpenThreshold);
+          lowerBound =
+            containerTranslateY.value < threshold ? "partial-open" : "close";
+          upperBound =
+            containerTranslateY.value < threshold ? "open" : "partial-open";
+          if (lowerBound === "close") {
+            boundary = Math.round((threshold + containerHeight) * 0.5);
+          } else {
+            boundary = Math.round(threshold * 0.5);
+          }
+        }
+
+        if (Math.abs(velocityY) >= 1000) {
+          switchState(velocityY > 0 ? lowerBound : upperBound);
+        } else {
+          if (containerTranslateY.value >= boundary) {
+            switchState(lowerBound);
+          } else {
+            switchState(upperBound);
+          }
+        }
       }
     })
     .enabled(containerHeight > 0);
 
   const combinedGesture = Gesture.Exclusive(panGesture, tapGesture);
 
+  useBackHandler(() => {
+    switchState("close");
+    return true;
+  });
+
+  useEffect(() => {
+    if (containerHeight) {
+      switchState(partialOpenThreshold ? "partial-open" : "open");
+    }
+  }, [containerHeight, switchState, partialOpenThreshold]);
+
+  const content_container_style: StyleProp<
+    Animated.AnimateStyle<StyleProp<ViewStyle>>
+  > = [
+    {
+      maxHeight: screenHeight,
+      height: useMaxHeight ? screenHeight : "auto",
+    },
+    borderStyle.border_top_radius_12,
+    layoutStyle.overflow_hidden,
+    animatedContainerStyle,
+    backgroundStyle.background_color_1,
+  ];
+
   return (
     <Portal>
       <GestureDetector gesture={combinedGesture}>
-        <Animated.View
-          style={[
-            backgroundStyle.background_color_3,
-            StyleSheet.absoluteFill,
-            layoutStyle.justify_content_flex_end,
-          ]}
-        >
-          <Animated.View
-            entering={SlideInDown.duration(800)}
-            exiting={SlideOutDown.duration(800)}
-            onLayout={onLayout}
-            style={[
-              {
-                maxHeight: screenHeight * 0.8,
-              },
-              borderStyle.border_top_radius_12,
-              layoutStyle.overflow_hidden,
-              animatedContainerStyle,
-              backgroundStyle.background_color_1,
-            ]}
-          >
-            <View
-              style={[
-                layoutStyle.justify_content_center,
-                layoutStyle.align_item_center,
-                { height: SIZE_45 },
-                borderStyle.border_bottom_width_hairline,
-                borderStyle.border_color_2,
-              ]}
-            >
+        <Animated.View style={root_container_style}>
+          <Animated.View onLayout={onLayout} style={content_container_style}>
+            <View style={title_container_style}>
               {title ? (
-                <AppText size={SIZE_18} weight="bold">
+                <Text size={SIZE_18} weight="bold">
                   options
-                </AppText>
+                </Text>
               ) : (
-                <View
-                  style={[
-                    {
-                      width: SIZE_70,
-                      height: SIZE_4,
-                      backgroundColor: LOGO_BLUE,
-                      borderRadius: 12,
-                    },
-                  ]}
-                />
+                <View style={styles.title_placeholder} />
               )}
             </View>
-            <Animated.ScrollView overScrollMode="never" ref={scrollRef}>
-              {children}
-            </Animated.ScrollView>
+            {children}
           </Animated.View>
         </Animated.View>
       </GestureDetector>
     </Portal>
   );
 };
+
+const styles = StyleSheet.create({
+  title_container: { height: SIZE_45 },
+  title_placeholder: {
+    width: SIZE_70,
+    height: SIZE_4,
+    backgroundColor: LOGO_BLUE,
+    borderRadius: SIZE_12,
+  },
+});
+
+const title_container_style = [
+  styles.title_container,
+  layoutStyle.content_center,
+  borderStyle.border_bottom_width_hairline,
+  borderStyle.border_color_2,
+];
+
+const root_container_style = [
+  backgroundStyle.background_color_3,
+  StyleSheet.absoluteFill,
+  layoutStyle.justify_content_flex_end,
+];
 
 export default Modal;

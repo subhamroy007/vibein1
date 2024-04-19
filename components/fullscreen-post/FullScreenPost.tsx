@@ -103,7 +103,7 @@ export default function FullScreenPost({
   const gotoProifile = useCallback(() => {
     router.push({
       pathname: "/account/[username]",
-      params: { username: postParams?.createdBy.username },
+      params: { username: postParams?.author.username },
     });
   }, [router, postParams]);
   if (!postParams) {
@@ -111,7 +111,7 @@ export default function FullScreenPost({
   }
 
   const {
-    createdBy,
+    author,
     engagementSummary: { noOfComments, noOfLikes },
     isLiked,
     isSaved,
@@ -160,17 +160,17 @@ export default function FullScreenPost({
           >
             <View style={styles.author_info_container}>
               <Pressable onPress={gotoProifile}>
-                <Avatar url={createdBy.profilePictureUri} />
+                <Avatar url={author.profilePictureUri} />
               </Pressable>
               <AppText
                 style={marginStyle.margin_left_9}
                 color={COLOR_1}
                 onPress={gotoProifile}
               >
-                {createdBy.username}
+                {author.username}
               </AppText>
               <AppButton
-                text={createdBy.isFollowed ? "following" : "follow"}
+                text={author.isFollowed ? "following" : "follow"}
                 style={marginStyle.margin_left_9}
                 hasOutline
                 hideBackground

@@ -195,7 +195,7 @@ export const generateAccount = (includeFields?: AccountField[]) => {
   const account: AccountParams = {
     id: nanoid(10),
     username: usernames[getRandom(usernames.length - 1)] + nanoid(6),
-    profilePictureUri: getProfilePictureUrl(getRandom(40)),
+    profilePictureUri: getProfilePictureUrl(getRandom(30, 1)),
   };
 
   if (includeFields) {
@@ -246,6 +246,11 @@ export const generateAccount = (includeFields?: AccountField[]) => {
     }
     if (includeFields.includes("no-of-posts")) {
       account.noOfPosts = getRandom(100, 9);
+    }
+
+    if (includeFields.includes("memory-info")) {
+      account.noOfAvailableMemories = getRandom(10, 1);
+      account.noOfUnseenMemories = account.noOfAvailableMemories;
     }
   }
 
