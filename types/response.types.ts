@@ -121,11 +121,6 @@ export type SimilarPostResponseDataParams = {
 export type SimilarPostResponseParams =
   ThunkResponseParams<SimilarPostResponseDataParams>;
 
-export type HashtagGeneralRouteResponseParams = {
-  hashtag: HashtagAdapterParams;
-  topPosts: OutDatedResponseParams2[];
-};
-
 export type HashtagRouteThunkParams = {
   routeId: string;
   hashtag: string;
@@ -278,6 +273,14 @@ export type GeneralPaginatedResponse<T> = {
 export type PostPaginatedResponse =
   GeneralPaginatedResponse<PostResponseParams>;
 
+export type PhotoPostPaginatedResponse =
+  GeneralPaginatedResponse<PhotoPostResponseParams>;
+
+export type MomentPostPaginatedResponse =
+  GeneralPaginatedResponse<MomentPostResponseParams>;
+
+export type AccountPaginatedResponse = GeneralPaginatedResponse<AccountParams>;
+
 export type MemoryAccountPaginatedResponse =
   GeneralPaginatedResponse<MemoryAccountResponseParams>;
 
@@ -359,4 +362,21 @@ export type MemoryResponseParams = {
 export type AccountMemoryFetchResponseParams = {
   memories: MemoryResponseParams[];
   account: AccountParams;
+};
+
+export type AccountSectionResponseParams = {
+  account: AccountParams;
+  recentPosts?: PostPaginatedResponse;
+};
+
+export type HashtagRouteResponseParams = {
+  name: string;
+  noOfPosts: number;
+  topPosts?: PostPaginatedResponse;
+};
+
+export type LocationRouteResponseParams = {
+  name: string;
+  noOfPosts: number;
+  topPosts?: PostPaginatedResponse;
 };

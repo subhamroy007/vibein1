@@ -24,6 +24,8 @@ import {
 } from "../client/client.thunk";
 import {
   CommentResponseParams,
+  MomentPostResponseParams,
+  PhotoPostResponseParams,
   PostResponseParams,
 } from "../../types/response.types";
 import {
@@ -40,6 +42,21 @@ import {
   uploadComment,
 } from "./post.thunks";
 import { ItemKey } from "../../types/utility.types";
+import {
+  fetchAccountAllPosts,
+  fetchAccountMomentPosts,
+  fetchAccountPhotoPosts,
+  fetchAccountProfileDetails,
+  fetchAccountTaggedPosts,
+} from "../account-store/account.thunks";
+import {
+  fetchHashtagRoute,
+  fetchHashtagTopPosts,
+} from "../hashtag/hashtag.thunk";
+import {
+  fetchLocationRoute,
+  fetchLocationTopPosts,
+} from "../location/location.thunk";
 
 const initialState: {
   posts: EntityState<PostAdapterParams>;
@@ -51,10 +68,22 @@ const initialState: {
   comment_placeholders: getCommentPlaceholderAdapterInitialState(),
 };
 
+export function isPhotoPost(post: any): post is PhotoPostResponseParams {
+  return post.photos !== undefined;
+}
+
+export function isMomentPost(post: any): post is MomentPostResponseParams {
+  return post.video !== undefined;
+}
+
+export function isPost(post: any): post is PostResponseParams {
+  return post.type !== undefined;
+}
+
 const transformToPostAdapter = (
-  post: PostResponseParams
+  post: PostResponseParams | PhotoPostResponseParams | MomentPostResponseParams
 ): PostAdapterParams => {
-  if (post.type === "photo-post") {
+  if (isPhotoPost(post)) {
     return {
       ...post,
       author: post.author.username,
@@ -71,6 +100,7 @@ const transformToPostAdapter = (
       })),
       commentSection: null,
       likeSection: null,
+      type: "photo-post",
     };
   }
   return {
@@ -81,6 +111,7 @@ const transformToPostAdapter = (
       : undefined,
     commentSection: null,
     likeSection: null,
+    type: "moment-post",
   };
 };
 
@@ -97,7 +128,10 @@ const transformToCommentAdapter = (
 
 const addPostsToStore = (
   state: Draft<EntityState<PostAdapterParams>>,
-  posts: PostResponseParams[]
+  posts:
+    | PostResponseParams[]
+    | PhotoPostResponseParams[]
+    | MomentPostResponseParams[]
 ) => {
   const newPosts: PostAdapterParams[] = [];
   posts.forEach((post) => {
@@ -585,6 +619,42 @@ const postSlice = createSlice({
         }
       }
     );
+    builder.addCase(
+      fetchAccountProfileDetails.fulfilled,
+      (state, { payload: { recentPosts } }) => {
+        if (recentPosts) {
+          addPostsToStore(state.posts, recentPosts.items);
+        }
+      }
+    );
+    builder.addCase(fetchAccountAllPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchAccountTaggedPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchAccountPhotoPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchAccountMomentPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchHashtagRoute.fulfilled, (state, { payload }) => {
+      if (payload.topPosts) {
+        addPostsToStore(state.posts, payload.topPosts.items);
+      }
+    });
+    builder.addCase(fetchHashtagTopPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchLocationRoute.fulfilled, (state, { payload }) => {
+      if (payload.topPosts) {
+        addPostsToStore(state.posts, payload.topPosts.items);
+      }
+    });
+    builder.addCase(fetchLocationTopPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
   },
 });
 

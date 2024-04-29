@@ -510,3 +510,37 @@ export type MemorySectionParams = BasicDataRouteParams<ItemKey[] | null>;
 export type AccountAdapeterParams = {
   memorySection?: MemorySectionParams;
 } & AccountParams;
+
+export type AccountProfileSectionParams = {
+  userId: string;
+  createdAt: number;
+  expiresAt: number;
+  allPosts: PageData<ItemKey> | null;
+  taggedPosts: PageData<ItemKey> | null;
+  photos: PageData<ItemKey> | null;
+  moments: PageData<ItemKey> | null;
+  relatedAccounts: {
+    followings: PageData<ItemKey> | null;
+    followers: {
+      allAccounts: PageData<ItemKey>;
+      searchedAccounts: Dictionary<ItemKey[]>;
+    } | null;
+    suggested: PageData<ItemKey> | null;
+  };
+};
+
+export type HashTagRouteParams = {
+  name: string;
+  noOfPosts: number;
+  createdAt: number;
+  expiresAt: number;
+  topPosts: PageData<ItemKey>;
+};
+
+export type LocationRouteParams = {
+  name: string;
+  noOfPosts: number;
+  createdAt: number;
+  expiresAt: number;
+  topPosts: PageData<ItemKey>;
+};

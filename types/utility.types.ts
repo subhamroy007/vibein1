@@ -92,23 +92,6 @@ export type CommentTemplateParams<T = string | AccountResponseParams> = {
   noOfReplies: number;
 } & ReplyTemplateParams<T>;
 
-export type AccountField =
-  | "has-followed-client"
-  | "has-requeste-to-follow-client"
-  | "no-of-followers"
-  | "no-of-followings"
-  | "no-of-posts"
-  | "is-available"
-  | "is-memory-hidden"
-  | "is-followed"
-  | "is-requested-to-follow"
-  | "fullname"
-  | "is-private"
-  | "is-favourite"
-  | "is-blocked"
-  | "bio"
-  | "memory-info";
-
 export type ChatType = "direct" | "group-solid";
 
 /**
@@ -201,13 +184,38 @@ export type AudioWithUri = {
   usedSection: [number, number];
 } & AudioWithTitle;
 
+export type AccountField =
+  | "fullname"
+  | "bio"
+  | "no-of-posts"
+  | "no-of-tagged-posts"
+  | "no-of-followings"
+  | "no-of-followers"
+  | "has-followed-client"
+  | "has-requeste-to-follow-client"
+  | "is-available"
+  | "is-memory-hidden"
+  | "is-followed"
+  | "is-requested-to-follow"
+  | "is-private"
+  | "is-favourite"
+  | "is-blocked"
+  | "memory-info"
+  | "mute-settings"
+  | "notification-settings"
+  | "post-meta";
+
+//collection of all the informations about an account that could be sent from the server
 export type AccountParams = {
+  //required properties
   id: string;
   username: string;
   profilePictureUri: string;
+  //optional properties
   fullname?: string;
   bio?: string;
   noOfPosts?: number;
+  noOfTaggedPosts?: number;
   noOfFollowings?: number;
   noOfFollowers?: number;
   hasFollowedClient?: boolean;
@@ -219,8 +227,25 @@ export type AccountParams = {
   isFollowed?: boolean;
   isRequestedToFollow?: boolean;
   isFavourite?: boolean;
-  noOfAvailableMemories?: number;
-  noOfUnseenMemories?: number;
+  memoryInfo?: {
+    noOfAvailableMemories: number;
+    noOfUnseenMemories: number;
+  };
+  //mute settings if the account is followed by the client
+  muteSettings?: {
+    post: boolean;
+    memory: boolean;
+  };
+  //notification settings if the account is followed by the client
+  notificationSettings?: {
+    memory: boolean;
+    photo: boolean;
+    moment: boolean;
+  };
+  postMeta?: {
+    hasPhotos: boolean;
+    hasMoments: boolean;
+  };
 };
 
 export type TextSearchParams = {

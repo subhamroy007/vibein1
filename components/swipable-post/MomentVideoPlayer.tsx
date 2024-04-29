@@ -38,14 +38,6 @@ const MomentVideoPlayer = ({
 
   const [animatedHeartStyle, startHeartAnimation] = useSpringAnimation();
 
-  useEffect(() => {
-    return () => {
-      if (!focused) {
-        setPaused(false);
-      }
-    };
-  }, [focused]);
-
   const tapCallback = useCallback(() => {
     startPlayAnimation(1);
     setPaused((value) => !value);
@@ -74,6 +66,8 @@ const MomentVideoPlayer = ({
           focused={focused}
           style={layoutStyle.fill}
           paused={paused}
+          shouldPlayOnFocus
+          shouldRestartOnBlur
           repeat
         />
         <LinearGradient

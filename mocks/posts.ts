@@ -8,6 +8,7 @@ import { nanoid } from "@reduxjs/toolkit";
 import {
   MOMENT_VIDEOS,
   PHOTOS,
+  getMomentVideoPosterUri,
   getPostMomentVideoThumbnailUrl,
   getPostMomentVideoUrl,
   getPostPhotoPreviewUrl,
@@ -35,6 +36,7 @@ import {
   generateAccounts,
 } from "./accounts";
 import { CLIENT_ACCOUNT } from "../constants";
+import { MOMENT_POSTER_BLURHASH, POST_PHOTO_BLURHASH } from "./blurHash";
 
 export const captions = [
   `🌺🌺🌺
@@ -263,7 +265,7 @@ export const generatePhotos = (count: number): PhotoWithPreview[] => {
 
     photos.push({
       uri: getPostPhotoUrl(index),
-      blurhash: photo_hashs[index - 1],
+      blurhash: POST_PHOTO_BLURHASH[index - 1],
       preview: getPostPhotoPreviewUrl(index),
     });
   }
@@ -318,6 +320,26 @@ export const generateMomentPost = (): MomentPostResponseParams => {
   };
 };
 
+export const generateMomentPosts = (count: number) => {
+  const posts: MomentPostResponseParams[] = [];
+
+  for (let i = 0; i < count; i++) {
+    posts.push(generateMomentPost());
+  }
+
+  return posts;
+};
+
+export const generatePhotoPosts = (count: number) => {
+  const posts: PhotoPostResponseParams[] = [];
+
+  for (let i = 0; i < count; i++) {
+    posts.push(generatePhotoPost());
+  }
+
+  return posts;
+};
+
 export const generateVideo = (): PostVideoParams => {
   const index = getRandom(30, 1);
 
@@ -326,8 +348,8 @@ export const generateVideo = (): PostVideoParams => {
     duration: 0,
     preview: "",
     poster: {
-      blurhash: poster_hashs[index - 1],
-      uri: getPostMomentVideoThumbnailUrl(index),
+      blurhash: MOMENT_POSTER_BLURHASH[index - 1],
+      uri: getMomentVideoPosterUri(index),
     },
     muted: Math.random() > 0.7,
   };
@@ -337,14 +359,13 @@ export const generatePost = (count: number, type?: "photos" | "moments") => {
   const posts: PostResponseParams[] = [];
 
   for (let i = 0; i < count; i++) {
-    const postType = !type
-      ? Math.random() > 0.5
-        ? 1
-        : 2
-      : type === "photos"
-      ? 1
-      : 2;
-    if (postType === 1) {
+    if (!type) {
+      if (Math.random() > 0.5) {
+        posts.push({ type: "photo-post", ...generatePhotoPost() });
+      } else {
+        posts.push({ type: "moment-post", ...generateMomentPost() });
+      }
+    } else if (type === "photos") {
       posts.push({ type: "photo-post", ...generatePhotoPost() });
     } else {
       posts.push({ type: "moment-post", ...generateMomentPost() });

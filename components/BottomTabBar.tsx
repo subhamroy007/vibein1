@@ -9,9 +9,9 @@ import { BottomTabBarProps } from "../types/component.types";
 import { layoutStyle, borderStyle, backgroundStyle } from "../styles";
 import { BOTTOM_TAB_HEIGHT, COLOR_1, COLOR_4, SIZE_24 } from "../constants";
 import { useCallback, useMemo } from "react";
-import Icon from "./Icon";
 import { useAppSelector } from "../hooks/storeHooks";
 import { useDarkScreenFocused } from "../hooks/utility.hooks";
+import Icon from "./utility-components/icon/Icon";
 
 export default function BottomTabBar({ navigation, state }: BottomTabBarProps) {
   const currentTabIndex = state.index;

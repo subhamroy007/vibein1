@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useCallback, useState } from "react";
-import { SIZE_10 } from "../../constants";
+import { SIZE_10, SIZE_20 } from "../../constants";
 import { useMediaMutedState } from "../../hooks/client.hooks";
 import Carosol from "../utility-components/media/Carosol";
 import PhotoAlbumItem from "./PhotoAlbumItem";
@@ -68,7 +68,7 @@ const PhotoAlbum = ({
 };
 
 const styles = StyleSheet.create({
-  carosol: { bottom: SIZE_10 },
+  carosol: { bottom: SIZE_20 },
 });
 
 const carosol_style = [

@@ -13,22 +13,23 @@ import {
   SIZE_6,
 } from "../../constants";
 import { backgroundStyle, layoutStyle } from "../../styles";
-import Icon from "../Icon";
-import AppText from "../AppText";
+
 import { formatNumber } from "../../utility";
 import { useCallback, useMemo, useState } from "react";
 import { PostItemIdentifier } from "../../types/store.types";
 import { useAppSelector } from "../../hooks/storeHooks";
 import { selectPostPreview } from "../../store/post-store/post.selectors";
 import Photo from "../Photo";
+import Icon from "../utility-components/icon/Icon";
+import Text from "../utility-components/text/Text";
 
 export type GridPostProps = {
   index: number;
-  onPress: (item: PostItemIdentifier, index: number) => void;
+  onPress: (id: string, index: number) => void;
   portrait?: boolean;
   showPin?: boolean;
   showViews?: boolean;
-  item: PostItemIdentifier;
+  id: string;
 };
 
 export function GridPost({
@@ -37,9 +38,9 @@ export function GridPost({
   showViews,
   index,
   onPress,
-  item,
+  id,
 }: GridPostProps) {
-  const post = useAppSelector((state) => selectPostPreview(state, item.id));
+  const post = useAppSelector((state) => selectPostPreview(state, id));
 
   const [isPreviewVisible, setPreviewVisibleState] = useState(false);
 
@@ -53,8 +54,8 @@ export function GridPost({
   );
 
   const pressCallback = useCallback(() => {
-    onPress(item, index);
-  }, [item, index]);
+    onPress(id, index);
+  }, [id, index]);
 
   // const longPressCallback = useCallback(() => {
   //   Vibration.vibrate(LONG_PRESS_VIBRATION_DURATION);
@@ -128,9 +129,9 @@ export function GridPost({
           )}
           {post.type === "moment-post" && post.noOfViews > 0 && showViews && (
             <View style={styles.views_container}>
-              <AppText size={SIZE_11} color={COLOR_1} weight="regular">
+              <Text size={SIZE_11} color={COLOR_1} weight="regular">
                 {formatNumber(post.noOfViews)}
-              </AppText>
+              </Text>
               <Icon name="play" size={SIZE_15} color={COLOR_1} />
             </View>
           )}

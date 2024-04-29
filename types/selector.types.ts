@@ -17,6 +17,7 @@ export type AccountSelectorParams = {
   fullname?: string;
   bio?: string;
   noOfPosts?: number;
+  noOfTaggedPosts?: number;
   noOfFollowings?: number;
   noOfFollowers?: number;
   hasFollowedClient?: boolean;
@@ -28,12 +29,28 @@ export type AccountSelectorParams = {
   isFollowed?: boolean;
   isRequestedToFollow?: boolean;
   isFavourite?: boolean;
+  muteSettings?: {
+    post: boolean;
+    memory: boolean;
+  };
+  notificationSettings?: {
+    memory: boolean;
+    photo: boolean;
+    moment: boolean;
+  };
   memoryInfo?: {
     hasMemory: boolean;
     hasUnseenMemory: boolean;
     isMemoryAvailable: boolean;
   };
+  postMeta?: {
+    hasPhotos: boolean;
+    hasMoments: boolean;
+  };
 };
+
+export type AccountSectionSelectorParams =
+  GeneralDataFetchSelectorParams<AccountSelectorParams>;
 
 export type CommentSelectorParams = {
   id: string;

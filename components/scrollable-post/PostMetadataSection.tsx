@@ -5,6 +5,8 @@ import { SIZE_12, SIZE_14 } from "../../constants";
 import { getRelativeTimeString } from "../../utility";
 import { useRouter } from "expo-router";
 import { nanoid } from "@reduxjs/toolkit";
+import MultilineText from "../utility-components/text/MultilineText";
+import { useCallback, useState } from "react";
 
 export type PostMetadataSectionProps = {
   createdAt: string;
@@ -12,6 +14,7 @@ export type PostMetadataSectionProps = {
   noOfComments: number;
   onCommentPress: () => void;
   onLikeCountPress: () => void;
+  caption?: string;
 };
 
 const PostMetadataSection = ({
@@ -20,11 +23,25 @@ const PostMetadataSection = ({
   noOfLikes,
   onCommentPress,
   onLikeCountPress,
+  caption,
 }: PostMetadataSectionProps) => {
-  const router = useRouter();
+  const [captionCollapsed, setCaptionCollapsed] = useState(true);
+
+  const switchCaptionCollapsedState = useCallback(
+    () => setCaptionCollapsed((value) => !value),
+    []
+  );
 
   return (
     <View style={root_container_style}>
+      {caption !== undefined && (
+        <MultilineText
+          text={caption}
+          style={marginStyle.margin_bottom_12}
+          collapsed={captionCollapsed}
+          onPress={switchCaptionCollapsedState}
+        />
+      )}
       {noOfLikes > 0 ? (
         <Text weight="semi-bold" size={SIZE_14} onPress={onLikeCountPress}>
           {noOfLikes} likes

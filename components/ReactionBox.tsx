@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { backgroundStyle, borderStyle, layoutStyle } from "../styles";
 import { SIZE_20, SIZE_24, SIZE_48 } from "../constants";
-import AppText from "./AppText";
+import Text from "./utility-components/text/Text";
 
 const emojis = ["❤️", "🔥", "😍", "👌", "😘", "😚"];
 
@@ -18,7 +18,7 @@ export default function ReactionBox({ onSelect }: ReactionBoxProps) {
           onPress={() => onSelect(emoji)}
           key={emoji}
         >
-          <AppText size={SIZE_20}>{emoji}</AppText>
+          <Text size={SIZE_20}>{emoji}</Text>
         </Pressable>
       ))}
     </View>

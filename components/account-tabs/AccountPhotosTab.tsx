@@ -1,39 +1,82 @@
-import { useCallback, useEffect } from "react";
-import { useAccountPhotosRoute } from "../../hooks/account.hooks";
+import { Layout } from "react-native-tab-view/lib/typescript/src/types";
+import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
+import { useCallback, useEffect, useState } from "react";
+import { selectAccountPhotoPosts } from "../../store/account-store/account.selectors";
+import {
+  fetchAccountPhotoPosts,
+  fetchAccountTaggedPosts,
+} from "../../store/account-store/account.thunks";
 import GridPostList from "../grid-post/GripPostList";
+import { useRouter } from "expo-router";
 
-const AccountPhotosTab = ({
-  username,
-  routeId,
+const AccountPhotoPostsTab = ({
+  userId,
+  layout,
+  nestedScrollingEnabled,
 }: {
-  username: string;
-  routeId: string;
+  userId: string;
+  layout: Layout;
+  nestedScrollingEnabled: boolean;
 }) => {
-  const { routeParams, fetch } = useAccountPhotosRoute(username, routeId);
+  const dispatch = useAppDispatch();
 
-  const initRequest = useCallback(() => fetch(true), []);
+  const router = useRouter();
 
-  if (!routeParams) {
-    return null;
-  }
+  const [isLoading, setLoading] = useState(false);
+  const [isError, setError] = useState(false);
+
+  const photoPosts = useAppSelector((state) =>
+    selectAccountPhotoPosts(state, userId)
+  );
+
+  const onEndReached = useCallback(async () => {
+    setError(false);
+    setLoading(true);
+    dispatch(fetchAccountPhotoPosts({ userId }))
+      .unwrap()
+      .catch((error: any) => {
+        console.log(
+          "could not fetch photos for ",
+          userId,
+          " something went wrong ",
+          error
+        );
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [userId]);
+
+  const onGridPress = useCallback(
+    (id: string, index: number) => {
+      router.push({
+        params: { userid: userId },
+        pathname: "/profile/userid/photos_swipable_feed",
+      });
+    },
+    [router, userId]
+  );
+  useEffect(() => {
+    if (!photoPosts) {
+      onEndReached();
+    }
+  }, [photoPosts, onEndReached]);
 
   return (
     <GridPostList
-      data={routeParams.data.posts}
-      initRequest={initRequest}
-      paginationRequest={fetch}
-      state={routeParams.state}
+      data={photoPosts?.items}
+      onPress={onGridPress}
+      hasEndReached={photoPosts?.hasEndReached}
+      isError={isError}
+      isLoading={isLoading}
+      onEndReach={onEndReached}
       portrait
       showViews
-      showPlaceHolder
-      enablePagination={!routeParams.data.hasEndReached}
-      enableReresh
-      gridPressRoute={{
-        params: { routeId, username },
-        pathname: "/account/[username]/photos_swipable_feed",
-      }}
+      style={{ width: layout.width }}
+      nestedScrollingEnabled={nestedScrollingEnabled}
     />
   );
 };
 
-export default AccountPhotosTab;
+export default AccountPhotoPostsTab;

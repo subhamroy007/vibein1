@@ -7,7 +7,6 @@ import { generateChatObjects } from "../../mocks/chat.mock";
 import { selectClientAccountParams } from "../../store/client/client.selector";
 import { addChats } from "../../store/inbox/chat.slice";
 import { initInbox } from "../../store/client/client.slice";
-import { addAccountFromChats } from "../../store/account/account.slice";
 
 const Layout = () => {
   const dispatch = useAppDispatch();
@@ -20,7 +19,6 @@ const Layout = () => {
     if (clientAccountParams) {
       const inboxChats = generateChatObjects(10, clientAccountParams, "dm");
       dispatch(addChats(inboxChats));
-      dispatch(addAccountFromChats(inboxChats));
       dispatch(initInbox(inboxChats));
     }
   }, [clientAccountParams]);

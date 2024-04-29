@@ -16,7 +16,7 @@ import { useBackHandler } from "@react-native-community/hooks";
 import { FlatList, StyleSheet, View } from "react-native";
 import { useDataFetchHook } from "../../hooks/utility.hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
-import AccountListItem from "../account/AccountListItem";
+import GeneralAccount from "../account/GeneralAccount";
 import { SIZE_120, SIZE_16, SIZE_20 } from "../../constants";
 import Text from "../utility-components/text/Text";
 import Icon from "../utility-components/icon/Icon";
@@ -161,7 +161,7 @@ export default function PostLikeSection({
             : likeSection.data?.filteredAccounts
         }
         renderItem={({ item }) => {
-          return <AccountListItem id={item.key} />;
+          return <GeneralAccount id={item.key} />;
         }}
         showsVerticalScrollIndicator={false}
         overScrollMode="never"

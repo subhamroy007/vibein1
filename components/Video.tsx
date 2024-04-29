@@ -1,11 +1,8 @@
 import { useNetInfo } from "@react-native-community/netinfo";
-import {
-  Video as ExpoVideo,
-  ResizeMode,
-  VideoReadyForDisplayEvent,
-} from "expo-av";
+import { AVPlaybackStatus, Video as ExpoVideo, ResizeMode } from "expo-av";
 import {
   forwardRef,
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -17,6 +14,7 @@ import Photo from "./Photo";
 import { useIsFocused } from "../hooks/utility.hooks";
 import { COLOR_1, COLOR_4 } from "../constants";
 import Animated from "react-native-reanimated";
+import { shallowEqual } from "react-redux";
 
 type VideoProps = {
   uri: string;
@@ -29,10 +27,13 @@ type VideoProps = {
   focused?: boolean;
   preload?: boolean;
   repeat?: boolean;
-  autoPlayOnFocus?: boolean;
   muted?: boolean;
   paused?: boolean;
-  onReady?: (duration: number) => void;
+  onReady?: () => void;
+  onPlaybackStateChange?: (state: AVPlaybackStatus) => void;
+  shouldPlayOnFocus?: boolean;
+  shouldRestartOnBlur?: boolean;
+  shouldRestartOnScreenBlur?: boolean;
 } & ViewProps;
 
 type VideoRefParams = {
@@ -54,117 +55,152 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
       focused,
       preload,
       repeat,
-      autoPlayOnFocus,
+      shouldPlayOnFocus,
+      shouldRestartOnBlur,
+      shouldRestartOnScreenBlur,
       muted,
       onReady,
+      onPlaybackStateChange,
       ...restProps
     },
     ref
   ) => {
-    const videoRef = useRef<ExpoVideo | null>(null);
+    const videoRef = useRef<ExpoVideo | null>(null); //intialize the reference for the video
 
+    const autoPlayRef = useRef(false); //intialize the reference for the  play of fucus prop
+    const restartOnBlurRef = useRef(false); //initialize the referecne for the restart on blur prop
+    const restartOnScreenBlurRef = useRef(false); //initialize the reference for the restart on screen blur prop
+    const positionRef = useRef(0); //intialize the video position reference
+    const muteRef = useRef(false);
+    const repeatRef = useRef(false);
+
+    repeatRef.current = repeat || false;
+    muteRef.current = muted || false;
+    autoPlayRef.current = shouldPlayOnFocus || false;
+    restartOnBlurRef.current = shouldRestartOnBlur || false;
+    restartOnScreenBlurRef.current = shouldRestartOnScreenBlur || false;
+
+    //define the handler to expose the imperative functions of the component which will be callable from outside of the component
     useImperativeHandle(ref, () => {
       return {
+        //function to pause the video
         pause() {
           videoRef.current?.pauseAsync();
         },
+        //function to play the video
         play() {
           videoRef.current?.playAsync();
         },
+        //function to change the plaback position
         seek(position) {
           videoRef.current?.playFromPositionAsync(position);
         },
       };
     });
 
-    const isRouteFocused = useIsFocused();
-
     const [isVideoReady, setVideoReady] = useState(false);
 
-    const { isInternetReachable } = useNetInfo();
+    const [isFinished, setFinished] = useState(false);
 
-    const timemoutRef = useRef<NodeJS.Timeout>();
+    const isScreenFocused = useIsFocused(); //initialize the screen focus hook
 
-    const [error, setError] = useState<any | null>(null);
+    const { isInternetReachable } = useNetInfo(); //intiailze the net-info hook to check for internet reachability
 
-    const loadVideo = useCallback(async (uri: string) => {
+    const timemoutRef = useRef<NodeJS.Timeout>(); //intialize the timeout referecence to implement video retry
+
+    const [isError, setError] = useState(false); //initialize the video error state
+
+    //callback function to load a video from the given source
+    const loadVideo = useCallback(async () => {
+      setError(false);
       try {
-        setError(null);
-        await videoRef.current?.loadAsync({ uri }, { shouldPlay: false });
-        console.log("video loaded");
+        await videoRef.current?.loadAsync(
+          { uri },
+          {
+            shouldPlay: false,
+            positionMillis: positionRef.current,
+            isMuted: muteRef.current,
+            isLooping: repeatRef.current,
+          }
+        );
       } catch (error) {
-        console.error("failed to load video");
-        console.error(error);
-        setError(error);
+        setError(true);
       }
-    }, []);
+    }, [uri]);
 
-    const unloadVideo = useCallback(async () => {
-      setError(null);
-      setVideoReady(false);
-      if (videoRef.current) {
-        videoRef.current
-          .unloadAsync()
-          .then(() => {
-            console.log("video unloaded");
-          })
-          .catch((reason) => {
-            console.error("failed to unload video");
-            console.error(reason);
-          });
+    //callback function, invoked when the video is ready to display
+    const onVideoReady = useCallback(() => {
+      setVideoReady(true);
+      if (onReady) {
+        onReady();
       }
-    }, []);
+    }, [onReady]);
 
-    //used to preload the video if the route is focused and in case the uri changes and otherwise unload it
-    useEffect(() => {
-      if (preload && isRouteFocused) {
-        loadVideo(uri);
-      }
-
-      return () => {
-        unloadVideo();
-      };
-    }, [preload, uri, isRouteFocused]);
-
-    //use to play or pause the video in case the focused or autoplay prop changes
-    useEffect(() => {
-      return () => {
-        if (focused && isVideoReady && autoPlayOnFocus !== false) {
-          videoRef.current?.stopAsync();
+    //callback function, invoked every time the internal state changes
+    const onPlaybackStatusUpdate = useCallback(
+      (status: AVPlaybackStatus) => {
+        if (status.isLoaded) {
+          if (status.didJustFinish && !status.isLooping) {
+            setFinished(true);
+            positionRef.current = 0;
+          } else {
+            positionRef.current = status.positionMillis;
+          }
         }
-      };
-    }, [focused, isVideoReady, autoPlayOnFocus]);
+        if (onPlaybackStateChange) {
+          onPlaybackStateChange(status);
+        }
+      },
+      [onPlaybackStateChange]
+    );
 
-    //use to repeatedly try to load the video if the route is focused and internet is reachable
+    //reset all the defined states when the uri of the video source changes
     useEffect(() => {
-      if (error && isInternetReachable && preload && isRouteFocused) {
-        timemoutRef.current = setTimeout(() => loadVideo(uri), 2000);
+      setVideoReady(false);
+      setError(false);
+      setFinished(false);
+      positionRef.current = 0;
+    }, [uri]);
+
+    //effect callback to load and unload the video accordingly when the preload state and/or screen focused state changes
+    useEffect(() => {
+      if (preload && isScreenFocused) {
+        loadVideo();
+      } else {
+        setError(false);
+        setVideoReady(false);
+        setFinished(false);
+        if (!preload || (!isScreenFocused && restartOnScreenBlurRef.current)) {
+          positionRef.current = 0;
+        }
+        videoRef.current?.unloadAsync();
+      }
+    }, [preload, isScreenFocused, loadVideo]);
+
+    //effect callback to play and pause the video accordingly when the focused and/or puased state changes
+    useEffect(() => {
+      if (focused && !paused && isVideoReady && autoPlayRef.current) {
+        setFinished(false);
+        videoRef.current?.playAsync();
+      } else {
+        if (!focused && restartOnBlurRef.current) {
+          positionRef.current = 0;
+          videoRef.current?.playFromPositionAsync(0);
+        }
+        videoRef.current?.pauseAsync();
+      }
+    }, [focused, paused, isVideoReady]);
+
+    //effect callback to repeteadly try to load the video from the source in case of error
+    useEffect(() => {
+      if (isError && isInternetReachable && preload && isScreenFocused) {
+        timemoutRef.current = setTimeout(() => loadVideo(), 2000);
       }
 
       return () => {
         clearTimeout(timemoutRef.current);
       };
-    }, [uri, error, isInternetReachable, isRouteFocused]);
-
-    const videoReadyCallback = useCallback(
-      ({ status }: VideoReadyForDisplayEvent) => {
-        setVideoReady(true);
-        if (onReady && status && status.isLoaded && status.durationMillis) {
-          onReady(status.durationMillis);
-        }
-      },
-      [onReady]
-    );
-
-    const errorCallback = useCallback(
-      (error: string) => {
-        if (isVideoReady) {
-          unloadVideo();
-          setError(error);
-        }
-      },
-      [isVideoReady]
-    );
+    }, [loadVideo, isError, isInternetReachable, isScreenFocused]);
 
     const calculatedBackgroundColor =
       !background || background === "transparent"
@@ -175,21 +211,18 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
     return (
       <Animated.View
         style={[{ backgroundColor: calculatedBackgroundColor }, style]}
+        {...restProps}
       >
         <ExpoVideo
           ref={videoRef}
+          progressUpdateIntervalMillis={100}
+          onPlaybackStatusUpdate={onPlaybackStatusUpdate}
           isMuted={muted}
           resizeMode={contained ? ResizeMode.CONTAIN : ResizeMode.COVER}
-          {...restProps}
-          onReadyForDisplay={videoReadyCallback}
-          onError={errorCallback}
+          onReadyForDisplay={onVideoReady}
           style={StyleSheet.absoluteFill}
-          isLooping={repeat}
-          shouldPlay={
-            !paused && autoPlayOnFocus !== false && focused && isVideoReady
-          }
         />
-        {(!focused || !isVideoReady) && poster && (
+        {(!isVideoReady || isFinished) && poster && (
           <Photo
             style={StyleSheet.absoluteFill}
             uri={poster.uri}
@@ -203,11 +236,9 @@ const Video = forwardRef<VideoRefParams, VideoProps>(
   }
 );
 
-export default Video;
-
-// export default memo<VideoProps>(
-//   Video,
-//   ({ children: children1, ...prop1 }, { children: children2, ...prop2 }) => {
-//     return shallowEqual(prop1, prop2);
-//   }
-// );
+export default memo<VideoProps>(
+  Video,
+  ({ children: children1, ...prop1 }, { children: children2, ...prop2 }) => {
+    return shallowEqual(prop1, prop2);
+  }
+);

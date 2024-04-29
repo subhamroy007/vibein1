@@ -5,39 +5,34 @@ import {
   View,
 } from "react-native";
 import { useCallback } from "react";
-import { PostItemIdentifier } from "../../types/store.types";
 import { GRID_SPACEx3, SIZE_120 } from "../../constants";
 import { layoutStyle } from "../../styles";
 import { GridPost } from "./GridPost";
 import { GridPostListProps } from "../../types/component.types";
-import GridPlaceHolder from "../utility-components/GridPlaceHolder";
-import DefaultPlaceHolder from "../utility-components/DefaultFallback";
+import GridPlaceHolder from "./GridPlaceHolder";
 import Animated from "react-native-reanimated";
-import DefaultErrorFallback from "../utility-components/DefaultErrorFallback";
 import { useLayout } from "@react-native-community/hooks";
-import { useDataFetchHook } from "../../hooks/utility.hooks";
+import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
+import { ItemKey } from "../../types/utility.types";
 
 export default function GridPostList({
   data,
   hasEndReached,
   isError,
   isLoading,
-  onFetch,
+  onEndReach,
   onRefresh,
+  refreshing,
+  nestedScrollingEnabled,
+  style,
+  header,
   ...restProps
 }: GridPostListProps) {
   const { height, onLayout } = useLayout();
 
-  const { endReachedCallback, refreshCallback, refreshing } = useDataFetchHook(
-    data,
-    isLoading,
-    onFetch,
-    onRefresh
-  );
-
   const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<PostItemIdentifier>) => {
-      return <GridPost index={index} item={item} {...restProps} />;
+    ({ item, index }: ListRenderItemInfo<ItemKey>) => {
+      return <GridPost id={item.key} index={index} {...restProps} />;
     },
     [restProps]
   );
@@ -47,35 +42,44 @@ export default function GridPostList({
     []
   );
 
+  const useEndReachCallback =
+    !isLoading && data?.length && !refreshing && hasEndReached === false;
+
   return (
     <Animated.FlatList
+      ListHeaderComponent={header}
+      style={[style, layoutStyle.flex_1]}
       onLayout={onLayout}
       data={data}
-      keyExtractor={(item) => item.id}
       renderItem={renderItem}
       ItemSeparatorComponent={itemSeparator}
       columnWrapperStyle={layoutStyle.justify_content_space_between}
       numColumns={3}
+      nestedScrollEnabled={nestedScrollingEnabled}
       ListEmptyComponent={
-        isError ? (
-          onFetch && <DefaultErrorFallback retry={onFetch} height={height} />
-        ) : (
-          <GridPlaceHolder />
-        )
+        data ? undefined : onEndReach ? (
+          <GridPlaceHolder
+            height={height}
+            callback={onEndReach}
+            isError={isError || false}
+          />
+        ) : undefined
       }
       ListFooterComponent={
-        hasEndReached !== false ? undefined : isError ? (
-          onFetch && <DefaultErrorFallback retry={onFetch} />
-        ) : (
-          <DefaultPlaceHolder isLoading={isLoading || false} />
-        )
+        hasEndReached === false && onEndReach ? (
+          <DefaultPlaceholder
+            isLoading={isLoading || false}
+            callback={onEndReach}
+            isError={isError || false}
+          />
+        ) : undefined
       }
       onEndReachedThreshold={0.2}
-      onEndReached={hasEndReached !== false ? undefined : endReachedCallback}
+      onEndReached={useEndReachCallback && onEndReach ? onEndReach : undefined}
       refreshControl={
-        onRefresh && (
-          <RefreshControl refreshing={refreshing} onRefresh={refreshCallback} />
-        )
+        refreshing !== undefined && onRefresh !== undefined ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ) : undefined
       }
       showsVerticalScrollIndicator={false}
       overScrollMode={"never"}

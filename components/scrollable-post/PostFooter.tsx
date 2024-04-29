@@ -1,10 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import { AccountParams } from "../../types/utility.types";
 import { layoutStyle, marginStyle, paddingStyle } from "../../styles";
-import { SIZE_24, SIZE_48 } from "../../constants";
+import { SIZE_24, SIZE_30, SIZE_36, SIZE_48 } from "../../constants";
 import Avatar from "../Avatar";
 import Text from "../utility-components/text/Text";
 import PressableIcon from "../utility-components/button/PressableIcon";
+import OutlinedAvatar from "../utility-components/OutlinedAvatar";
 
 export type PostFooterProps = {
   author: AccountParams;
@@ -14,8 +15,13 @@ export type PostFooterProps = {
 const PostFooter = ({ author, onMoreIconPress }: PostFooterProps) => {
   return (
     <View style={root_container_style}>
-      <Avatar url={author.profilePictureUri} />
-      <Text weight="bold" style={marginStyle.margin_left_9}>
+      <OutlinedAvatar
+        url={author.profilePictureUri}
+        size={SIZE_36}
+        outlineWidth={5}
+        gapWidth={3}
+      />
+      <Text weight="semi-bold" style={marginStyle.margin_left_9}>
         {author.username}
       </Text>
       <PressableIcon

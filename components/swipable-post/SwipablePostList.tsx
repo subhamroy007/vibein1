@@ -5,15 +5,14 @@ import {
   RefreshControl,
 } from "react-native";
 import { useCallback, useState } from "react";
-import { PostItemIdentifier } from "../../types/store.types";
-import PhotoPost from "./PhotoPost";
-import MomentPost from "./MomentPost";
 import { useLayout } from "@react-native-community/hooks";
 import { SwipablePostListProps } from "../../types/component.types";
-import { useDataFetchHook } from "../../hooks/utility.hooks";
 import Animated from "react-native-reanimated";
-import DefaultErrorFallback from "../utility-components/DefaultErrorFallback";
+import SwipablePost from "./SwipablePost";
+import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
+import { ItemKey } from "../../types/utility.types";
 import SwipablePostPlaceHolder from "../utility-components/SwipablePostPlaceHolder";
+import { layoutStyle } from "../../styles";
 
 const SwipablePostList = ({
   data,
@@ -21,36 +20,27 @@ const SwipablePostList = ({
   hasEndReached,
   isError,
   isLoading,
-  onFetch,
   onRefresh,
+  onEndReach,
+  refreshing,
+  style,
 }: SwipablePostListProps) => {
   const [focusedPostIndex, setFocusedPostIndex] = useState(0);
-
-  const { endReachedCallback, refreshCallback, refreshing } = useDataFetchHook(
-    data,
-    isLoading,
-    onFetch,
-    onRefresh
-  );
 
   const { height, onLayout } = useLayout();
 
   const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<PostItemIdentifier>) => {
+    ({ item, index }: ListRenderItemInfo<ItemKey>) => {
       const preload = Math.abs(index - focusedPostIndex) <= 3 && focused;
       if (!height) return null;
-      if (item.type === "photo-post") {
-        return <PhotoPost id={item.id} height={height} preload={preload} />;
-      } else {
-        return (
-          <MomentPost
-            id={item.id}
-            height={height}
-            focused={focused && index === focusedPostIndex}
-            preload={preload}
-          />
-        );
-      }
+      return (
+        <SwipablePost
+          id={item.key}
+          height={height}
+          focused={focused && index === focusedPostIndex}
+          preload={preload}
+        />
+      );
     },
     [focusedPostIndex, height, focused]
   );
@@ -85,44 +75,54 @@ const SwipablePostList = ({
     [height]
   );
 
+  const useEndReachCallback =
+    !isLoading &&
+    data !== null &&
+    data !== undefined &&
+    data.length > 0 &&
+    !refreshing &&
+    hasEndReached === false;
+
+  const showFooter =
+    data !== null &&
+    data !== undefined &&
+    data.length > 0 &&
+    hasEndReached === false;
+
   return (
     <Animated.FlatList
       data={data}
-      keyExtractor={(item) => item.id}
       renderItem={renderItem}
       onLayout={onLayout}
       onMomentumScrollEnd={onMomentumScrollEnd}
       getItemLayout={getItemLayoutCallback}
       pagingEnabled
-      showsVerticalScrollIndicator={false}
-      overScrollMode={"never"}
-      onEndReachedThreshold={0.2}
-      onEndReached={hasEndReached !== false ? undefined : endReachedCallback}
-      refreshControl={
-        onRefresh && (
-          <RefreshControl refreshing={refreshing} onRefresh={refreshCallback} />
-        )
-      }
       ListEmptyComponent={
-        isError ? (
-          onFetch && <DefaultErrorFallback retry={onFetch} height={height} />
-        ) : (
+        onEndReach && height ? (
           <SwipablePostPlaceHolder
-            height={height}
             isLoading={isLoading || false}
+            height={height}
           />
-        )
+        ) : undefined
       }
       ListFooterComponent={
-        hasEndReached !== false ? undefined : isError ? (
-          onFetch && <DefaultErrorFallback retry={onFetch} />
-        ) : (
+        showFooter && height && onEndReach ? (
           <SwipablePostPlaceHolder
-            height={height}
             isLoading={isLoading || false}
+            height={height}
           />
-        )
+        ) : undefined
       }
+      onEndReachedThreshold={0.2}
+      onEndReached={useEndReachCallback && onEndReach ? onEndReach : undefined}
+      refreshControl={
+        refreshing !== undefined && onRefresh !== undefined ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ) : undefined
+      }
+      showsVerticalScrollIndicator={false}
+      overScrollMode={"never"}
+      style={layoutStyle.flex_1}
     />
   );
 };

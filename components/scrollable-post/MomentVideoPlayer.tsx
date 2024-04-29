@@ -23,7 +23,7 @@ const MomentVideoPlayer = ({
         focused={focused}
         preload={preload}
         style={layoutStyle.fill}
-        repeat
+        shouldPlayOnFocus
         muted={muted}
       />
     </View>

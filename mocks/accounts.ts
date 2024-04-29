@@ -141,9 +141,7 @@ export const generateAccountObject = (includeFields?: AccountField[]) => {
     if (includeFields.includes("bio")) {
       account.bio = bios[getRandom(bios.length - 1)];
     }
-    if (includeFields.includes("fullname")) {
-      account.fullname = fullnames[getRandom(fullnames.length - 1)];
-    }
+
     if (includeFields.includes("has-followed-client")) {
       account.hasFollowedClient = Math.random() > 0.5;
     }
@@ -199,43 +197,45 @@ export const generateAccount = (includeFields?: AccountField[]) => {
   };
 
   if (includeFields) {
-    if (includeFields.includes("bio")) {
-      account.bio = bios[getRandom(bios.length - 1)];
-    }
     if (includeFields.includes("fullname")) {
       account.fullname = fullnames[getRandom(fullnames.length - 1)];
     }
-    if (includeFields.includes("has-followed-client")) {
-      account.hasFollowedClient = Math.random() > 0.5;
-    }
-    if (includeFields.includes("has-requeste-to-follow-client")) {
-      account.hasRequestedToFollowClient = account.hasFollowedClient
-        ? false
-        : Math.random() > 0.5;
-    }
-    if (includeFields.includes("is-available")) {
-      account.isAvailable = Math.random() > 0.5;
+
+    if (includeFields.includes("bio")) {
+      account.bio = bios[getRandom(bios.length - 1)];
     }
     if (includeFields.includes("is-blocked")) {
-      account.isBlocked = Math.random() > 0.5;
+      account.isBlocked = Math.random() > 0.85;
     }
-
+    if (includeFields.includes("is-available")) {
+      account.isAvailable = Math.random() > 0.85;
+    }
+    if (includeFields.includes("is-private")) {
+      account.isPrivate = Math.random() > 0.8;
+    }
+    if (includeFields.includes("has-followed-client")) {
+      account.hasFollowedClient = !account.isBlocked && Math.random() > 0.5;
+    }
+    if (includeFields.includes("has-requeste-to-follow-client")) {
+      account.hasRequestedToFollowClient =
+        !account.hasFollowedClient && !account.isBlocked && Math.random() > 0.5;
+    }
     if (includeFields.includes("is-followed")) {
-      account.isFollowed = Math.random() > 0.5;
+      account.isFollowed =
+        !account.isBlocked && !account.isAvailable && Math.random() > 0.5;
     }
     if (includeFields.includes("is-favourite")) {
-      account.isFavourite = account.isFollowed ? Math.random() > 0.5 : false;
+      account.isFavourite = account.isFollowed && Math.random() > 0.5;
     }
     if (includeFields.includes("is-memory-hidden")) {
       account.isMemoryHidden = Math.random() > 0.5;
     }
-    if (includeFields.includes("is-private")) {
-      account.isPrivate = Math.random() > 0.5;
-    }
+
     if (includeFields.includes("is-requested-to-follow")) {
-      account.isRequestedToFollow = account.isFollowed
-        ? false
-        : Math.random() > 0.5;
+      account.isRequestedToFollow =
+        account.isFollowed === false &&
+        account.isPrivate &&
+        Math.random() > 0.5;
     }
 
     if (includeFields.includes("no-of-followers")) {
@@ -245,12 +245,38 @@ export const generateAccount = (includeFields?: AccountField[]) => {
       account.noOfFollowings = getRandom(700, 5);
     }
     if (includeFields.includes("no-of-posts")) {
-      account.noOfPosts = getRandom(100, 9);
+      const count = Math.random() > -1 ? getRandom(100, 9) : 0;
+      account.noOfPosts = count;
+      if (includeFields.includes("post-meta")) {
+        account.postMeta = {
+          hasMoments: count && Math.random() > 0.3 ? true : false,
+          hasPhotos: count && Math.random() > 0.3 ? true : false,
+        };
+      }
+    }
+
+    if (includeFields.includes("no-of-tagged-posts")) {
+      account.noOfTaggedPosts = Math.random() > 0.4 ? getRandom(1, 100) : 0;
     }
 
     if (includeFields.includes("memory-info")) {
-      account.noOfAvailableMemories = getRandom(10, 1);
-      account.noOfUnseenMemories = account.noOfAvailableMemories;
+      const count = Math.random() > 0.4 ? getRandom(10, 1) : 0;
+      account.memoryInfo = {
+        noOfAvailableMemories: count,
+        noOfUnseenMemories: count,
+      };
+    }
+
+    if (includeFields.includes("mute-settings") && account.isFollowed) {
+      account.muteSettings = { memory: false, post: false };
+    }
+
+    if (includeFields.includes("notification-settings") && account.isFollowed) {
+      account.notificationSettings = {
+        memory: false,
+        moment: false,
+        photo: false,
+      };
     }
   }
 

@@ -1,27 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
-import accountReducer from "./account/account.slice";
-import postReducer from "./post/post.slice";
 import clientReducer from "./client/client.slice";
 import hashtagReducer from "./hashtag/hashtag.slice";
-import requestReducer from "./request/request.slice";
-import postScreenReducer from "./post-screen/post_screen.slice";
-import locationScreenReducer from "./location-screen/location_screen.slice";
 import chatReducer from "./inbox/chat.slice";
 import postStoreReducer from "./post-store/post.slice";
 import accountStoreReducer from "./account-store/account.slice";
+import locationReducer from "./location/location.slice";
 
 const appDataStore = configureStore({
   reducer: {
-    account: accountReducer,
-    post: postReducer,
     client: clientReducer,
     hashtag: hashtagReducer,
-    request: requestReducer,
-    postScreen: postScreenReducer,
-    locationScreen: locationScreenReducer,
     chat: chatReducer,
     post_store: postStoreReducer,
     account_store: accountStoreReducer,
+    location: locationReducer,
   },
 });
 

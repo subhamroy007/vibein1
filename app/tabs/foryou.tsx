@@ -7,11 +7,11 @@ import {
 } from "react-native-tab-view";
 import MomentsSuggestionTab from "../../components/foryou_tabs/MomentsSuggestionTab";
 import PhotosSuggestionTab from "../../components/foryou_tabs/PhotosSuggestionTab";
-import AppText from "../../components/AppText";
 import { backgroundStyle, layoutStyle } from "../../styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useScreenInit } from "../../hooks/utility.hooks";
 import { View } from "react-native";
+import Text from "../../components/utility-components/text/Text";
 
 export default function Foryou() {
   const [index, setIndex] = useState(0);
@@ -68,15 +68,15 @@ export default function Foryou() {
                   switch (route.key) {
                     case "photo-tab":
                       return (
-                        <AppText color={color} weight="semi-bold">
+                        <Text color={color} weight="semi-bold">
                           PHOTOS
-                        </AppText>
+                        </Text>
                       );
                     case "moment-tab":
                       return (
-                        <AppText color={color} weight="semi-bold">
+                        <Text color={color} weight="semi-bold">
                           MOMENTS
-                        </AppText>
+                        </Text>
                       );
                   }
                 }}

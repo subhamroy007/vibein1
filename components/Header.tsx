@@ -10,10 +10,10 @@ import {
   paddingStyle,
 } from "../styles";
 import { COLOR_1, SIZE_18, SIZE_20, SIZE_24, SIZE_54 } from "../constants";
-import AppText from "./AppText";
-import Icon from "./Icon";
 import { useNavigation } from "expo-router";
 import { ReactNode, useCallback } from "react";
+import Icon from "./utility-components/icon/Icon";
+import Text from "./utility-components/text/Text";
 
 export type HeaderProps = {
   floating?: boolean;
@@ -91,14 +91,14 @@ const Header = ({
         ]}
       >
         {title !== undefined && (
-          <AppText
+          <Text
             weight="bold"
             size={SIZE_20}
             color={transparent ? COLOR_1 : undefined}
-            isMultiline
+            numberOfLines={0}
           >
             {title}
-          </AppText>
+          </Text>
         )}
         {ItemMiddle && ItemMiddle}
       </View>

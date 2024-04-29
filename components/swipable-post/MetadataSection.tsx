@@ -6,10 +6,15 @@ import {
 } from "../../types/utility.types";
 import { layoutStyle, marginStyle, paddingStyle } from "../../styles";
 import Animated from "react-native-reanimated";
-import { LAYOUT_ANIMATION_400, SIZE_24 } from "../../constants";
-import HighlightedText from "../HighlightedText";
+import {
+  COLOR_1,
+  COLOR_2,
+  LAYOUT_ANIMATION_400,
+  SIZE_24,
+} from "../../constants";
 import AuthorInfo from "./AuthorInfo";
 import Capsule from "../utility-components/button/Capsule";
+import MultilineText from "../utility-components/text/MultilineText";
 
 type MetadataSectionProps = {
   author: AccountParams;
@@ -38,13 +43,13 @@ const MetadataSection = ({
           fadingEdgeLength={20}
           style={marginStyle.margin_top_12}
         >
-          <HighlightedText
-            transparent
+          <MultilineText
             onPress={onCaptionPress}
             collapsed={captionCollapsed}
-          >
-            {caption}
-          </HighlightedText>
+            text={caption}
+            color={COLOR_1}
+            hightlightColor={COLOR_2}
+          />
         </ScrollView>
       ) : undefined}
       {(audio || location) && (

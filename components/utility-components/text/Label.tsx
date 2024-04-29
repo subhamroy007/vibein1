@@ -18,6 +18,7 @@ export default class Label extends PureComponent<LabelProps> {
       outlineWidth,
       keepBackgroundWithOutline,
       width,
+      stretch,
       ...restProps
     } = this.props;
 
@@ -49,7 +50,8 @@ export default class Label extends PureComponent<LabelProps> {
     const label_style: StyleProp<TextStyle> = [
       {
         height: calculatedSize,
-        width: width ? width : "auto",
+        width: width && !stretch ? width : "auto",
+        flex: stretch ? stretch : undefined,
         backgroundColor: calculatedBackgroundColor,
         textAlign: "center",
         textAlignVertical: "center",

@@ -1,10 +1,16 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
-import { AccountField, AccountParams } from "../../types/utility.types";
+import {
+  AccountField,
+  AccountParams,
+  ItemKey,
+} from "../../types/utility.types";
 import { selectAccountById } from "./account.adapter";
 import {
+  AccountSectionSelectorParams,
   AccountSelectorParams,
   MemorySectionSelectorParams,
+  PaginatedDataFetchSelectorParams,
 } from "../../types/selector.types";
 
 export const selectAccountParams = createSelector(
@@ -27,71 +33,86 @@ export const selectAccountParams = createSelector(
     output.username = account.username;
     output.profilePictureUri = account.profilePictureUri;
 
-    if (!includeFields) {
-      return output;
-    }
-
-    if (includeFields.includes("fullname")) {
+    if (!includeFields || includeFields.includes("fullname")) {
       output.fullname = account.fullname;
     }
 
-    if (includeFields.includes("has-requeste-to-follow-client")) {
+    if (
+      !includeFields ||
+      includeFields.includes("has-requeste-to-follow-client")
+    ) {
       output.hasRequestedToFollowClient = account.hasRequestedToFollowClient;
     }
 
-    if (includeFields.includes("is-followed")) {
+    if (!includeFields || includeFields.includes("is-followed")) {
       output.isFollowed = account.isFollowed;
     }
 
-    if (includeFields.includes("has-followed-client")) {
+    if (!includeFields || includeFields.includes("has-followed-client")) {
       output.hasFollowedClient = account.hasFollowedClient;
     }
 
-    if (includeFields.includes("no-of-followers")) {
+    if (!includeFields || includeFields.includes("no-of-followers")) {
       output.noOfFollowers = account.noOfFollowers;
     }
 
-    if (includeFields.includes("is-private")) {
+    if (!includeFields || includeFields.includes("is-private")) {
       output.isPrivate = account.isPrivate;
     }
 
-    if (includeFields.includes("is-favourite")) {
+    if (!includeFields || includeFields.includes("is-requested-to-follow")) {
+      output.isRequestedToFollow = account.isRequestedToFollow;
+    }
+
+    if (!includeFields || includeFields.includes("is-favourite")) {
       output.isFavourite = account.isFavourite;
     }
 
-    if (includeFields.includes("bio")) {
+    if (!includeFields || includeFields.includes("bio")) {
       output.bio = account.bio;
     }
 
-    if (includeFields.includes("no-of-followings")) {
+    if (!includeFields || includeFields.includes("no-of-followings")) {
       output.noOfFollowings = account.noOfFollowings;
     }
 
-    if (includeFields.includes("no-of-posts")) {
+    if (!includeFields || includeFields.includes("no-of-posts")) {
       output.noOfPosts = account.noOfPosts;
     }
 
-    if (includeFields.includes("is-available")) {
+    if (!includeFields || includeFields.includes("no-of-tagged-posts")) {
+      output.noOfTaggedPosts = account.noOfTaggedPosts;
+    }
+
+    if (!includeFields || includeFields.includes("is-available")) {
       output.isAvailable = account.isAvailable;
     }
 
-    if (includeFields.includes("is-blocked")) {
+    if (!includeFields || includeFields.includes("is-blocked")) {
       output.isBlocked = account.isBlocked;
     }
 
-    if (includeFields.includes("is-memory-hidden")) {
+    if (!includeFields || includeFields.includes("is-memory-hidden")) {
       output.isMemoryHidden = account.isMemoryHidden;
     }
 
-    if (includeFields.includes("memory-info")) {
+    if (!includeFields || includeFields.includes("post-meta")) {
+      output.postMeta = account.postMeta;
+    }
+
+    if (!includeFields || includeFields.includes("memory-info")) {
       let isMemoryAvailable = account.memorySection?.data ? true : false;
-      if (account.memorySection?.data && account.noOfAvailableMemories) {
+      if (
+        account.memorySection?.data &&
+        account.memoryInfo?.noOfAvailableMemories
+      ) {
         isMemoryAvailable =
-          account.memorySection.data.length === account.noOfAvailableMemories;
+          account.memorySection.data.length ===
+          account.memoryInfo.noOfAvailableMemories;
       }
       output.memoryInfo = {
-        hasMemory: account.noOfAvailableMemories ? true : false,
-        hasUnseenMemory: account.noOfUnseenMemories ? true : false,
+        hasMemory: account.memoryInfo?.noOfAvailableMemories ? true : false,
+        hasUnseenMemory: account.memoryInfo?.noOfUnseenMemories ? true : false,
         isMemoryAvailable,
       };
     }
@@ -114,8 +135,125 @@ export const selectAccountMemorySection = createSelector(
         id: account.id,
         username: account.username,
         profilePictureUri: account.profilePictureUri,
+        fullname: account.fullname,
       },
       memorySection: account.memorySection,
+    };
+  }
+);
+
+export const selectAccountAllPosts = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const profile = state.account_store.profiles[userId];
+
+    if (!profile) return undefined;
+
+    return profile.allPosts;
+  }
+);
+
+export const selectAccountTaggedPosts = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const profile = state.account_store.profiles[userId];
+
+    if (!profile) return undefined;
+
+    return profile.taggedPosts;
+  }
+);
+
+export const selectAccountPhotoPosts = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const profile = state.account_store.profiles[userId];
+
+    if (!profile) return undefined;
+
+    return profile.photos;
+  }
+);
+
+export const selectAccountMomentPosts = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const profile = state.account_store.profiles[userId];
+
+    if (!profile) return undefined;
+
+    return profile.moments;
+  }
+);
+
+export const selectAccountProfile = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const profile = state.account_store.profiles[userId];
+
+    if (!profile) return undefined;
+
+    const account = selectAccountParams(state, userId);
+
+    if (!account) return undefined;
+    return {
+      account,
+      expiresAt: profile.expiresAt,
+      createdAt: profile.createdAt,
+    };
+  }
+);
+
+export const selectAccountFollowings = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const relatedAccounts =
+      state.account_store.profiles[userId]?.relatedAccounts;
+
+    if (!relatedAccounts || !relatedAccounts.followings) return null;
+
+    return relatedAccounts.followings;
+  }
+);
+
+export const selectAccountSuggestions = createSelector(
+  [(state: RootState) => state, (state: RootState, userId: string) => userId],
+  (state, userId) => {
+    const relatedAccounts =
+      state.account_store.profiles[userId]?.relatedAccounts;
+
+    if (!relatedAccounts || !relatedAccounts.suggested) return null;
+
+    return relatedAccounts.suggested;
+  }
+);
+
+export const selectAccountFollowers = createSelector(
+  [
+    (state: RootState) => state,
+    (state: RootState, userId: string) => userId,
+    (state: RootState, userId: string, searchPhase: string | null) =>
+      searchPhase,
+  ],
+  (state, userId, searchPhase) => {
+    const relatedAccounts =
+      state.account_store.profiles[userId]?.relatedAccounts;
+
+    const account = selectAccountParams(state, userId, ["no-of-followers"]);
+
+    if (
+      !relatedAccounts ||
+      !relatedAccounts.followers ||
+      account?.noOfFollowers === undefined
+    )
+      return null;
+
+    return {
+      allAccounts: relatedAccounts.followers.allAccounts,
+      searchedAccounts: searchPhase
+        ? relatedAccounts.followers.searchedAccounts[searchPhase]
+        : null,
+      noOfFollowers: account.noOfFollowers,
     };
   }
 );

@@ -12,10 +12,10 @@ import { useDeviceLayout } from "../../hooks/utility.hooks";
 import Carosol from "../utility-components/media/Carosol";
 import { useSpringAnimation } from "../../hooks/animation.hooks";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { AnimatedIcon } from "../Icon";
 import { COLOR_6, SIZE_120, SIZE_45 } from "../../constants";
 import Animated from "react-native-reanimated";
 import PhotoAlbumItem from "./PhotoAlbumItem";
+import { AnimatedIcon } from "../utility-components/icon/Icon";
 
 export type PhotoAlbumProps = {
   preload: boolean;

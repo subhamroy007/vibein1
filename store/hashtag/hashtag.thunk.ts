@@ -1,85 +1,65 @@
 import { getRandom } from "../../mocks";
-import { getPostPhotoPreviewUrl } from "../../mocks/data";
-import { generatePostObjects } from "../../mocks/posts";
+import { generatePost } from "../../mocks/posts";
 import {
-  HashtagGeneralRouteResponseParams,
-  HashtagRouteThunkParams,
-  PostScreenResponseParams,
+  HashtagRouteResponseParams,
+  PostPaginatedResponse,
 } from "../../types/response.types";
 import { createAppAsyncThunk, delay } from "../../utility";
 
-export const getHashtagGeneralRouteThunk = createAppAsyncThunk<
-  HashtagGeneralRouteResponseParams,
-  HashtagRouteThunkParams
->(
-  "hashtag/general",
-  async ({ hashtag }, thunkApi) => {
-    const posts = generatePostObjects(24);
+export const fetchHashtagRoute = createAppAsyncThunk<
+  HashtagRouteResponseParams,
+  { name: string }
+>("hashtag/route", async ({ name }, thunkApi) => {
+  const posts = generatePost(12);
 
-    const data: HashtagGeneralRouteResponseParams = {
-      hashtag: {
-        name: hashtag,
-        isFollowing: false,
-        noOfPosts: getRandom(10000, 100),
-        previewUrl: getPostPhotoPreviewUrl(3),
-      },
-      topPosts: posts,
-    };
-    await delay(3_000);
-    if (Math.random() > 0.9) {
-      return thunkApi.rejectWithValue(
-        { errorCode: 1000, message: "something went wrong" },
-        {
-          statusCode: 400,
-          requestTimestamp: Date.now(),
-        }
-      );
-    }
-
-    return thunkApi.fulfillWithValue(data, {
-      statusCode: 200,
-      requestTimestamp: Date.now(),
-    });
-  },
-  {
-    idGenerator: (arg) => {
-      return arg.routeId;
-    },
+  const data: HashtagRouteResponseParams = {
+    name,
+    noOfPosts: getRandom(1000000, 1000),
+    topPosts: { endCursor: "", hasEndReached: false, items: posts },
+  };
+  await delay(400);
+  if (Math.random() > 1.9) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp: Date.now(),
+      }
+    );
   }
-);
 
-export const getHashtagTopPostsRouteThunk = createAppAsyncThunk<
-  PostScreenResponseParams,
-  HashtagRouteThunkParams
->(
-  "hashtag/top-posts",
-  async ({ hashtag }, thunkApi) => {
-    const requestTimestamp = Date.now();
+  return thunkApi.fulfillWithValue(data, {
+    statusCode: 200,
+    requestTimestamp: Date.now(),
+  });
+});
 
-    const posts = generatePostObjects(24);
+export const fetchHashtagTopPosts = createAppAsyncThunk<
+  PostPaginatedResponse,
+  { name: string }
+>("hashtag/top-posts", async ({ name }, thunkApi) => {
+  const requestTimestamp = Date.now();
 
-    const data: PostScreenResponseParams = {
-      posts,
-    };
-    await delay(7_000);
-    if (Math.random() > 0.9) {
-      return thunkApi.rejectWithValue(
-        { errorCode: 1000, message: "something went wrong" },
-        {
-          statusCode: 400,
-          requestTimestamp,
-        }
-      );
-    }
+  const posts = generatePost(8);
 
-    return thunkApi.fulfillWithValue(data, {
-      statusCode: 200,
-      requestTimestamp,
-    });
-  },
-  {
-    idGenerator: (arg) => {
-      return arg.routeId;
-    },
+  const data: PostPaginatedResponse = {
+    endCursor: "",
+    hasEndReached: false,
+    items: posts,
+  };
+  await delay(400);
+  if (Math.random() > 1.9) {
+    return thunkApi.rejectWithValue(
+      { errorCode: 1000, message: "something went wrong" },
+      {
+        statusCode: 400,
+        requestTimestamp,
+      }
+    );
   }
-);
+
+  return thunkApi.fulfillWithValue(data, {
+    statusCode: 200,
+    requestTimestamp,
+  });
+});

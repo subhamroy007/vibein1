@@ -8,7 +8,6 @@ import { PortalProvider } from "@gorhom/portal";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import appDataStore from "../store";
-import { generateAccountObject } from "../mocks/accounts";
 import { backgroundStyle, layoutStyle } from "../styles";
 import { initClientInfo } from "../store/client/client.slice";
 import { LogBox } from "react-native";

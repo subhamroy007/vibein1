@@ -14,18 +14,6 @@ import {
 } from "react-native-safe-area-context";
 import { nanoid } from "@reduxjs/toolkit";
 import { useAppDispatch, useAppSelector } from "./storeHooks";
-import { selectPostScreenInfo } from "../store/post-screen/post_screen.selector";
-import {
-  cleanPostScreen,
-  initPostScreen,
-} from "../store/post-screen/post_screen.slice";
-import { getPostScreenThunk } from "../store/post-screen/post_screen.thunk";
-import { selectLocationScreenInfo } from "../store/location-screen/location_screen.selector";
-import {
-  cleanLocationScreen,
-  initLocationScreen,
-} from "../store/location-screen/location_screen.slice";
-import { getLocationScreenThunk } from "../store/location-screen/location_screen.thunk";
 import {
   usePermissions,
   getAlbumsAsync,
@@ -125,64 +113,6 @@ export function useDownloadImage(url: string, retry: boolean = true) {
   }, [url, retry]);
 
   return { state, urlValue };
-}
-
-export function usePostScreen(url: string, initPosts: string[]) {
-  const screenId = useRef(nanoid()).current;
-
-  const screenInfo = useAppSelector((state) =>
-    selectPostScreenInfo(state, screenId)
-  );
-
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(initPostScreen({ screenId, initPosts }));
-  }, [initPostScreen]);
-
-  useEffect(() => {
-    return () => {
-      dispatch(cleanPostScreen({ screenId }));
-    };
-  }, []);
-
-  const fetch = useCallback(() => {
-    dispatch(getPostScreenThunk({ url, screenId }));
-  }, [url]);
-
-  return {
-    screenInfo,
-    fetch,
-  };
-}
-
-export function useLocationScreen(locationId: string) {
-  const screenId = useRef(nanoid()).current;
-
-  const screenInfo = useAppSelector((state) =>
-    selectLocationScreenInfo(state, screenId)
-  );
-
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(initLocationScreen({ screenId }));
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      dispatch(cleanLocationScreen({ screenId }));
-    };
-  }, []);
-
-  const fetch = useCallback(() => {
-    dispatch(getLocationScreenThunk({ screenId, locationId }));
-  }, [locationId]);
-
-  return {
-    screenInfo,
-    fetch,
-  };
 }
 
 const checkReadPermission = () => {

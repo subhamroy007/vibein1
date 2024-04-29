@@ -5,6 +5,8 @@ import {
   ViewProps,
   DimensionValue,
   FlatListProps,
+  ViewStyle,
+  ListRenderItemInfo,
 } from "react-native";
 import { AppDispatch, RootState } from "../store";
 import { Tabs } from "expo-router";
@@ -15,7 +17,7 @@ import {
   TouchableHighlight,
 } from "react-native-gesture-handler";
 import { AnimateProps, SharedValue } from "react-native-reanimated";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { HitSlop } from "react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon";
 import { PostItemIdentifier } from "./store.types";
 import { ItemKey } from "./utility.types";
@@ -181,6 +183,7 @@ export type GeneralLabelProps = {
   outlineWidth?: number;
   keepBackgroundWithOutline?: boolean;
   width?: DimensionValue;
+  stretch?: number;
 };
 
 export type LabelProps = GeneralLabelProps & TextProps;
@@ -204,27 +207,41 @@ export type CapsuleProps = {
 
 export type DataFetchListGeneralProps<T> = {
   isLoading?: boolean;
-  isPageLoading?: boolean;
   isError?: boolean;
   hasEndReached?: boolean;
-  refreshable?: boolean;
+  refreshing?: boolean;
   onEndReach?: () => void;
-  onInit?: () => void;
+  onRefresh?: () => void;
   data: T[] | null | undefined;
+  style?: StyleProp<ViewStyle>;
+  header?: FlatListProps<T>["ListHeaderComponent"];
+  nestedScrollingEnabled?: boolean;
+};
+
+export type ItemKeyListProps = DataFetchListGeneralProps<ItemKey>;
+
+export type SuggestedAccountListProps = ItemKeyListProps & {
+  onRemove: (userId: string) => void;
+};
+
+export type AccountListProps = ItemKeyListProps & {
+  renderAccount: (item: ListRenderItemInfo<ItemKey>) => React.JSX.Element;
 };
 
 export type GridPostListProps = {
   portrait?: boolean;
   showViews?: boolean;
   showPin?: boolean;
-  onPress: (item: PostItemIdentifier, index: number) => void;
-} & DataFetchListGeneralProps<PostItemIdentifier>;
+  onPress: (id: string, index: number) => void;
+} & DataFetchListGeneralProps<ItemKey>;
 
 export type SwipablePostListProps = {
   focused: boolean;
-} & DataFetchListGeneralProps<PostItemIdentifier>;
+} & DataFetchListGeneralProps<ItemKey>;
 
-export type ScrollablePostListProps = DataFetchListGeneralProps<ItemKey>;
+export type ScrollablePostListProps = DataFetchListGeneralProps<ItemKey> & {
+  onPress: (id: string, index: number) => void;
+};
 
 export type IconProps = TxtProps & GeneralIconProps;
 

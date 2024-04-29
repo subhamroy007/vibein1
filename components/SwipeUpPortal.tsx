@@ -1,6 +1,5 @@
 import { ReactNode, useCallback, useEffect } from "react";
 import { StatusBar, StyleSheet, View, useWindowDimensions } from "react-native";
-import AppText from "./AppText";
 import {
   useBackHandler,
   useKeyboard,
@@ -23,6 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Text from "./utility-components/text/Text";
 
 export type AppModalProps = {
   children: ReactNode;
@@ -160,9 +160,9 @@ export default function SwipeUpPortal({
             onLayout={onContentContainerLayout}
           >
             <View style={[styles.title_container]}>
-              <AppText weight="bold" size={SIZE_16}>
+              <Text weight="bold" size={SIZE_16}>
                 {title}
-              </AppText>
+              </Text>
             </View>
             {children}
           </Animated.View>

@@ -13,9 +13,17 @@ export type ScrollablePostProps = {
   id: string;
   preload: boolean;
   focused: boolean;
+  onPress: (id: string, index: number) => void;
+  index: number;
 };
 
-const ScrollablePost = ({ id, preload, focused }: ScrollablePostProps) => {
+const ScrollablePost = ({
+  id,
+  preload,
+  focused,
+  onPress,
+  index,
+}: ScrollablePostProps) => {
   const post = useAppSelector((state) => selectPost(state, id));
 
   const [likes, setLikes] = useState(false);
@@ -38,6 +46,10 @@ const ScrollablePost = ({ id, preload, focused }: ScrollablePostProps) => {
       pathname: "/comment_route",
     });
   }, [id]);
+
+  const onTap = useCallback(() => {
+    onPress(id, index);
+  }, [onPress, id, index]);
 
   if (!post) return null;
 
@@ -79,11 +91,11 @@ const ScrollablePost = ({ id, preload, focused }: ScrollablePostProps) => {
       onLike={() => {}}
       onMoreIconPress={() => {}}
       onSendIconPress={toggleSend}
-      onTap={() => {}}
+      onTap={onTap}
       audio={usedAudio === null ? undefined : usedAudio}
       caption={caption}
       sound={usedAudio ? "toggle" : undefined}
-      liftCaption={false}
+      liftCaption={true}
       onCommentPress={onCommentPress}
     >
       {content}
@@ -92,11 +104,11 @@ const ScrollablePost = ({ id, preload, focused }: ScrollablePostProps) => {
           <PostLikeSection id={id} onDismiss={toggleLikes} />
         </Portal>
       )}
-      {send && (
+      {/* {send && (
         <Portal>
           <SendSection onDismiss={toggleSend} />
         </Portal>
-      )}
+      )} */}
     </PostTemplate>
   );
 };

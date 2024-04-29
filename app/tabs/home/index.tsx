@@ -6,10 +6,10 @@ import { SIZE_18, SIZE_24, SIZE_27, SIZE_30 } from "../../../constants";
 import { selectClientAccountParams } from "../../../store/client/client.selector";
 import Header from "../../../components/Header";
 import Avatar from "../../../components/Avatar";
-import Icon from "../../../components/Icon";
 import StackContainer from "../../../components/StackContainer";
 import ScrollablePostList from "../../../components/scrollable-post/ScrollablePostList";
 import MemoryAccountList from "../../../components/memory-section/MemoryAccountList";
+import Icon from "../../../components/utility-components/icon/Icon";
 
 export default function Home() {
   const clientAccount = useAppSelector(selectClientAccountParams);
@@ -43,16 +43,15 @@ export default function Home() {
         }
       />
       <MemoryAccountList data={memoryAccounts.data?.items} />
-      <ScrollablePostList
+      {/* <ScrollablePostList
         data={posts.data?.items}
         isLoading={posts.isLoading}
         isError={posts.error}
-        isPageLoading={posts.isLoading}
-        refreshable
+
         onEndReach={fetchPosts}
         onInit={refresh}
         hasEndReached={posts.data?.hasEndReached}
-      />
+      /> */}
     </StackContainer>
   );
 }

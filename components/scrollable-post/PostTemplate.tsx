@@ -52,8 +52,6 @@ const PostTemplate = ({
         onDoubleTap={onLike}
         onTap={onTap}
         audio={audio}
-        caption={caption}
-        liftCaption={liftCaption}
         sound={sound}
       >
         {children}
@@ -70,6 +68,7 @@ const PostTemplate = ({
         noOfLikes={noOfLikes}
         onCommentPress={onCommentPress}
         onLikeCountPress={onLikeCountPress}
+        caption={caption}
       />
     </View>
   );

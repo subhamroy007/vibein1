@@ -1,11 +1,9 @@
-import Animated from "react-native-reanimated";
 import { useSpringAnimation } from "../../hooks/animation.hooks";
 import { backgroundStyle, layoutStyle, marginStyle } from "../../styles";
 import {
   COLOR_1,
   COLOR_15,
   COLOR_6,
-  LAYOUT_ANIMATION_400,
   SIZE_10,
   SIZE_12,
   SIZE_120,
@@ -19,12 +17,10 @@ import {
 import { ReactNode, useCallback, useState } from "react";
 import AdvancedGesture from "../utility-components/AdvancedGesture";
 import { AudioWithTitle } from "../../types/utility.types";
-import HighlightedText from "../HighlightedText";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Pressable from "../utility-components/button/Pressable";
 import Icon, { AnimatedIcon } from "../utility-components/icon/Icon";
 import Text from "../utility-components/text/Text";
-import PressableIcon from "../utility-components/button/PressableIcon";
 import { useMediaMutedState } from "../../hooks/client.hooks";
 import PressableIconCircle from "../utility-components/button/PressableIconCircle";
 
@@ -32,19 +28,15 @@ type ContentContainerProps = {
   onDoubleTap: () => void;
   onTap: () => void;
   children: ReactNode;
-  caption?: string;
   sound?: "nosound" | "unavailbale" | "toggle";
   audio?: AudioWithTitle;
-  liftCaption?: boolean;
 };
 
 const ContentContainer = ({
   onDoubleTap,
   onTap,
   children,
-  caption,
   audio,
-  liftCaption,
   sound,
 }: ContentContainerProps) => {
   const [animatedStyle, startAnimation] = useSpringAnimation();
@@ -78,7 +70,6 @@ const ContentContainer = ({
       style={root_container_style}
       onDoubleTap={doubleTapCallback}
       onTap={onTap}
-      onLongPress={caption ? toggleCollapsedState : undefined}
     >
       {children}
       {audio && (
@@ -121,29 +112,6 @@ const ContentContainer = ({
       {!collapsed && (
         <Pressable onPress={toggleCollapsedState} style={overlay_style} />
       )}
-      {caption ? (
-        <Animated.View
-          layout={LAYOUT_ANIMATION_400}
-          style={[
-            caption_container_style,
-            { bottom: liftCaption ? SIZE_24 : SIZE_12, width: "80%" },
-          ]}
-        >
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            overScrollMode="never"
-            fadingEdgeLength={24}
-          >
-            <HighlightedText
-              transparent
-              collapsed={collapsed}
-              onPress={toggleCollapsedState}
-            >
-              {caption}
-            </HighlightedText>
-          </ScrollView>
-        </Animated.View>
-      ) : undefined}
     </AdvancedGesture>
   );
 };

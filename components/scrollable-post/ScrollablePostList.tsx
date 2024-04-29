@@ -7,11 +7,11 @@ import {
 import { useCallback, useState } from "react";
 import { useLayout } from "@react-native-community/hooks";
 import { ScrollablePostListProps } from "../../types/component.types";
-import { useDataFetchHook } from "../../hooks/utility.hooks";
 import Animated from "react-native-reanimated";
 import { ItemKey } from "../../types/utility.types";
 import ScrollablePost from "./ScrollablePost";
 import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
+import { LAYOUT_ANIMATION_400 } from "../../constants";
 
 const viewabilityConfig: ViewabilityConfig = {
   minimumViewTime: 150,
@@ -23,20 +23,12 @@ const ScrollablePostList = ({
   hasEndReached,
   isError,
   isLoading,
-  isPageLoading,
-  refreshable,
   onEndReach,
-  onInit,
+  onRefresh,
+  refreshing,
+  onPress,
 }: ScrollablePostListProps) => {
   const [focusedPostIndex, setFocusedPostIndex] = useState(0);
-
-  const { endReachedCallback, refreshCallback, refreshing } = useDataFetchHook(
-    data,
-    isLoading,
-    isPageLoading,
-    onEndReach,
-    onInit
-  );
 
   const { height, onLayout } = useLayout();
 
@@ -45,10 +37,16 @@ const ScrollablePostList = ({
       const preload = Math.abs(index - focusedPostIndex) <= 3;
       const focused = index === focusedPostIndex;
       return (
-        <ScrollablePost id={item.key} focused={focused} preload={preload} />
+        <ScrollablePost
+          id={item.key}
+          focused={focused}
+          preload={preload}
+          onPress={onPress}
+          index={index}
+        />
       );
     },
-    [focusedPostIndex]
+    [focusedPostIndex, onPress]
   );
 
   const viewableItemsChangedCallback = useCallback(
@@ -65,41 +63,56 @@ const ScrollablePostList = ({
     []
   );
 
+  const useEndReachCallback =
+    !isLoading &&
+    data !== null &&
+    data !== undefined &&
+    data.length > 0 &&
+    !refreshing &&
+    hasEndReached === false;
+
+  const showFooter =
+    data !== null &&
+    data !== undefined &&
+    data.length > 0 &&
+    hasEndReached === false;
+
   return (
     <Animated.FlatList
       data={data}
       renderItem={renderItem}
       onLayout={onLayout}
-      showsVerticalScrollIndicator={false}
-      overScrollMode={"never"}
-      onEndReachedThreshold={0.2}
-      onEndReached={hasEndReached !== false ? undefined : endReachedCallback}
-      refreshControl={
-        onInit && refreshable ? (
-          <RefreshControl refreshing={refreshing} onRefresh={refreshCallback} />
-        ) : undefined
-      }
       ListEmptyComponent={
-        onInit && (
+        onEndReach ? (
           <DefaultPlaceholder
-            isLoading={isLoading || false}
-            callback={onInit}
             isError={isError || false}
-            height={height}
+            isLoading={isLoading || false}
+            callback={onEndReach}
           />
-        )
+        ) : undefined
       }
       ListFooterComponent={
-        hasEndReached === false ? (
+        showFooter && onEndReach ? (
           <DefaultPlaceholder
-            isLoading={isLoading || false}
-            callback={endReachedCallback}
             isError={isError || false}
+            isLoading={isLoading || false}
+            callback={onEndReach}
           />
         ) : undefined
       }
+      onEndReachedThreshold={0.2}
+      onEndReached={useEndReachCallback && onEndReach ? onEndReach : undefined}
+      refreshControl={
+        refreshing !== undefined && onRefresh !== undefined ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ) : undefined
+      }
+      showsVerticalScrollIndicator={false}
+      overScrollMode={"never"}
       viewabilityConfig={viewabilityConfig}
       onViewableItemsChanged={viewableItemsChangedCallback}
+      removeClippedSubviews={false}
+      itemLayoutAnimation={LAYOUT_ANIMATION_400}
     />
   );
 };

@@ -1,34 +1,48 @@
-import { useLocalSearchParams } from "expo-router";
-import AppScreen from "../../../components/AppScreen";
 import Header from "../../../components/Header";
-import FullScreenPostList from "../../../components/fullscreen-post/FullScreenPostList";
-import { useHashtagGeneralRoute } from "../../../hooks/hashtag.hook";
+import { useGlobalSearchParams } from "expo-router";
+import { useAppDispatch, useAppSelector } from "../../../hooks/storeHooks";
+import { useCallback, useState } from "react";
+import StackContainer from "../../../components/StackContainer";
+import { selectHashtagTopPosts } from "../../../store/hashtag/hashtag.selector";
+import { fetchHashtagTopPosts } from "../../../store/hashtag/hashtag.thunk";
+import SwipablePostList from "../../../components/swipable-post/SwipablePostList";
 
-const TopPostsSwipableFeed = () => {
-  const { routeId, hashtag } = useLocalSearchParams<{
-    routeId: string;
-    hashtag: string;
-  }>();
+export default function AllPostScrollableFeed() {
+  const { hashtag } = useGlobalSearchParams<{ hashtag: string }>();
 
-  const { fetchTopPosts, routeParams } = useHashtagGeneralRoute(
-    routeId!,
-    hashtag!
+  const dispatch = useAppDispatch();
+
+  const [isLoading, setLoading] = useState(false);
+  const [isError, setError] = useState(false);
+
+  const data = useAppSelector((state) =>
+    selectHashtagTopPosts(state, hashtag!)
   );
+
+  const onEndReached = useCallback(async () => {
+    setError(false);
+    setLoading(true);
+    dispatch(fetchHashtagTopPosts({ name: hashtag! }))
+      .unwrap()
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [hashtag]);
 
   return (
-    <AppScreen dark>
-      {routeParams && (
-        <FullScreenPostList
-          data={routeParams.data?.posts}
-          enablePagination={!routeParams.data?.hasEndReached}
-          paginationRequest={fetchTopPosts}
-          state={routeParams.state}
-          tabFocused
-        />
-      )}
+    <StackContainer dark>
+      <SwipablePostList
+        data={data?.items}
+        hasEndReached={data?.hasEndReached}
+        onEndReach={onEndReached}
+        isError={isError}
+        isLoading={isLoading}
+        focused
+      />
       <Header title="Posts" floating transparent />
-    </AppScreen>
+    </StackContainer>
   );
-};
-
-export default TopPostsSwipableFeed;
+}

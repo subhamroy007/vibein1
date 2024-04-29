@@ -1,38 +1,78 @@
-import { useCallback, useEffect } from "react";
-import { useAccountTagsRoute } from "../../hooks/account.hooks";
+import { Layout } from "react-native-tab-view/lib/typescript/src/types";
+import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
+import { useCallback, useEffect, useState } from "react";
+import { selectAccountTaggedPosts } from "../../store/account-store/account.selectors";
+import { fetchAccountTaggedPosts } from "../../store/account-store/account.thunks";
 import GridPostList from "../grid-post/GripPostList";
+import { useRouter } from "expo-router";
 
-const AccountTagsTab = ({
-  username,
-  routeId,
+const AccountTaggedPostsTab = ({
+  userId,
+  layout,
+  nestedScrollingEnabled,
 }: {
-  username: string;
-  routeId: string;
+  userId: string;
+  layout: Layout;
+  nestedScrollingEnabled: boolean;
 }) => {
-  const { routeParams, fetch } = useAccountTagsRoute(username, routeId);
+  const dispatch = useAppDispatch();
 
-  const initRequest = useCallback(() => fetch(true), []);
+  const router = useRouter();
 
-  if (!routeParams) {
-    return null;
-  }
+  const [isLoading, setLoading] = useState(false);
+  const [isError, setError] = useState(false);
+
+  const taggedPosts = useAppSelector((state) =>
+    selectAccountTaggedPosts(state, userId)
+  );
+
+  const onEndReached = useCallback(async () => {
+    setError(false);
+    setLoading(true);
+    dispatch(fetchAccountTaggedPosts({ userId }))
+      .unwrap()
+      .catch((error: any) => {
+        console.log(
+          "could not fetch tagged posts for ",
+          userId,
+          " something went wrong ",
+          error
+        );
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [userId]);
+
+  const onGridPress = useCallback(
+    (id: string, index: number) => {
+      router.push({
+        params: { userid: userId },
+        pathname: "/profile/userid/tagged_post_scrollable_feed",
+      });
+    },
+    [router, userId]
+  );
+
+  useEffect(() => {
+    if (!taggedPosts) {
+      onEndReached();
+    }
+  }, [taggedPosts, onEndReached]);
 
   return (
     <GridPostList
-      data={routeParams.data.posts}
-      initRequest={initRequest}
-      paginationRequest={fetch}
-      state={routeParams.state}
-      showViews
-      showPlaceHolder
-      enablePagination={!routeParams.data.hasEndReached}
-      enableReresh
-      gridPressRoute={{
-        params: { routeId, username },
-        pathname: "/account/[username]/tagged_post_scrollable_feed",
-      }}
+      data={taggedPosts?.items}
+      onPress={onGridPress}
+      hasEndReached={taggedPosts?.hasEndReached}
+      isError={isError}
+      isLoading={isLoading}
+      onEndReach={onEndReached}
+      style={{ width: layout.width }}
+      nestedScrollingEnabled={nestedScrollingEnabled}
     />
   );
 };
 
-export default AccountTagsTab;
+export default AccountTaggedPostsTab;

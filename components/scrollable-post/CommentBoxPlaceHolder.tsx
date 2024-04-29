@@ -3,9 +3,9 @@ import { useAppSelector } from "../../hooks/storeHooks";
 import { selectClientAccountParams } from "../../store/client/client.selector";
 import { COLOR_2, SIZE_24, SIZE_42 } from "../../constants";
 import Avatar from "../Avatar";
-import AppText from "../AppText";
 import { borderStyle, layoutStyle, marginStyle } from "../../styles";
 import Pressable from "../utility-components/button/Pressable";
+import Text from "../utility-components/text/Text";
 
 export type CommentBoxPlaceHolderProps = {
   onCommentBoxPress: () => void;
@@ -21,13 +21,9 @@ const CommentBoxPlaceHolder = ({
   return (
     <Pressable onPress={onCommentBoxPress} style={root_container_style}>
       <Avatar size={SIZE_24} url={client.profilePictureUri} />
-      <AppText
-        color={COLOR_2}
-        weight="regular"
-        style={marginStyle.margin_left_6}
-      >
+      <Text color={COLOR_2} weight="regular" style={marginStyle.margin_left_6}>
         write a comment
-      </AppText>
+      </Text>
     </Pressable>
   );
 };
