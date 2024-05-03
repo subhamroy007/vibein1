@@ -358,7 +358,9 @@ export const marginStyle = StyleSheet.create({
   margin_left_6: {
     marginLeft: SIZE_6,
   },
-
+  margin_left_3: {
+    marginLeft: SIZE_3,
+  },
   margin_right_6: {
     marginRight: SIZE_6,
   },

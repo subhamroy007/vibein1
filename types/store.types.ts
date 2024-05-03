@@ -544,3 +544,11 @@ export type LocationRouteParams = {
   expiresAt: number;
   topPosts: PageData<ItemKey>;
 };
+
+export type AudioRouteParams = {
+  createdAt: number;
+  expiresAt: number;
+  id: string;
+  photos: PageData<ItemKey> | null;
+  moments: PageData<ItemKey>;
+};

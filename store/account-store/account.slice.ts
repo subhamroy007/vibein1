@@ -62,6 +62,11 @@ import {
   fetchLocationRoute,
   fetchLocationTopPosts,
 } from "../location/location.thunk";
+import {
+  fetchAudioMomentPosts,
+  fetchAudioPhotoPosts,
+  fetchAudioRoute,
+} from "../audio-store/audio.thunk";
 
 const profiles: Dictionary<AccountProfileSectionParams> = {};
 
@@ -207,6 +212,17 @@ const accountSlice = createSlice({
     builder.addCase(fetchHashtagTopPosts.fulfilled, (state, { payload }) => {
       addAccountFromPostToStore(state, payload.items);
     });
+    builder.addCase(fetchAudioRoute.fulfilled, (state, { payload }) => {
+      if (payload.moments) {
+        addAccountFromPostToStore(state, payload.moments.items);
+      }
+    });
+    builder.addCase(fetchAudioMomentPosts.fulfilled, (state, { payload }) => {
+      addAccountFromPostToStore(state, payload.items);
+    });
+    builder.addCase(fetchAudioPhotoPosts.fulfilled, (state, { payload }) => {
+      addAccountFromPostToStore(state, payload.items);
+    });
     builder.addCase(fetchLocationRoute.fulfilled, (state, { payload }) => {
       if (payload.topPosts) {
         addAccountFromPostToStore(state, payload.topPosts.items);
@@ -215,6 +231,7 @@ const accountSlice = createSlice({
     builder.addCase(fetchLocationTopPosts.fulfilled, (state, { payload }) => {
       addAccountFromPostToStore(state, payload.items);
     });
+
     builder.addCase(fetchComments.fulfilled, (state, { payload }) => {
       addAccountFromCommentToStore(state, payload.items);
     });

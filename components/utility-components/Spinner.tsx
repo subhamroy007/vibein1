@@ -10,18 +10,19 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import {
   COLOR_2,
   LINE_WIDTH,
   LOADING_INDICATOR_ANIMATION_1_DURATION,
   LOADING_INDICATOR_ANIMATION_2_DURATION,
+  LOGO_BLUE,
+  LOGO_GREEN,
   SIZE_48,
 } from "../../constants";
 import { layoutStyle } from "../../styles";
 import { shallowEqual } from "react-redux";
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+import AnimatedCircle from "./AnimatedCircle";
 
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 
@@ -64,7 +65,11 @@ const AnimatedLaodingIndicator = ({
     );
   }, []);
 
-  const indicatorColor = color ? color : COLOR_2;
+  const indicatorColor = color
+    ? color === "grad"
+      ? `url(#grad)`
+      : color
+    : COLOR_2;
   const indicatorSize = size ? size : SIZE_48; //intialize the avavtar size
   const strokeWidth = outlineWidth ? outlineWidth * LINE_WIDTH : 4 * LINE_WIDTH; //intialize stroke width of the svg
   const noOfSection = 8; //intialize the number of outlined sections in the svg
@@ -121,6 +126,12 @@ const AnimatedLaodingIndicator = ({
       ]}
       fillOpacity={0}
     >
+      <Defs>
+        <LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <Stop offset="0%" stopColor={LOGO_GREEN} />
+          <Stop offset="100%" stopColor={LOGO_BLUE} />
+        </LinearGradient>
+      </Defs>
       {sectionRotations.map((angel) => (
         <Circle
           key={angel}

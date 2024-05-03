@@ -64,9 +64,13 @@ const Header = ({
     >
       <View
         style={[
-          { aspectRatio: "1/1" },
+          { left: 0, zIndex: 3 },
           layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
+          layoutStyle.height_100_percent,
+          paddingStyle.padding_horizontal_12,
+          transparent ? undefined : backgroundStyle.background_color_1,
+          leftAligned ? undefined : layoutStyle.position_absolute,
         ]}
       >
         {ItemLeft ? (
@@ -104,9 +108,13 @@ const Header = ({
       </View>
       <View
         style={[
-          { aspectRatio: "1/1" },
+          { right: 0, zIndex: 3 },
           layoutStyle.align_item_center,
           layoutStyle.justify_content_center,
+          layoutStyle.position_absolute,
+          layoutStyle.height_100_percent,
+          paddingStyle.padding_horizontal_12,
+          transparent ? undefined : backgroundStyle.background_color_1,
         ]}
       >
         {ItemRight && ItemRight}

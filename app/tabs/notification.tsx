@@ -10,6 +10,7 @@ export default function Notification() {
   return (
     <AppScreen>
       <Header title="Notifications" hideBack />
+
       <Button
         text={"go to hashtag"}
         onPress={() => {
@@ -25,6 +26,16 @@ export default function Notification() {
           router.push({
             pathname: "/location/location_id",
             params: { location_id: "1245" },
+          });
+        }}
+        style={marginStyle.margin_top_20}
+      />
+      <Button
+        text={"go to audio"}
+        onPress={() => {
+          router.push({
+            pathname: "/audio/audio_id",
+            params: { audio_id: "125" },
           });
         }}
         style={marginStyle.margin_top_20}

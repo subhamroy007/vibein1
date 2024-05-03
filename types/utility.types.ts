@@ -328,3 +328,18 @@ export type NotificationParams =
   | PostRelatedNotificationParams
   | MemoryRelatedNotificationParams
   | AccountRelatedNotificationParams;
+
+export type AudioParams = {
+  id: string;
+  posterUri?: string;
+  title?: string;
+  artists?: string;
+  isOriginal: boolean;
+  author?: { username: string; profilePictureUri: string };
+  noOfMoments: number;
+  noOfPhotos: number;
+  isSaved: boolean;
+  duration: number;
+  audioUri: string;
+  bestSection: [number, number];
+};

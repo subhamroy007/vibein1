@@ -9,12 +9,9 @@ import {
   MOMENT_VIDEOS,
   PHOTOS,
   getMomentVideoPosterUri,
-  getPostMomentVideoThumbnailUrl,
   getPostMomentVideoUrl,
   getPostPhotoPreviewUrl,
   getPostPhotoUrl,
-  photo_hashs,
-  poster_hashs,
 } from "./data";
 import {
   AccountResponseParams,

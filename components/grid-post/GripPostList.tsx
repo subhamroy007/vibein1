@@ -25,6 +25,7 @@ export default function GridPostList({
   refreshing,
   nestedScrollingEnabled,
   style,
+  onScroll,
   header,
   ...restProps
 }: GridPostListProps) {
@@ -47,6 +48,7 @@ export default function GridPostList({
 
   return (
     <Animated.FlatList
+      onScroll={onScroll}
       ListHeaderComponent={header}
       style={[style, layoutStyle.flex_1]}
       onLayout={onLayout}

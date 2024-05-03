@@ -7,6 +7,8 @@ import {
   FlatListProps,
   ViewStyle,
   ListRenderItemInfo,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { AppDispatch, RootState } from "../store";
 import { Tabs } from "expo-router";
@@ -215,7 +217,7 @@ export type DataFetchListGeneralProps<T> = {
   data: T[] | null | undefined;
   style?: StyleProp<ViewStyle>;
   header?: FlatListProps<T>["ListHeaderComponent"];
-  nestedScrollingEnabled?: boolean;
+  nestedScrollingEnabled?: boolean | SharedValue<boolean>;
 };
 
 export type ItemKeyListProps = DataFetchListGeneralProps<ItemKey>;
@@ -233,6 +235,7 @@ export type GridPostListProps = {
   showViews?: boolean;
   showPin?: boolean;
   onPress: (id: string, index: number) => void;
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 } & DataFetchListGeneralProps<ItemKey>;
 
 export type SwipablePostListProps = {

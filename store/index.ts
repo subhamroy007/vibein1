@@ -5,6 +5,7 @@ import chatReducer from "./inbox/chat.slice";
 import postStoreReducer from "./post-store/post.slice";
 import accountStoreReducer from "./account-store/account.slice";
 import locationReducer from "./location/location.slice";
+import audioReducer from "./audio-store/audio.slice";
 
 const appDataStore = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const appDataStore = configureStore({
     post_store: postStoreReducer,
     account_store: accountStoreReducer,
     location: locationReducer,
+    audio_store: audioReducer,
   },
 });
 

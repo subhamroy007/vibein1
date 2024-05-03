@@ -76,15 +76,15 @@ export function formatTimeDifference(utcDateString: string): string {
   }
 }
 
-export function formatNumber(n: number): string {
+export function formatNumber(n: number, cap: boolean = false): string {
   if (n < 1000) {
     return n.toString();
   } else if (n < 1e6) {
-    return `${Math.floor(n / 1000)}k`;
+    return `${Math.floor(n / 1000)}${cap ? "K" : "k"}`;
   } else if (n < 1e9) {
-    return `${Math.floor(n / 1e6)}m`;
+    return `${Math.floor(n / 1e6)}${cap ? "M" : "m"}`;
   } else {
-    return `${Math.floor(n / 1e9)}b`;
+    return `${Math.floor(n / 1e9)}${cap ? "B" : "b"}`;
   }
 }
 

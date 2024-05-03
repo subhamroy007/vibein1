@@ -57,6 +57,11 @@ import {
   fetchLocationRoute,
   fetchLocationTopPosts,
 } from "../location/location.thunk";
+import {
+  fetchAudioMomentPosts,
+  fetchAudioPhotoPosts,
+  fetchAudioRoute,
+} from "../audio-store/audio.thunk";
 
 const initialState: {
   posts: EntityState<PostAdapterParams>;
@@ -653,6 +658,17 @@ const postSlice = createSlice({
       }
     });
     builder.addCase(fetchLocationTopPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchAudioRoute.fulfilled, (state, { payload }) => {
+      if (payload.moments) {
+        addPostsToStore(state.posts, payload.moments.items);
+      }
+    });
+    builder.addCase(fetchAudioMomentPosts.fulfilled, (state, { payload }) => {
+      addPostsToStore(state.posts, payload.items);
+    });
+    builder.addCase(fetchAudioPhotoPosts.fulfilled, (state, { payload }) => {
       addPostsToStore(state.posts, payload.items);
     });
   },

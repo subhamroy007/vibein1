@@ -13,6 +13,7 @@ import {
   AudioWithUri,
   SearchParams,
   HashTagSearchParams,
+  AudioParams,
 } from "./utility.types";
 import { HashtagAdapterParams, MessageAttachmentParams } from "./store.types";
 
@@ -379,4 +380,9 @@ export type LocationRouteResponseParams = {
   name: string;
   noOfPosts: number;
   topPosts?: PostPaginatedResponse;
+};
+
+export type AudioRouteResponseParams = {
+  audio: AudioParams;
+  moments?: PostPaginatedResponse;
 };
