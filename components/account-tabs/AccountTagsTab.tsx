@@ -5,15 +5,19 @@ import { selectAccountTaggedPosts } from "../../store/account-store/account.sele
 import { fetchAccountTaggedPosts } from "../../store/account-store/account.thunks";
 import GridPostList from "../grid-post/GripPostList";
 import { useRouter } from "expo-router";
+import { SharedValue } from "react-native-reanimated";
+import { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 
 const AccountTaggedPostsTab = ({
   userId,
   layout,
-  nestedScrollingEnabled,
+  nestedScrollEnabled,
+  onNestedScroll,
 }: {
   userId: string;
   layout: Layout;
-  nestedScrollingEnabled: boolean;
+  nestedScrollEnabled: SharedValue<boolean>;
+  onNestedScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }) => {
   const dispatch = useAppDispatch();
 
@@ -70,7 +74,8 @@ const AccountTaggedPostsTab = ({
       isLoading={isLoading}
       onEndReach={onEndReached}
       style={{ width: layout.width }}
-      nestedScrollingEnabled={nestedScrollingEnabled}
+      nestedScrollingEnabled={nestedScrollEnabled}
+      onScroll={onNestedScroll}
     />
   );
 };

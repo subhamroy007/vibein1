@@ -5,15 +5,19 @@ import { useCallback, useEffect, useState } from "react";
 import { Layout } from "react-native-tab-view/lib/typescript/src/types";
 import { fetchAccountAllPosts } from "../../store/account-store/account.thunks";
 import { useRouter } from "expo-router";
+import { SharedValue } from "react-native-reanimated";
+import { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 
 const AccountAllPostsTab = ({
   userId,
   layout,
-  nestedScrollingEnabled,
+  nestedScrollEnabled,
+  onNestedScroll,
 }: {
   userId: string;
   layout: Layout;
-  nestedScrollingEnabled: boolean;
+  nestedScrollEnabled: SharedValue<boolean>;
+  onNestedScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }) => {
   const dispatch = useAppDispatch();
 
@@ -65,7 +69,8 @@ const AccountAllPostsTab = ({
       onEndReach={onEndReached}
       showPin
       style={{ width: layout.width }}
-      nestedScrollingEnabled={nestedScrollingEnabled}
+      nestedScrollingEnabled={nestedScrollEnabled}
+      onScroll={onNestedScroll}
     />
   );
 };

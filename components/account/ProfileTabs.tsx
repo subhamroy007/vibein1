@@ -9,12 +9,15 @@ import { Layout } from "react-native-tab-view/lib/typescript/src/types";
 import { shallowEqual } from "react-redux";
 import TabView from "../swipable-tab/TabView";
 import { IconName } from "../../types/component.types";
+import { SharedValue } from "react-native-reanimated";
+import { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 
 export type ProfileTabsProps = {
   hasPhotos: boolean;
   hasMoments: boolean;
   userId: string;
-  nestedScrollEnabled: boolean;
+  nestedScrollEnabled: SharedValue<boolean>;
+  onNestedScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 };
 
 const ProfileTabs = ({
@@ -22,6 +25,7 @@ const ProfileTabs = ({
   hasPhotos,
   userId,
   nestedScrollEnabled,
+  onNestedScroll,
 }: ProfileTabsProps) => {
   const [index, setIndex] = useState(0);
 
@@ -34,7 +38,8 @@ const ProfileTabs = ({
               userId={userId}
               key={route.key}
               layout={layout}
-              nestedScrollingEnabled={nestedScrollEnabled}
+              nestedScrollEnabled={nestedScrollEnabled}
+              onNestedScroll={onNestedScroll}
             />
           );
         case "photos-route":
@@ -43,7 +48,8 @@ const ProfileTabs = ({
               userId={userId}
               key={route.key}
               layout={layout}
-              nestedScrollingEnabled={nestedScrollEnabled}
+              nestedScrollEnabled={nestedScrollEnabled}
+              onNestedScroll={onNestedScroll}
             />
           );
         case "moments-route":
@@ -52,7 +58,8 @@ const ProfileTabs = ({
               userId={userId}
               key={route.key}
               layout={layout}
-              nestedScrollingEnabled={nestedScrollEnabled}
+              nestedScrollEnabled={nestedScrollEnabled}
+              onNestedScroll={onNestedScroll}
             />
           );
         case "tags-route":
@@ -61,12 +68,13 @@ const ProfileTabs = ({
               userId={userId}
               key={route.key}
               layout={layout}
-              nestedScrollingEnabled={nestedScrollEnabled}
+              nestedScrollEnabled={nestedScrollEnabled}
+              onNestedScroll={onNestedScroll}
             />
           );
       }
     },
-    [userId, nestedScrollEnabled]
+    [userId, nestedScrollEnabled, onNestedScroll]
   );
 
   const routes: Route[] = [

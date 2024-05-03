@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { LayoutChangeEvent, Pressable, View } from "react-native";
 import { AccountSelectorParams } from "../../types/selector.types";
 import {
   layoutStyle,
@@ -14,11 +14,18 @@ import Button from "../utility-components/button/Button";
 import OutlinedAvatar from "../utility-components/OutlinedAvatar";
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
+import FollowRequestBox from "./FollowRequestBox";
 
 export default function AccountDetails({
   account,
+  onAccept,
+  onReject,
+  onLayout,
 }: {
   account: AccountSelectorParams;
+  onAccept: () => void;
+  onReject: () => void;
+  onLayout: (event: LayoutChangeEvent) => void;
 }) {
   const router = useRouter();
 
@@ -30,69 +37,78 @@ export default function AccountDetails({
   }, []);
 
   return (
-    <View style={root_container_style}>
-      <OutlinedAvatar url={account.profilePictureUri} size={SIZE_90} />
-      <Text weight="bold" size={SIZE_14} style={marginStyle.margin_top_12}>
-        {account.fullname}
-      </Text>
-      {account.bio !== undefined && (
-        <MultilineText style={bio_style} text={account.bio} />
+    <View onLayout={onLayout}>
+      {account.hasRequestedToFollowClient && (
+        <FollowRequestBox
+          userId={account.username}
+          onAccept={onAccept}
+          onReject={onReject}
+        />
       )}
-      <View style={metadata_container_style}>
-        <View style={metadata_item_style}>
-          <Text weight="bold" size={SIZE_15}>
-            {account.noOfPosts}
-          </Text>
-          <Text weight="bold" size={SIZE_15}>
-            {" "}
-            post
-          </Text>
-        </View>
-        <Pressable onPress={onPress} style={metadata_item_style}>
-          <Text weight="bold" size={SIZE_15}>
-            {account.noOfFollowings}
-          </Text>
-          <Text weight="bold" size={SIZE_15}>
-            {" "}
-            following
-          </Text>
-        </Pressable>
+      <View style={details_container_style}>
+        <OutlinedAvatar url={account.profilePictureUri} size={SIZE_90} />
+        <Text weight="bold" size={SIZE_14} style={marginStyle.margin_top_12}>
+          {account.fullname}
+        </Text>
+        {account.bio !== undefined && (
+          <MultilineText style={bio_style} text={account.bio} />
+        )}
+        <View style={metadata_container_style}>
+          <View style={metadata_item_style}>
+            <Text weight="bold" size={SIZE_15}>
+              {account.noOfPosts}
+            </Text>
+            <Text weight="bold" size={SIZE_15}>
+              {" "}
+              post
+            </Text>
+          </View>
+          <Pressable onPress={onPress} style={metadata_item_style}>
+            <Text weight="bold" size={SIZE_15}>
+              {account.noOfFollowings}
+            </Text>
+            <Text weight="bold" size={SIZE_15}>
+              {" "}
+              following
+            </Text>
+          </Pressable>
 
-        <View style={metadata_item_style}>
-          <Text weight="bold" size={SIZE_15}>
-            {formatNumber(account.noOfFollowers!)}
-          </Text>
-          <Text weight="bold" size={SIZE_15}>
-            {" "}
-            followers
-          </Text>
+          <View style={metadata_item_style}>
+            <Text weight="bold" size={SIZE_15}>
+              {formatNumber(account.noOfFollowers!)}
+            </Text>
+            <Text weight="bold" size={SIZE_15}>
+              {" "}
+              followers
+            </Text>
+          </View>
         </View>
+        {!account.isBlocked && !(account.isPrivate && !account.isFollowed) && (
+          <View style={buttons_container_style}>
+            <Button
+              text={
+                account.isFollowed
+                  ? "following"
+                  : account.hasFollowedClient
+                  ? "follow back"
+                  : "follow"
+              }
+              stretch={1}
+            />
+            <Button
+              text="message"
+              stretch={1}
+              outlined
+              style={marginStyle.margin_left_12}
+            />
+          </View>
+        )}
       </View>
-      {!account.isBlocked && !(account.isPrivate && !account.isFollowed) && (
-        <View style={buttons_container_style}>
-          <Button
-            text={
-              account.isFollowed
-                ? "following"
-                : account.hasFollowedClient
-                ? "follow back"
-                : "follow"
-            }
-            stretch={1}
-          />
-          <Button
-            text="message"
-            stretch={1}
-            outlined
-            style={marginStyle.margin_left_12}
-          />
-        </View>
-      )}
     </View>
   );
 }
 
-const root_container_style = [
+const details_container_style = [
   paddingStyle.padding_horizontal_12,
   paddingStyle.padding_vertical_18,
   layoutStyle.align_item_center,

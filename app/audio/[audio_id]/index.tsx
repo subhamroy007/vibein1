@@ -231,6 +231,7 @@ export default function Index() {
         }
       />
       <Animated.ScrollView
+        decelerationRate={0.999}
         onLayout={onScrollLayout}
         ref={scrollRef}
         nestedScrollEnabled

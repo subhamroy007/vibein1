@@ -40,6 +40,17 @@ export default function Notification() {
         }}
         style={marginStyle.margin_top_20}
       />
+
+      <Button
+        text={"go to account"}
+        onPress={() => {
+          router.push({
+            pathname: "/profile/userid",
+            params: { userid: "jaimahakal" },
+          });
+        }}
+        style={marginStyle.margin_top_20}
+      />
     </AppScreen>
   );
 }

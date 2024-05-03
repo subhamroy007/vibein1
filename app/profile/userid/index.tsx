@@ -1,10 +1,4 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  borderStyle,
-  layoutStyle,
-  marginStyle,
-  paddingStyle,
-} from "../../../styles";
+import { layoutStyle, marginStyle } from "../../../styles";
 import Header from "../../../components/Header";
 import { useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "../../../hooks/storeHooks";
@@ -22,22 +16,58 @@ import FollowRequestBox from "../../../components/account/FollowRequestBox";
 import ProfileTabs from "../../../components/account/ProfileTabs";
 import { selectAccountProfile } from "../../../store/account-store/account.selectors";
 import { fetchAccountProfileDetails } from "../../../store/account-store/account.thunks";
-import Icon from "../../../components/utility-components/icon/Icon";
-import Text from "../../../components/utility-components/text/Text";
-import { SIZE_15, SIZE_16 } from "../../../constants";
-import Button from "../../../components/utility-components/button/Button";
 import ActionBox from "../../../components/account/ActionBox";
 import { useAccountAction } from "../../../hooks/account.hooks";
 import StackContainer from "../../../components/StackContainer";
+import { useLayout } from "@react-native-community/hooks";
+import Spinner from "../../../components/utility-components/Spinner";
+import PressableIconCircle from "../../../components/utility-components/button/PressableIconCircle";
+import Icon from "../../../components/utility-components/icon/Icon";
+import { SIZE_24 } from "../../../constants";
+import Animated, {
+  useAnimatedRef,
+  useAnimatedScrollHandler,
+  useDerivedValue,
+  useScrollViewOffset,
+  useSharedValue,
+} from "react-native-reanimated";
 
 export default function Home() {
   const { userid } = useLocalSearchParams<{ userid: string }>();
 
+  const { onLayout, height } = useLayout();
+
+  const { onLayout: onDetailsLayout, height: detailsHeight } = useLayout();
+
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+
+  const scrollOffset = useScrollViewOffset(scrollRef);
+
+  const nestedScrollEnabled = useSharedValue(false);
+  const dragging = useSharedValue(false);
+
+  useDerivedValue(() => {
+    if (Math.floor(detailsHeight - scrollOffset.value) <= 0) {
+      nestedScrollEnabled.value = true;
+    } else {
+      if (!dragging.value) {
+        nestedScrollEnabled.value = false;
+      }
+    }
+  }, [detailsHeight]);
+
+  const onNestedScroll = useAnimatedScrollHandler({
+    onBeginDrag() {
+      dragging.value = true;
+    },
+    onEndDrag() {
+      dragging.value = false;
+    },
+  });
+
   const isDataAvailable = useRef(false);
 
   const [refreshing, setRefreshing] = useState(false);
-
-  const [nestedScrollingEnabled, setNestedScrollingState] = useState(false);
 
   const [isLoading, setLoading] = useState(false);
 
@@ -45,7 +75,7 @@ export default function Home() {
 
   const dispatch = useAppDispatch();
 
-  const profileParams = useAppSelector((state) =>
+  const routeParams = useAppSelector((state) =>
     selectAccountProfile(state, userid!)
   );
   const {
@@ -54,128 +84,122 @@ export default function Home() {
     changeFollowingStatus,
     accpetFollowRequest,
     rejectFollowRequest,
-  } = useAccountAction(profileParams?.account);
+  } = useAccountAction(routeParams?.account);
 
-  isDataAvailable.current = profileParams ? true : false;
+  isDataAvailable.current = routeParams ? true : false;
 
-  const fetchProfileDetalis = useCallback(
-    (shouldSetLoading: boolean, shouldSetError: boolean) => {
-      setError(false);
-      if (shouldSetLoading) {
-        setLoading(true);
-      }
-      dispatch(fetchAccountProfileDetails({ userId: userid! }))
-        .unwrap()
-        .catch((error: any) => {
-          console.log(error);
-          if (shouldSetError) {
-            setError(true);
-          }
-        })
-        .finally(() => {
-          setRefreshing(false);
-          setLoading(false);
-        });
-    },
-    [userid]
-  );
+  const loadData = useCallback(() => {
+    setError(false);
+    dispatch(fetchAccountProfileDetails({ userId: userid! }))
+      .unwrap()
+      .catch((error) => {
+        console.log("could not fetch account route ", error);
+        if (!isDataAvailable.current) {
+          setError(true);
+        } else {
+          console.log("showing previously fetched data");
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
+  }, []);
+
+  const onFetch = useCallback(() => {
+    setLoading(true);
+    loadData();
+  }, []);
 
   const onRefresh = useCallback(() => {
-    if (!isLoading) {
-      setRefreshing(true);
-      fetchProfileDetalis(!isDataAvailable.current, !isDataAvailable.current);
+    setRefreshing(true);
+    if (!isDataAvailable.current) {
+      setLoading(true);
     }
-  }, [fetchProfileDetalis, isLoading]);
+    loadData();
+  }, []);
 
-  const onLoad = useCallback(() => {
-    fetchProfileDetalis(true, true);
-  }, [fetchProfileDetalis]);
-
-  // useEffect(() => {
-  //   fetchProfileDetalis(true, !isDataAvailable.current);
-  // }, [fetchProfileDetalis]);
-
-  const onMomentumScrollEnd = useCallback(
-    ({
-      nativeEvent: { contentOffset, contentSize, layoutMeasurement },
-    }: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (
-        Math.round(
-          contentSize.height - layoutMeasurement.height - contentOffset.y
-        ) === 0
-      ) {
-        setNestedScrollingState(true);
-      } else {
-        setNestedScrollingState(false);
-      }
-    },
-    []
-  );
+  useEffect(() => {
+    onFetch();
+  }, []);
 
   let element = null;
+  if (height) {
+    if (isLoading) {
+      element = (
+        <Spinner
+          style={[layoutStyle.align_self_center, { marginTop: height * 0.4 }]}
+        />
+      );
+    } else if (isError) {
+      element = (
+        <PressableIconCircle
+          color={"grey"}
+          name={"retry"}
+          style={[layoutStyle.align_self_center, { marginTop: height * 0.4 }]}
+        />
+      );
+    } else if (routeParams) {
+      const {
+        account: { isMemoryHidden, postMeta, ...restAccountParams },
+      } = routeParams;
 
-  if (isLoading || isError) {
-    element = (
-      <DefaultPlaceholder
-        callback={onLoad}
-        isError={isError}
-        isLoading={isLoading}
-      />
-    );
-  } else if (profileParams) {
-    const {
-      account: {
-        isMemoryHidden,
-        postMeta,
-        hasRequestedToFollowClient,
-        ...restAccountParams
-      },
-    } = profileParams;
-
-    element = (
-      <>
-        {hasRequestedToFollowClient && (
-          <FollowRequestBox
-            userId={userid!}
+      element = (
+        <>
+          <AccountDetails
+            account={restAccountParams}
             onAccept={accpetFollowRequest}
             onReject={rejectFollowRequest}
+            onLayout={onDetailsLayout}
           />
-        )}
-        <AccountDetails account={restAccountParams} />
-        {restAccountParams.isBlocked ||
-        (restAccountParams.isPrivate && !restAccountParams.isFollowed) ? (
-          <ActionBox
-            isBlocked={restAccountParams.isBlocked!}
-            isRequestedToFollow={restAccountParams.isRequestedToFollow!}
-            onRequest={changeFollowRequestStatus}
-            onUnblock={changeBlockStatus}
-          />
-        ) : (
-          <ProfileTabs
-            hasMoments={postMeta?.hasMoments || false}
-            hasPhotos={postMeta?.hasPhotos || false}
-            userId={userid!}
-            nestedScrollEnabled={nestedScrollingEnabled}
-          />
-        )}
-      </>
-    );
+          {restAccountParams.isBlocked ||
+          (restAccountParams.isPrivate && !restAccountParams.isFollowed) ? (
+            <ActionBox
+              isBlocked={restAccountParams.isBlocked!}
+              isRequestedToFollow={restAccountParams.isRequestedToFollow!}
+              onRequest={changeFollowRequestStatus}
+              onUnblock={changeBlockStatus}
+            />
+          ) : (
+            <ProfileTabs
+              hasMoments={postMeta?.hasMoments || false}
+              hasPhotos={postMeta?.hasPhotos || false}
+              userId={userid!}
+              nestedScrollEnabled={nestedScrollEnabled}
+              onNestedScroll={onNestedScroll}
+            />
+          )}
+        </>
+      );
+    }
   }
 
   return (
     <StackContainer>
-      <Header title={userid} />
-      <ScrollView
+      <Header
+        title={userid}
+        ItemRight={
+          isDataAvailable.current && !isLoading ? (
+            <View style={layoutStyle.flex_direction_row}>
+              <Icon name="send-outline" style={marginStyle.margin_right_18} />
+              <Icon name="more-vert" size={SIZE_24} />
+            </View>
+          ) : undefined
+        }
+      />
+      <Animated.ScrollView
+        decelerationRate={0.999}
+        ref={scrollRef}
         style={layoutStyle.flex_1}
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onMomentumScrollEnd={onMomentumScrollEnd}
+        onLayout={onLayout}
       >
         {element}
-      </ScrollView>
+      </Animated.ScrollView>
     </StackContainer>
   );
 }
