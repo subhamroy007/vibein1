@@ -10,12 +10,12 @@ export const fetchLocationRoute = createAppAsyncThunk<
   LocationRouteResponseParams,
   { location_id: string }
 >("location/route", async ({ location_id }, thunkApi) => {
-  const posts = generatePost(12);
+  const posts = generatePost(6, "photos");
 
   const data: LocationRouteResponseParams = {
     name: "Kolkata-city of joy",
     noOfPosts: getRandom(1000000, 1000),
-    topPosts: { endCursor: "", hasEndReached: false, items: posts },
+    topPosts: { endCursor: "", hasEndReached: true, items: posts },
   };
   await delay(400);
   if (Math.random() > 1.9) {

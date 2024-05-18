@@ -1,197 +1,236 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  backgroundStyle,
-  borderStyle,
-  layoutStyle,
-  marginStyle,
-  paddingStyle,
-} from "../../styles";
 import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
 import { selectLikeSection } from "../../store/post-store/post.selectors";
 import {
   fetchFilteredLikes,
   fetchLikes,
 } from "../../store/post-store/post.thunks";
-import { useBackHandler } from "@react-native-community/hooks";
-import { FlatList, StyleSheet, View } from "react-native";
-import { useDataFetchHook } from "../../hooks/utility.hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
-import GeneralAccount from "../account/GeneralAccount";
-import { SIZE_120, SIZE_16, SIZE_20 } from "../../constants";
+import GeneralAccountList from "../account/GeneralAccountList";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { layoutStyle, marginStyle } from "../../styles";
+import { SIZE_120, SIZE_16, SIZE_18 } from "../../constants";
 import Text from "../utility-components/text/Text";
-import Icon from "../utility-components/icon/Icon";
-import { TextInput } from "react-native-gesture-handler";
-import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
-import PressableIcon from "../utility-components/button/PressableIcon";
+import SearchBox from "../utility-components/SearchBox";
+import SwipeUpPortal from "./SwipeUpPortal";
+import { Dictionary } from "@reduxjs/toolkit";
+import { ItemKey } from "../../types/utility.types";
+import Spinner from "../utility-components/Spinner";
 
 export default function PostLikeSection({
   id,
-  onDismiss,
+  onClose,
 }: {
   id: string;
-  onDismiss: () => void;
+  onClose: () => void;
 }) {
-  const abortCallbackRef = useRef<((reason?: string) => void) | null>(null);
+  const { height: window_height } = useWindowDimensions();
 
-  const [searchPhase, setSearchPhase] = useState("");
+  const [searchedLikes, setSearchedLikes] = useState<Dictionary<ItemKey[]>>({}); //dictionary of all the searched accounts
 
-  const likeSection = useAppSelector((state) =>
-    selectLikeSection(state, id, searchPhase === "" ? null : searchPhase)
-  );
+  const abortCallback = useRef<(() => void) | null>(null); //callback reference to abort an ongoing search request
+  const [searchPhase, setSearchPhase] = useState(""); //current search phase
 
-  const resetPhase = useCallback(() => {
-    setSearchPhase("");
-  }, []);
+  const [isSearchLoading, setSearchLoading] = useState(false); //boolean to indicate the search loading state
+  const [isSearchError, setSearchError] = useState(false); //boolean to indicate the search error state
 
-  const paginationCallback = useCallback(() => {
-    dispatch(fetchLikes({ postId: id }));
-  }, []);
+  const lastSeachedPhase = useRef<string | null>(null); // reference to the last searched phase
+  const trimmedText = searchPhase.trim(); //trim the text
 
-  const initCallback = useCallback(() => {
-    dispatch(fetchLikes({ postId: id, refresh: true }));
-  }, []);
+  const [isLoading, setLoading] = useState(false); //boolean to indicate the loading state of the all likes request
+  const [isError, setError] = useState(false); //boolean to indicate the error state of the all likes request
 
-  const getFilteredLikesCallback = useCallback(() => {
-    if (abortCallbackRef.current) {
-      abortCallbackRef.current();
-    }
-    const thunkInfo = dispatch(fetchFilteredLikes({ postId: id, searchPhase }));
-    abortCallbackRef.current = thunkInfo.abort;
-    thunkInfo
+  const showData = useRef(false); //boolean reference to indicate whethere to show the current or previous loaded data
+
+  const isDataAvailable = useRef(false); //boolean reference to indicate whthere data is available or not
+
+  const filteredLikes = searchedLikes[searchPhase]; //list of the last seached accounts
+
+  const likeSection = useAppSelector((state) => selectLikeSection(state, id)); //all likes cached data
+
+  isDataAvailable.current = likeSection ? true : false; //check if any data is available or not
+
+  //callback to load likes of the target posts
+  const loadLikes = useCallback((refresh: boolean) => {
+    setError(false); //reset the error state
+    setLoading(true); //set the loading state to true
+    dispatch(fetchLikes({ postId: id, refresh }))
       .unwrap()
-      .catch(() => {})
+      .catch(() => {
+        if (!isDataAvailable.current || !refresh) {
+          setError(true); //set the error state to true if no data is available and it was the first request
+        }
+        if (isDataAvailable.current) {
+          showData.current = true; //incase any catched data is available set the show data reference to true
+        }
+      })
+      .then(() => {
+        if (refresh) {
+          showData.current = true; // set the show data ref to true to show the fresh data
+        }
+      })
       .finally(() => {
-        abortCallbackRef.current = null;
+        setLoading(false); //set the loading state to false
       });
-  }, [id, searchPhase]);
+  }, []);
+
+  //callback to fetch next page of post likes
+  const onEndReached = useCallback(() => {
+    loadLikes(false);
+  }, []);
+
+  //callback to fetch the first page of the post likes
+  const onInit = useCallback(() => {
+    loadLikes(true);
+  }, []);
 
   const dispatch = useAppDispatch();
-  const { endReachedCallback } = useDataFetchHook(
-    likeSection?.data?.allLikes.items,
-    likeSection?.isLoading,
-    paginationCallback
-  );
-  useBackHandler(() => {
-    onDismiss();
-    return true;
-  });
 
+  //load the first page of the post likes when the component is mounted
   useEffect(() => {
-    if (searchPhase !== "" && !likeSection?.data?.filteredAccounts) {
-      getFilteredLikesCallback();
-    }
-  }, [
-    searchPhase,
-    likeSection?.data?.filteredAccounts,
-    getFilteredLikesCallback,
-  ]);
-
-  useEffect(() => {
-    initCallback();
+    onInit();
   }, []);
 
-  if (!likeSection) {
-    return (
-      <SafeAreaView
-        style={[backgroundStyle.background_color_1, StyleSheet.absoluteFill]}
-      />
+  //logic to fetch the searched accounts
+  useEffect(() => {
+    lastSeachedPhase.current = trimmedText; //set the trimmed text as the last searched phase ref
+    if (trimmedText !== "" && !filteredLikes) {
+      //if no accounts is available for the non-empty trimmed text then send the search request
+      setSearchLoading(true); //set the search loading state to true
+      setSearchError(false); //reset the search state
+      const promise = dispatch(
+        fetchFilteredLikes({ postId: id, searchPhase: trimmedText })
+      ); //store the promise of the sent request
+      abortCallback.current = promise.abort; //set the abort callback of the promise as the abortCallback ref
+      promise
+        .unwrap()
+        .then((value) => {
+          //in case new account is found, store them in the dictionary
+          const newAccounts = value.accounts.map<ItemKey>((account) => ({
+            key: account.userId,
+          }));
+          setSearchedLikes((value) => {
+            return {
+              ...value,
+              [trimmedText]: newAccounts,
+            };
+          });
+        })
+        .catch(() => {
+          if (trimmedText === lastSeachedPhase.current) {
+            //if the request is failed and the trimmed text is still the last seached text then set the search error state to true
+            setSearchError(true);
+          }
+        })
+        .finally(() => {
+          if (trimmedText === lastSeachedPhase.current) {
+            //if the trimmed text is still the last searched phase then set the loading state to true and reset the last search phase ref and abort callback ref to null
+            setSearchLoading(false);
+            lastSeachedPhase.current = null;
+            abortCallback.current = null;
+          }
+        });
+    }
+
+    return () => {
+      if (abortCallback.current) {
+        // incase the search phase is changed and the last search request is still not finished, abort it
+        abortCallback.current();
+        abortCallback.current = null;
+      }
+    };
+  }, [trimmedText, filteredLikes]);
+
+  if (likeSection === undefined) {
+    return null;
+  }
+
+  let listData = null;
+  if (trimmedText === "") {
+    //in case the search phase is empty show the all likes list if the show data reference is set to true;
+    listData = showData.current ? likeSection?.allLikes.items : null;
+  } else {
+    //if the search phase is not empty show the corresponding list of searched accounts
+    listData = filteredLikes;
+  }
+
+  let header = null;
+  if (isDataAvailable.current && showData.current) {
+    //in case the data is available and the show data ref is set to true set the header
+    header = (
+      <View style={header_style}>
+        <SearchBox
+          text={searchPhase}
+          setText={setSearchPhase}
+          placeholder={`search ${likeSection?.engagementSummary.noOfLikes} likes...`}
+        />
+        <Text
+          weight="light_medium"
+          color="grey"
+          size={SIZE_16}
+          style={view_text_style}
+        >
+          {likeSection?.engagementSummary.noOfViews} views
+        </Text>
+      </View>
+    );
+  }
+
+  let placeholder = null;
+  if (trimmedText !== "") {
+    //in case the data is available and the show data ref is set to true set the placeholder
+
+    placeholder = (
+      <View style={placeholder_style}>
+        {isSearchLoading && (
+          <Spinner size={SIZE_18} style={marginStyle.margin_right_9} />
+        )}
+        <Text weight="semi-bold" color="grey">
+          {isSearchLoading
+            ? "Searching..."
+            : isSearchError
+            ? "Request failed"
+            : "No result found"}
+        </Text>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView
-      style={[backgroundStyle.background_color_1, StyleSheet.absoluteFill]}
+    <SwipeUpPortal
+      onClose={onClose}
+      contentHeight={window_height}
+      title="likes"
     >
-      {likeSection.data && (
-        <View style={[{ height: SIZE_120 }, layoutStyle.content_center]}>
-          <View
-            style={[
-              { width: "85%" },
-              layoutStyle.flex_direction_row,
-              layoutStyle.align_item_center,
-              paddingStyle.padding_horizontal_18,
-              paddingStyle.padding_vertical_9,
-              backgroundStyle.background_dove_grey,
-              borderStyle.border_radius_6,
-            ]}
-          >
-            <TextInput
-              style={[
-                layoutStyle.flex_1,
-                { fontSize: SIZE_16, fontFamily: "medium" },
-              ]}
-              placeholder={`search ${likeSection.data.engagementSummary.noOfLikes} likes...`}
-              placeholderTextColor={"grey"}
-              value={searchPhase}
-              onChangeText={setSearchPhase}
-            />
-
-            {searchPhase === "" ? (
-              <Icon
-                size={SIZE_20}
-                color="grey"
-                name="search"
-                style={marginStyle.margin_left_6}
-              />
-            ) : (
-              <PressableIcon
-                size={SIZE_20}
-                color="grey"
-                name="close"
-                style={marginStyle.margin_left_6}
-                onPress={resetPhase}
-              />
-            )}
-          </View>
-          <Text
-            weight="semi-bold"
-            color="grey"
-            size={SIZE_16}
-            style={[layoutStyle.align_self_center, marginStyle.margin_top_24]}
-          >
-            {likeSection.data.engagementSummary.noOfViews} views
-          </Text>
-        </View>
-      )}
-      <FlatList
-        keyboardShouldPersistTaps={"always"}
-        data={
-          searchPhase === ""
-            ? likeSection.data?.allLikes.items
-            : likeSection.data?.filteredAccounts
+      <GeneralAccountList
+        header={header}
+        data={listData}
+        hasEndReached={
+          trimmedText === "" ? likeSection?.allLikes.hasEndReached : true
         }
-        renderItem={({ item }) => {
-          return <GeneralAccount id={item.key} />;
-        }}
-        showsVerticalScrollIndicator={false}
-        overScrollMode="never"
-        ListEmptyComponent={
-          <DefaultPlaceholder
-            callback={
-              searchPhase === "" ? initCallback : getFilteredLikesCallback
-            }
-            isError={likeSection.isError}
-            isLoading={likeSection.isLoading}
-          />
-        }
-        ListFooterComponent={
-          searchPhase === "" &&
-          likeSection.data?.allLikes.hasEndReached === false ? (
-            <DefaultPlaceholder
-              callback={paginationCallback}
-              isError={likeSection.isError}
-              isLoading={likeSection.isLoading}
-            />
-          ) : undefined
-        }
-        onEndReachedThreshold={0.2}
-        onEndReached={
-          searchPhase === "" &&
-          likeSection.data?.allLikes.hasEndReached !== true
-            ? endReachedCallback
-            : undefined
-        }
+        isError={trimmedText === "" ? isError : isSearchError}
+        isLoading={trimmedText === "" ? isLoading : isSearchLoading}
+        onEndReach={trimmedText === "" ? onEndReached : undefined}
+        placeholder={placeholder}
       />
-    </SafeAreaView>
+    </SwipeUpPortal>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    height: SIZE_120,
+  },
+});
+
+const view_text_style = [
+  layoutStyle.align_self_center,
+  marginStyle.margin_top_24,
+];
+
+const header_style = [styles.header, layoutStyle.content_center];
+
+const placeholder_style = [
+  marginStyle.margin_top_24,
+  layoutStyle.flex_direction_row,
+  layoutStyle.content_center,
+];

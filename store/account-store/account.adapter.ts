@@ -5,9 +5,9 @@ import {
 } from "../../types/store.types";
 
 const accountAdapter = createEntityAdapter<AccountAdapeterParams>({
-  selectId: (model) => model.username,
+  selectId: (model) => model.userId,
   sortComparer: (account1, account2) =>
-    account1.username.localeCompare(account2.username),
+    account1.userId.localeCompare(account2.userId),
 });
 
 export const { selectById: selectAccountById } = accountAdapter.getSelectors();

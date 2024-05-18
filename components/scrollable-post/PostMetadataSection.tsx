@@ -43,12 +43,11 @@ const PostMetadataSection = ({
         />
       )}
       {noOfLikes > 0 ? (
-        <Text weight="semi-bold" size={SIZE_14} onPress={onLikeCountPress}>
+        <Text size={SIZE_14} onPress={onLikeCountPress}>
           {noOfLikes} likes
         </Text>
       ) : undefined}
       <Text
-        weight="semi-bold"
         color="grey"
         size={SIZE_14}
         style={marginStyle.margin_top_6}
@@ -60,7 +59,7 @@ const PostMetadataSection = ({
         color="grey"
         size={SIZE_12}
         style={marginStyle.margin_top_6}
-        weight="medium"
+        weight="light_medium"
       >
         {getRelativeTimeString(createdAt)}
       </Text>

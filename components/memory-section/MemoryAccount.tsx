@@ -81,7 +81,7 @@ export default function MemoryAccount({
         />
       </Pressable>
       <Text weight="medium" size={SIZE_11} style={marginStyle.margin_top_4}>
-        {account.username}
+        {account.userId}
       </Text>
     </View>
   );

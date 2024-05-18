@@ -16,7 +16,7 @@ export default function SuggestedAccount({
   onRemove: (userId: string) => void;
 }) {
   const account = useAccountSelector(userId, [
-    "fullname",
+    "name",
     "has-followed-client",
     "is-followed",
   ]);
@@ -39,10 +39,10 @@ export default function SuggestedAccount({
       <Avatar size={SIZE_48} url={account.profilePictureUri} />
       <View style={[marginStyle.margin_horizontal_12, layoutStyle.flex_1]}>
         <Text weight="semi-bold" size={SIZE_14}>
-          {account.username}
+          {account.userId}
         </Text>
         <Text weight="semi-bold" color="grey" size={SIZE_14}>
-          {account.fullname}
+          {account.name}
         </Text>
       </View>
       <Button

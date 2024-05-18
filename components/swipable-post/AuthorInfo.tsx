@@ -14,7 +14,7 @@ const AuthorInfo = ({ account }: { account: AccountParams }) => {
         <Avatar url={account.profilePictureUri} />
       </Pressable>
       <Text style={marginStyle.margin_left_9} color={COLOR_1}>
-        {account.username}
+        {account.userId}
       </Text>
       <Button
         text={account.hasFollowedClient ? "following" : "follow"}

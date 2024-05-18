@@ -8,7 +8,7 @@ import { useAccountSelector } from "../../hooks/account.hooks";
 
 export default function GeneralAccount({ id }: { id: string }) {
   const account = useAccountSelector(id, [
-    "fullname",
+    "name",
     "has-followed-client",
     "is-followed",
   ]);
@@ -26,11 +26,9 @@ export default function GeneralAccount({ id }: { id: string }) {
     >
       <Avatar size={SIZE_48} url={account.profilePictureUri} />
       <View style={[marginStyle.margin_horizontal_12, layoutStyle.flex_1]}>
-        <Text weight="semi-bold" size={SIZE_14}>
-          {account.username}
-        </Text>
-        <Text weight="semi-bold" color="grey" size={SIZE_14}>
-          {account.fullname}
+        <Text size={SIZE_14}>{account.userId}</Text>
+        <Text color="grey" weight="light_medium">
+          {account.name}
         </Text>
       </View>
       <Button

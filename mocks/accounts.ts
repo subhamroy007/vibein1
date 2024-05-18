@@ -133,7 +133,7 @@ YouTube👇🏻`,
 export const generateAccountObject = (includeFields?: AccountField[]) => {
   const account: AccountResponseParams = {
     id: nanoid(10),
-    username: usernames[getRandom(usernames.length - 1)] + nanoid(6),
+    userId: usernames[getRandom(usernames.length - 1)] + nanoid(6),
     profilePictureUri: getProfilePictureUrl(getRandom(40)),
   };
 
@@ -192,13 +192,13 @@ export const generateAccountObject = (includeFields?: AccountField[]) => {
 export const generateAccount = (includeFields?: AccountField[]) => {
   const account: AccountParams = {
     id: nanoid(10),
-    username: usernames[getRandom(usernames.length - 1)] + nanoid(6),
+    userId: usernames[getRandom(usernames.length - 1)] + nanoid(6),
     profilePictureUri: getProfilePictureUrl(getRandom(30, 1)),
   };
 
   if (includeFields) {
-    if (includeFields.includes("fullname")) {
-      account.fullname = fullnames[getRandom(fullnames.length - 1)];
+    if (includeFields.includes("name")) {
+      account.name = fullnames[getRandom(fullnames.length - 1)];
     }
 
     if (includeFields.includes("bio")) {

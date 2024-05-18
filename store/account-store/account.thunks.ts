@@ -23,7 +23,7 @@ export const fetchAccountMemories = createAppAsyncThunk<
   { userId: string }
 >("account/memories", async ({ userId }, thunkApi) => {
   const account = generateAccount();
-  account.username = userId;
+  account.userId = userId;
 
   const output: AccountMemoryFetchResponseParams = {
     account,
@@ -111,7 +111,7 @@ export const fetchAccountProfileDetails = createAppAsyncThunk<
   { userId: string }
 >("account/profile", async ({ userId }, thunkApi) => {
   const account = generateAccount([
-    "fullname",
+    "name",
     "bio",
     "has-followed-client",
     "has-requeste-to-follow-client",
@@ -131,7 +131,7 @@ export const fetchAccountProfileDetails = createAppAsyncThunk<
     "post-meta",
   ]);
 
-  account.username = userId;
+  account.userId = userId;
   const output: AccountSectionResponseParams = {
     account,
     recentPosts:
@@ -165,7 +165,7 @@ export const addRandomAccount = createAppAsyncThunk<
   { userId: string }
 >("account/random", async ({ userId }, thunkApi) => {
   const account = generateAccount();
-  account.username = userId;
+  account.userId = userId;
 
   return thunkApi.fulfillWithValue(account, {
     statusCode: 200,
@@ -286,7 +286,7 @@ export const fetchAccountFollowings = createAppAsyncThunk<
   { userId: string }
 >("account/followings", async ({ userId }, thunkApi) => {
   const accounts = generateAccounts(24, [
-    "fullname",
+    "name",
     "is-private",
     "has-followed-client",
     "is-followed",
@@ -319,7 +319,7 @@ export const fetchAccountFollowers = createAppAsyncThunk<
   { userId: string }
 >("account/followers", async ({ userId }, thunkApi) => {
   const accounts = generateAccounts(24, [
-    "fullname",
+    "name",
     "is-private",
     "has-followed-client",
     "is-followed",
@@ -352,7 +352,7 @@ export const fetchAccountSearchedFollowers = createAppAsyncThunk<
   { userId: string; searchedPhase: string }
 >("account/search-followers", async ({ userId, searchedPhase }, thunkApi) => {
   const accounts = generateAccounts(24, [
-    "fullname",
+    "name",
     "is-private",
     "has-followed-client",
     "is-followed",
@@ -395,7 +395,7 @@ export const fetchAccountSuggestions = createAppAsyncThunk<
   { userId: string }
 >("account/suggestions", async ({ userId }, thunkApi) => {
   const accounts = generateAccounts(24, [
-    "fullname",
+    "name",
     "is-private",
     "has-followed-client",
   ]);

@@ -30,6 +30,7 @@ import {
 } from "../../types/response.types";
 import {
   CommentAdapterParams,
+  CommentItemIdentifier,
   CommentPlaceholderParams,
   PostAdapterParams,
   PostPhotoAccountTagAdapterParams,
@@ -62,6 +63,7 @@ import {
   fetchAudioPhotoPosts,
   fetchAudioRoute,
 } from "../audio-store/audio.thunk";
+import { fetchInboxChats } from "../chat/chat.thunk";
 
 const initialState: {
   posts: EntityState<PostAdapterParams>;
@@ -91,13 +93,13 @@ const transformToPostAdapter = (
   if (isPhotoPost(post)) {
     return {
       ...post,
-      author: post.author.username,
+      author: post.author.userId,
       photos: post.photos.map((photo) => ({
         ...photo,
         taggedAccounts: photo.taggedAccounts
           ? photo.taggedAccounts.map<PostPhotoAccountTagAdapterParams>(
               (tag) => ({
-                account: tag.account.username,
+                account: tag.account.userId,
                 position: tag.position,
               })
             )
@@ -110,9 +112,9 @@ const transformToPostAdapter = (
   }
   return {
     ...post,
-    author: post.author.username,
+    author: post.author.userId,
     taggedAccounts: post.taggedAccounts
-      ? post.taggedAccounts.map((account) => account.username)
+      ? post.taggedAccounts.map((account) => account.userId)
       : undefined,
     commentSection: null,
     likeSection: null,
@@ -125,8 +127,7 @@ const transformToCommentAdapter = (
 ): CommentAdapterParams => {
   return {
     ...comment,
-    author: comment.author.username,
-    isReplyHidden: true,
+    author: comment.author.userId,
     replySection: null,
   };
 };
@@ -208,20 +209,6 @@ const postSlice = createSlice({
         removeOneComment(state.comments, commentId);
       },
     },
-    swithReplyHiddenState: {
-      prepare(commentId: string) {
-        return { payload: { commentId } };
-      },
-      reducer(
-        state,
-        { payload: { commentId } }: PayloadAction<{ commentId: string }>
-      ) {
-        const targetComment = state.comments.entities[commentId];
-        if (targetComment) {
-          targetComment.isReplyHidden = !targetComment.isReplyHidden;
-        }
-      },
-    },
   },
   extraReducers(builder) {
     builder.addCase(fetchHomeFeedPosts.fulfilled, (state, { payload }) => {
@@ -257,66 +244,25 @@ const postSlice = createSlice({
         const newItems = payload.items.map<ItemKey>((item) => ({
           key: item.id,
         }));
-        const commentSection = state.posts.entities[postId]?.commentSection;
-        if (commentSection) {
-          commentSection.fetched.isLoading = false;
-          if (commentSection.fetched.data) {
-            commentSection.fetched.data.endCursor = payload.endCursor;
-            commentSection.fetched.data.hasEndReached = payload.hasEndReached;
-            commentSection.fetched.data.items = [
-              ...commentSection.fetched.data.items,
-              ...newItems,
-            ];
+        const post = state.posts.entities[postId];
+        if (post) {
+          if (post.commentSection) {
+            const commentSection = post.commentSection.fetched;
+            commentSection.endCursor = payload.endCursor;
+            commentSection.hasEndReached = payload.hasEndReached;
+            commentSection.items = [...commentSection.items, ...newItems];
           } else {
-            commentSection.fetched.data = {
-              endCursor: payload.endCursor,
-              hasEndReached: payload.hasEndReached,
-              items: newItems,
+            post.commentSection = {
+              createdAt: Date.now(),
+              fetched: {
+                endCursor: payload.endCursor,
+                hasEndReached: payload.hasEndReached,
+                items: newItems,
+              },
+              pending: [],
+              uploaded: [],
             };
           }
-        }
-      }
-    );
-    builder.addCase(
-      fetchComments.rejected,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId },
-          },
-          payload,
-        }
-      ) => {
-        const commentSection = state.posts.entities[postId]?.commentSection;
-        if (commentSection) {
-          commentSection.fetched.error = payload;
-          commentSection.fetched.isLoading = false;
-        }
-      }
-    );
-    builder.addCase(
-      fetchComments.pending,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId },
-          },
-        }
-      ) => {
-        const targetPost = state.posts.entities[postId];
-        if (!targetPost) return;
-        if (!targetPost.commentSection) {
-          targetPost.commentSection = {
-            pending: [],
-            uploaded: [],
-            fetched: { data: null, error: null, isLoading: true },
-          };
-        } else {
-          const commentSection = targetPost.commentSection;
-          commentSection.fetched.error = null;
-          commentSection.fetched.isLoading = true;
         }
       }
     );
@@ -332,194 +278,98 @@ const postSlice = createSlice({
         }
       ) => {
         addCommentsToStore(state.comments, payload.items);
+
         const newItems = payload.items.map<ItemKey>((item) => ({
           key: item.id,
         }));
-        const reply = state.comments.entities[commentId];
-        if (reply) {
-          const replySection = reply.replySection;
-          if (replySection) {
-            replySection.fetched.isLoading = false;
-            if (replySection.fetched.data) {
-              replySection.fetched.data.endCursor = payload.endCursor;
-              replySection.fetched.data.hasEndReached = payload.hasEndReached;
-              replySection.fetched.data.items = [
-                ...replySection.fetched.data.items,
-                ...newItems,
-              ];
-            } else {
-              replySection.fetched.data = {
+        const targetComment = state.comments.entities[commentId];
+        if (targetComment) {
+          if (targetComment.replySection) {
+            const replySection = targetComment.replySection.fetched;
+            replySection.endCursor = payload.endCursor;
+            replySection.hasEndReached = payload.hasEndReached;
+            replySection.items = [...replySection.items, ...newItems];
+          } else {
+            targetComment.replySection = {
+              createdAt: Date.now(),
+              fetched: {
                 endCursor: payload.endCursor,
                 hasEndReached: payload.hasEndReached,
                 items: newItems,
-              };
-              reply.isReplyHidden = false;
-            }
+              },
+              pending: [],
+              uploaded: [],
+            };
           }
         }
       }
     );
-    builder.addCase(
-      fetchReplies.rejected,
-      (
-        state,
-        {
-          meta: {
-            arg: { commentId },
-          },
-          payload,
-        }
-      ) => {
-        const replySection = state.comments.entities[commentId]?.replySection;
-        if (replySection) {
-          replySection.fetched.error = payload;
-          replySection.fetched.isLoading = false;
-        }
-      }
-    );
-    builder.addCase(
-      fetchReplies.pending,
-      (
-        state,
-        {
-          meta: {
-            arg: { commentId },
-          },
-        }
-      ) => {
-        const reply = state.comments.entities[commentId];
-        if (!reply) return;
-        if (!reply.replySection) {
-          reply.replySection = {
-            pending: [],
-            uploaded: [],
-            fetched: { data: null, error: null, isLoading: true },
-          };
-        } else {
-          const replySection = reply.replySection;
-          replySection.fetched.error = null;
-          replySection.fetched.isLoading = true;
-        }
-      }
-    );
-    builder.addCase(
-      uploadComment.pending,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId, text, id },
-          },
-        }
-      ) => {
-        addOneCommentPlaceholder(state.comment_placeholders, {
-          id,
-          text,
-          postId: postId,
-          error: null,
-          isUploading: true,
-        });
-        const commentSection = state.posts.entities[postId]?.commentSection;
-        if (commentSection) {
-          commentSection.pending = [{ key: id }, ...commentSection.pending];
-        }
-      }
-    );
-    builder.addCase(
-      uploadComment.fulfilled,
-      (
-        state,
-        {
-          meta: {
-            arg: { id, postId },
-          },
-          payload,
-        }
-      ) => {
-        addCommentsToStore(state.comments, [payload]);
-        removeOneCommentPlaceholder(state.comment_placeholders, id);
-        const commentSection = state.posts.entities[postId]?.commentSection;
-        if (commentSection) {
-          commentSection.uploaded = [
-            { key: payload.id },
-            ...commentSection.uploaded,
-          ];
-          commentSection.pending = commentSection.pending.filter(
-            (item) => item.key !== id
-          );
-        }
-      }
-    );
-    builder.addCase(
-      uploadComment.rejected,
-      (
-        state,
-        {
-          meta: {
-            arg: { id },
-          },
-          payload,
-        }
-      ) => {
-        const placeholder = state.comment_placeholders.entities[id];
-        if (placeholder) {
-          placeholder.error = payload;
-          placeholder.isUploading = false;
-        }
-      }
-    );
-    builder.addCase(
-      fetchLikes.pending,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId },
-          },
-        }
-      ) => {
-        const targetPost = state.posts.entities[postId];
-        if (!targetPost) return;
-        if (!targetPost.likeSection) {
-          targetPost.likeSection = {
-            searchedLikes: {
-              isLoading: false,
-              error: null,
-              data: {},
-              searchPhase: null,
-            },
-            allLikes: {
-              isLoading: true,
-              error: null,
-              data: null,
-            },
-          };
-        } else {
-          const likedSection = targetPost.likeSection;
-          likedSection.allLikes.isLoading = true;
-          likedSection.allLikes.error = null;
-        }
-      }
-    );
-    builder.addCase(
-      fetchLikes.rejected,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId },
-          },
-          payload,
-        }
-      ) => {
-        const targetPost = state.posts.entities[postId];
-        if (!targetPost) return;
-        const likedSection = targetPost.likeSection;
-        if (!likedSection) return;
-        likedSection.allLikes.error = payload;
-        likedSection.allLikes.isLoading = false;
-      }
-    );
+    // builder.addCase(
+    //   uploadComment.pending,
+    //   (
+    //     state,
+    //     {
+    //       meta: {
+    //         arg: { postId, text, id },
+    //       },
+    //     }
+    //   ) => {
+    //     addOneCommentPlaceholder(state.comment_placeholders, {
+    //       id,
+    //       text,
+    //       postId: postId,
+    //       error: null,
+    //       isUploading: true,
+    //     });
+    //     const commentSection = state.posts.entities[postId]?.commentSection;
+    //     if (commentSection) {
+    //       commentSection.pending = [{ key: id }, ...commentSection.pending];
+    //     }
+    //   }
+    // );
+    // builder.addCase(
+    //   uploadComment.fulfilled,
+    //   (
+    //     state,
+    //     {
+    //       meta: {
+    //         arg: { id, postId },
+    //       },
+    //       payload,
+    //     }
+    //   ) => {
+    //     addCommentsToStore(state.comments, [payload]);
+    //     removeOneCommentPlaceholder(state.comment_placeholders, id);
+    //     const commentSection = state.posts.entities[postId]?.commentSection;
+    //     if (commentSection) {
+    //       commentSection.uploaded = [
+    //         { key: payload.id },
+    //         ...commentSection.uploaded,
+    //       ];
+    //       commentSection.pending = commentSection.pending.filter(
+    //         (item) => item.key !== id
+    //       );
+    //     }
+    //   }
+    // );
+    // builder.addCase(
+    //   uploadComment.rejected,
+    //   (
+    //     state,
+    //     {
+    //       meta: {
+    //         arg: { id },
+    //       },
+    //       payload,
+    //     }
+    //   ) => {
+    //     const placeholder = state.comment_placeholders.entities[id];
+    //     if (placeholder) {
+    //       placeholder.error = payload;
+    //       placeholder.isUploading = false;
+    //     }
+    //   }
+    // );
     builder.addCase(
       fetchLikes.fulfilled,
       (
@@ -539,88 +389,27 @@ const postSlice = createSlice({
           targetPost.engagementSummary.noOfViews =
             payload.engagementSummary.noOfViews;
         }
-        const likedSection = targetPost.likeSection;
-        if (!likedSection) return;
         const newItems = payload.likes.items.map<ItemKey>((item) => ({
-          key: item.username,
+          key: item.userId,
         }));
-        likedSection.allLikes.isLoading = false;
-        if (refresh || !likedSection.allLikes.data) {
-          likedSection.allLikes.data = {
-            endCursor: payload.likes.endCursor,
-            hasEndReached: payload.likes.hasEndReached,
-            items: newItems,
-          };
-        } else {
-          likedSection.allLikes.data.hasEndReached =
+        if (targetPost.likeSection && !refresh) {
+          targetPost.likeSection.allLikes.endCursor = payload.likes.endCursor;
+          targetPost.likeSection.allLikes.hasEndReached =
             payload.likes.hasEndReached;
-          likedSection.allLikes.data.endCursor = payload.likes.endCursor;
-          likedSection.allLikes.data.items = [
-            ...likedSection.allLikes.data.items,
+          targetPost.likeSection.allLikes.items = [
+            ...targetPost.likeSection.allLikes.items,
             ...newItems,
           ];
-        }
-      }
-    );
-    builder.addCase(
-      fetchFilteredLikes.pending,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId, searchPhase },
-          },
-        }
-      ) => {
-        const targetPost = state.posts.entities[postId];
-        if (!targetPost) return;
-        const likedSection = targetPost.likeSection;
-        if (!likedSection) return;
-        likedSection.searchedLikes.isLoading = true;
-        likedSection.searchedLikes.searchPhase = searchPhase;
-        likedSection.searchedLikes.error = null;
-      }
-    );
-    builder.addCase(
-      fetchFilteredLikes.rejected,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId, searchPhase },
-          },
-          payload,
-        }
-      ) => {
-        const targetPost = state.posts.entities[postId];
-        if (!targetPost) return;
-        const likedSection = targetPost.likeSection;
-        if (!likedSection) return;
-        if (likedSection.searchedLikes.searchPhase === searchPhase) {
-          likedSection.searchedLikes.isLoading = false;
-          likedSection.searchedLikes.error = payload;
-        }
-      }
-    );
-    builder.addCase(
-      fetchFilteredLikes.fulfilled,
-      (
-        state,
-        {
-          meta: {
-            arg: { postId, searchPhase },
-          },
-          payload,
-        }
-      ) => {
-        const targetPost = state.posts.entities[postId];
-        if (!targetPost) return;
-        const likedSection = targetPost.likeSection;
-        if (!likedSection) return;
-        if (likedSection.searchedLikes.searchPhase === searchPhase) {
-          likedSection.searchedLikes.isLoading = false;
-          likedSection.searchedLikes.data[searchPhase] =
-            payload.accounts.map<ItemKey>((item) => ({ key: item.username }));
+        } else {
+          targetPost.likeSection = {
+            createdAt: Date.now(),
+            expiresAt: -1,
+            allLikes: {
+              endCursor: payload.likes.endCursor,
+              hasEndReached: payload.likes.hasEndReached,
+              items: newItems,
+            },
+          };
         }
       }
     );
@@ -671,6 +460,22 @@ const postSlice = createSlice({
     builder.addCase(fetchAudioPhotoPosts.fulfilled, (state, { payload }) => {
       addPostsToStore(state.posts, payload.items);
     });
+    builder.addCase(fetchInboxChats.fulfilled, (state, { payload }) => {
+      const posts: PostResponseParams[] = [];
+      payload.chats.forEach((chat) => {
+        if (chat.recentMessages) {
+          chat.recentMessages.items.forEach((message) => {
+            if (message.attachment && message.attachment.type === "post") {
+              posts.push(message.attachment.post);
+            }
+          });
+        }
+      });
+      upsertManyPosts(
+        state.posts,
+        posts.map((post) => transformToPostAdapter(post))
+      );
+    });
   },
 });
 
@@ -679,10 +484,5 @@ const postStoreReducer = postSlice.reducer;
 export default postStoreReducer;
 
 export const {
-  actions: {
-    setCommentLike,
-    deleteComment,
-    setCommentPin,
-    swithReplyHiddenState,
-  },
+  actions: { setCommentLike, deleteComment, setCommentPin },
 } = postSlice;

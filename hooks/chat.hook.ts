@@ -7,7 +7,7 @@ import {
 import { selectChat } from "../store/inbox/chat.selector";
 import { initChat, removeChatMessages } from "../store/inbox/chat.slice";
 
-export function useChat(chatId: string, username: string) {
+export function useChat(chatId: string, userId: string) {
   const dispatch = useAppDispatch();
 
   const chatParams = useAppSelector((state) => selectChat(state, chatId));
@@ -18,9 +18,9 @@ export function useChat(chatId: string, username: string) {
 
   useEffect(() => {
     if (!chatParams) {
-      dispatch(initChat({ chatId, receipient: username }));
+      dispatch(initChat({ chatId, receipient: userId }));
     }
-  }, [chatId, username, chatParams]);
+  }, [chatId, userId, chatParams]);
 
   const fetchChatDetails = useCallback(() => {
     dispatch(getChatInfoThunk({ chatId }));

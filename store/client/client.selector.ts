@@ -2,8 +2,8 @@ import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
 
 import {
+  ChatItemSelectorParams,
   PaginatedDataFetchSelectorParams,
-  SendSectionItemSelectorParams,
   SendSectionSelectorParams,
 } from "../../types/selector.types";
 import {
@@ -184,60 +184,33 @@ export const selectAccountAndHashtagSearchSection = createSelector(
   }
 );
 
-export const selectSendSection = createSelector(
-  [
-    (state: RootState) => state.client,
-    (_: RootState, searchPhase: string | null) => searchPhase,
-  ],
-  (state, searchPhase): SendSectionSelectorParams => {
-    const searchedAccounts = searchPhase
-      ? state.sendSectionSearchResult.data[searchPhase]
-      : undefined;
+export const selectInboxAndSuggested = createSelector(
+  [(state: RootState) => state.client],
+  (state): SendSectionSelectorParams => {
+    let items: ChatItemSelectorParams[] = [];
 
-    let filteredSuggestedAccounts: AccountParams[] | undefined = undefined;
     if (state.suggestedAccounts) {
-      if (searchPhase) {
-        filteredSuggestedAccounts = state.suggestedAccounts
-          .filter((account) => account.username.startsWith(searchPhase))
-          .slice(0, 20);
-      } else {
-        filteredSuggestedAccounts = state.suggestedAccounts.slice(0, 20);
-      }
-    }
-
-    const items: SendSectionItemSelectorParams[] = [];
-    if (filteredSuggestedAccounts) {
-      items.push(
-        ...filteredSuggestedAccounts.map<SendSectionItemSelectorParams>(
-          (account) => ({
-            type: "one-to-one",
-            id: account.id,
-            name: account.fullname!,
-            secondaryText: account.username,
-            pictureUri: account.profilePictureUri,
-          })
-        )
-      );
-    }
-    if (searchedAccounts) {
-      items.push(
-        ...searchedAccounts.map<SendSectionItemSelectorParams>((account) => ({
-          type: "one-to-one",
-          id: account.id,
-          name: account.fullname!,
-          secondaryText: account.username,
-          pictureUri: account.profilePictureUri,
-        }))
+      items = state.suggestedAccounts.map<ChatItemSelectorParams>(
+        (account) => ({ type: "one-to-one", ...account, name: account.name! })
       );
     }
 
     return {
-      isLoading: searchPhase ? state.sendSectionSearchResult.isLoading : false,
-      isError: searchPhase
-        ? state.sendSectionSearchResult.error || false
-        : false,
-      hasSearchResult: searchPhase ? (searchedAccounts ? true : false) : true,
-      items,
+      inboxAndSuggested: items,
     };
+  }
+);
+
+export const selectPopupNotification = createSelector(
+  [(state: RootState) => state.client],
+  (state) => {
+    return state.notification;
+  }
+);
+
+export const selectInbox = createSelector(
+  [(state: RootState) => state.client],
+  (state) => {
+    return state.inbox;
   }
 );

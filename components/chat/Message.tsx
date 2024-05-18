@@ -103,7 +103,7 @@ const Message = ({ id }: { id: string }) => {
       dispatch(
         setMessageReaction({
           messageId: id,
-          clientUsername: clientInfo!.username,
+          clientUsername: clientInfo!.userId,
           reactionEmoji,
         })
       );

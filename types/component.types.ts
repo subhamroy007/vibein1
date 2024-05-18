@@ -129,7 +129,14 @@ export type MultilineTextProps = {
 export type GeneralTextProps = {
   size?: number;
   color?: string;
-  weight?: "bold" | "medium" | "regular" | "semi-bold" | "extra-bold" | "light";
+  weight?:
+    | "bold"
+    | "medium"
+    | "regular"
+    | "semi-bold"
+    | "extra-bold"
+    | "light"
+    | "light_medium";
   scale?: number;
 };
 
@@ -218,9 +225,12 @@ export type DataFetchListGeneralProps<T> = {
   style?: StyleProp<ViewStyle>;
   header?: FlatListProps<T>["ListHeaderComponent"];
   nestedScrollingEnabled?: boolean | SharedValue<boolean>;
+  placeholder?: FlatListProps<T>["ListEmptyComponent"];
 };
 
-export type ItemKeyListProps = DataFetchListGeneralProps<ItemKey>;
+export type ItemKeyListProps = DataFetchListGeneralProps<ItemKey> & {
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+};
 
 export type SuggestedAccountListProps = ItemKeyListProps & {
   onRemove: (userId: string) => void;
@@ -244,6 +254,7 @@ export type SwipablePostListProps = {
 
 export type ScrollablePostListProps = DataFetchListGeneralProps<ItemKey> & {
   onPress: (id: string, index: number) => void;
+  startIndex?: number;
 };
 
 export type IconProps = TxtProps & GeneralIconProps;

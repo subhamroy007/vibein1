@@ -204,7 +204,7 @@ export const generatePhotoPost = (): PhotoPostResponseParams => {
     taggedAccounts:
       Math.random() > 0.6
         ? generateAccounts(getRandom(10, 1), [
-            "fullname",
+            "name",
             "has-followed-client",
           ]).map<PostPhotoAccountTagResponseParams>((account) => ({
             account,
@@ -218,7 +218,7 @@ export const generatePhotoPost = (): PhotoPostResponseParams => {
       commentDisabled: false,
       hideLikesAndViewsCount: false,
     },
-    author: generateAccount(["fullname"]),
+    author: generateAccount(["name"]),
     createdAt: new Date().toUTCString(),
     engagementSummary: {
       noOfComments: getRandom(100000, 10),
@@ -276,7 +276,7 @@ export const generateMomentPost = (): MomentPostResponseParams => {
       commentDisabled: false,
       hideLikesAndViewsCount: false,
     },
-    author: generateAccount(["fullname"]),
+    author: generateAccount(["name"]),
     createdAt: new Date().toUTCString(),
     engagementSummary: {
       noOfComments: getRandom(100000, 10),
@@ -294,10 +294,7 @@ export const generateMomentPost = (): MomentPostResponseParams => {
     video: generateVideo(),
     taggedAccounts:
       Math.random() > 0.6
-        ? generateAccounts(getRandom(10, 1), [
-            "fullname",
-            "has-followed-client",
-          ])
+        ? generateAccounts(getRandom(10, 1), ["name", "has-followed-client"])
         : undefined,
     caption:
       Math.random() > 0.3

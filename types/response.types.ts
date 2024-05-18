@@ -14,8 +14,8 @@ import {
   SearchParams,
   HashTagSearchParams,
   AudioParams,
+  MessageMediaAttachmentParams,
 } from "./utility.types";
-import { HashtagAdapterParams, MessageAttachmentParams } from "./store.types";
 
 /**
  * reprsents the abstract type of response params from a thnuk
@@ -44,14 +44,14 @@ export type PageResponseParams2<T extends {}> = {
 
 /**
  * represents the account response data structure
- * most of the fields are optional because other then username and profile picture, other fields
+ * most of the fields are optional because other then userId and profile picture, other fields
  * may or may not required in different queries
  */
 export type AccountResponseParams = {
   id: string;
-  username: string;
+  userId: string;
   profilePictureUri: string;
-  fullname?: string;
+  name?: string;
   bio?: string | null;
   noOfPosts?: number;
   noOfFollowings?: number;
@@ -173,45 +173,9 @@ export type AccountRouteResponseParams = {
 
 export type AccountRouteThunkParams = {
   routeId: string;
-  username: string;
+  userId: string;
   refresh?: boolean;
 };
-
-//---------------------------------------------------chat related response types------------------------------------------------
-
-export type MessageResponseParams = {
-  id: string;
-  body: {
-    text?: string;
-    attachment?: MessageAttachmentParams;
-  };
-  createdAt: string;
-  author: AccountResponseParams;
-  reactions: {
-    reactionEmoji: string;
-    author: AccountResponseParams;
-  }[];
-  seenByReceipient: boolean;
-};
-
-export type MessagePageResponseParams =
-  PageResponseParams2<MessageResponseParams>;
-
-export type ChatResponseParams = {
-  id: string;
-  receipient: {
-    account: AccountResponseParams;
-    lastActiveAt?: string;
-    isMember: boolean;
-    isMessageRequestRestricted: boolean;
-  };
-  recentMessages?: MessagePageResponseParams;
-  joinedAt?: string;
-  muted: boolean;
-  noOfUnseenMessages: number;
-};
-
-export type ChatPageResponseParams = PageResponseParams<ChatResponseParams>;
 
 //--------------------------------------------------------------------------------------------------------------------------
 
@@ -386,3 +350,67 @@ export type AudioRouteResponseParams = {
   audio: AudioParams;
   moments?: PostPaginatedResponse;
 };
+
+//---------------------------------------------------chat related response types------------------------------------------------
+
+export type MessageResponseAttachmentParams =
+  | { type: "post"; post: PostResponseParams }
+  | { type: "media"; media: MessageMediaAttachmentParams[] };
+
+export type MessageResponseReactionParams = {
+  account: AccountParams;
+  emoji: string;
+};
+
+export type MessageResponseParams = {
+  id: string;
+  author: AccountParams;
+  sentTo: string;
+  uploadedAt: number;
+  reactions: MessageResponseReactionParams[];
+  seenBy: AccountParams[];
+  text?: string;
+  attachment?: MessageResponseAttachmentParams;
+};
+
+export type MessagePaginatedResponse = PageResponse<MessageResponseParams>;
+
+export type OneToOneChatResponseReceipientParams = {
+  account: AccountParams;
+  lastSeenAt?: number;
+  isMember: boolean;
+};
+
+export type OneToOneChatResponseParams = {
+  id: string;
+  joinedAt: number;
+  isMember: boolean;
+  isMuted: boolean;
+  receipient: OneToOneChatResponseReceipientParams;
+  recentMessages?: MessagePaginatedResponse;
+  noOfUnseenMessages: number;
+};
+
+export type GroupChatResponseReceipientParams = {
+  account: AccountParams;
+  isMember: boolean;
+  isAdmin: boolean;
+  joinedAt: number;
+};
+
+export type GroupChatResponseParams = {
+  id: string;
+  joinedAt: number;
+  invitedBy?: string;
+  isMember: boolean;
+  isMuted: boolean;
+  name: string;
+  posterUri?: string;
+  receipients: GroupChatResponseReceipientParams[];
+  recentMessages?: MessagePaginatedResponse;
+  noOfUnseenMessages: number;
+};
+
+export type ChatResponseParams =
+  | ({ type: "one-to-one" } & OneToOneChatResponseParams)
+  | ({ type: "group" } & GroupChatResponseParams);

@@ -102,8 +102,8 @@ export default function FullScreenPost({
   const updatePressCallback = useCallback(() => {}, []);
   const gotoProifile = useCallback(() => {
     router.push({
-      pathname: "/account/[username]",
-      params: { username: postParams?.author.username },
+      pathname: "/account/[userId]",
+      params: { userId: postParams?.author.userId },
     });
   }, [router, postParams]);
   if (!postParams) {
@@ -167,7 +167,7 @@ export default function FullScreenPost({
                 color={COLOR_1}
                 onPress={gotoProifile}
               >
-                {author.username}
+                {author.userId}
               </AppText>
               <AppButton
                 text={author.isFollowed ? "following" : "follow"}

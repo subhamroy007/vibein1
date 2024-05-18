@@ -1,12 +1,12 @@
 import {
   NativeSyntheticEvent,
+  StyleSheet,
   TextInputSelectionChangeEventData,
   View,
 } from "react-native";
-import { SIZE_15, SIZE_54 } from "../../constants";
+import { SIZE_14, SIZE_15, SIZE_30, SIZE_54 } from "../../constants";
 import {
   backgroundStyle,
-  borderStyle,
   layoutStyle,
   marginStyle,
   paddingStyle,
@@ -16,7 +16,7 @@ import { selectClientAccountParams } from "../../store/client/client.selector";
 import Avatar from "../Avatar";
 import { TextInput } from "react-native-gesture-handler";
 import Button from "../utility-components/button/Button";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 export type CommentBoxProps = {
   text: string;
@@ -37,47 +37,52 @@ export default function CommentBox({
 }: CommentBoxProps) {
   const client = useAppSelector((state) => selectClientAccountParams(state));
 
-  const trimmedText = text.trim();
+  const trimmedText = useRef("");
+
+  trimmedText.current = text.trim();
 
   const onButtonPress = useCallback(() => {
-    onSubmit(trimmedText);
+    onSubmit(trimmedText.current);
     setText("");
-  }, [onSubmit, trimmedText]);
+  }, [onSubmit]);
 
   if (!client) return null;
 
   return (
-    <View
-      style={[
-        { minHeight: SIZE_54 },
-        layoutStyle.flex_direction_row,
-        layoutStyle.align_item_flex_start,
-        paddingStyle.padding_horizontal_12,
-        backgroundStyle.background_color_1,
-      ]}
-    >
-      <Avatar url={client.profilePictureUri} style={marginStyle.margin_top_9} />
+    <View style={container_style}>
+      <Avatar url={client.profilePictureUri} size={SIZE_30} />
       <TextInput
         value={text}
         onChangeText={setText}
         placeholder="write comment..."
-        style={[
-          layoutStyle.flex_1,
-          marginStyle.margin_horizontal_12,
-          layoutStyle.align_self_stretch,
-          { fontSize: SIZE_15, fontFamily: "medium" },
-        ]}
-        multiline
+        style={text_input_style}
         onSelectionChange={onSelectionChange}
         selection={selection}
       />
-      {trimmedText !== "" ? (
-        <Button
-          text={"send"}
-          style={marginStyle.margin_top_12}
-          onPress={onButtonPress}
-        />
+      {trimmedText.current !== "" ? (
+        <Button text={"send"} onPress={onButtonPress} />
       ) : undefined}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: SIZE_54,
+  },
+});
+
+const container_style = [
+  styles.container,
+  layoutStyle.flex_direction_row,
+  layoutStyle.align_item_center,
+  paddingStyle.padding_horizontal_12,
+  backgroundStyle.background_color_1,
+];
+
+const text_input_style = [
+  layoutStyle.flex_1,
+  marginStyle.margin_horizontal_12,
+  layoutStyle.align_self_stretch,
+  { fontSize: SIZE_14 },
+];

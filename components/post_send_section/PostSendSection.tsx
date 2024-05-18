@@ -25,17 +25,17 @@ export default function PostSendSection() {
   const inbox = useAppSelector(selectInboxParams);
 
   const selectCallback = useCallback(
-    (username: string) => {
+    (userId: string) => {
       setSelectedChats((prevChats) => {
         const selected = prevChats.find(
-          (item) => item.type === "one-to-one" && item.username === username
+          (item) => item.type === "one-to-one" && item.userId === userId
         );
         if (selected) {
           return prevChats.filter(
-            (item) => item.type === "one-to-one" && item.username !== username
+            (item) => item.type === "one-to-one" && item.userId !== userId
           );
         }
-        return [{ username, type: "one-to-one" }, ...prevChats];
+        return [{ userId, type: "one-to-one" }, ...prevChats];
       });
     },
     [setSelectedChats]
@@ -80,14 +80,13 @@ export default function PostSendSection() {
           if (chat.type === "one-to-one") {
             return (
               <OneToOneChatReceipient
-                username={chat.username}
-                key={chat.username + index}
+                userId={chat.userId}
+                key={chat.userId + index}
                 onSelect={selectCallback}
                 selected={
                   selectedChats.find(
                     (item) =>
-                      item.type === "one-to-one" &&
-                      item.username === chat.username
+                      item.type === "one-to-one" && item.userId === chat.userId
                   ) !== undefined
                 }
               />

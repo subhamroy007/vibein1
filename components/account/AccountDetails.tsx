@@ -32,7 +32,7 @@ export default function AccountDetails({
   const onPress = useCallback(() => {
     router.push({
       pathname: "/profile/userid/related_accounts",
-      params: { userid: account.username },
+      params: { userid: account.userId },
     });
   }, []);
 
@@ -40,7 +40,7 @@ export default function AccountDetails({
     <View onLayout={onLayout}>
       {account.hasRequestedToFollowClient && (
         <FollowRequestBox
-          userId={account.username}
+          userId={account.userId}
           onAccept={onAccept}
           onReject={onReject}
         />
@@ -48,7 +48,7 @@ export default function AccountDetails({
       <View style={details_container_style}>
         <OutlinedAvatar url={account.profilePictureUri} size={SIZE_90} />
         <Text weight="bold" size={SIZE_14} style={marginStyle.margin_top_12}>
-          {account.fullname}
+          {account.name}
         </Text>
         {account.bio !== undefined && (
           <MultilineText style={bio_style} text={account.bio} />

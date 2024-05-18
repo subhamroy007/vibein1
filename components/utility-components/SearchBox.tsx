@@ -15,16 +15,21 @@ import { useCallback } from "react";
 export type SearchBoxProps = {
   text: string;
   setText: (value: string) => void;
+  placeholder?: string;
 };
 
-export default function SearchBox({ setText, text }: SearchBoxProps) {
+export default function SearchBox({
+  setText,
+  text,
+  placeholder,
+}: SearchBoxProps) {
   const resetText = useCallback(() => setText(""), []);
 
   return (
     <View style={search_box_style}>
       <TextInput
         style={input_style}
-        placeholder={"search accounts..."}
+        placeholder={placeholder ? placeholder : "search accounts..."}
         placeholderTextColor={"grey"}
         value={text}
         onChangeText={setText}

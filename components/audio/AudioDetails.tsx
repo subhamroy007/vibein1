@@ -56,7 +56,7 @@ export default function AudioDetails({
         >
           <Avatar url={author.profilePictureUri} size={SIZE_18} />
           <Text weight="bold" style={marginStyle.margin_left_3}>
-            {author.username}
+            {author.userId}
           </Text>
         </View>
       ) : (

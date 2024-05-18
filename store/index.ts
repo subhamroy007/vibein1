@@ -1,11 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import clientReducer from "./client/client.slice";
 import hashtagReducer from "./hashtag/hashtag.slice";
-import chatReducer from "./inbox/chat.slice";
 import postStoreReducer from "./post-store/post.slice";
 import accountStoreReducer from "./account-store/account.slice";
 import locationReducer from "./location/location.slice";
 import audioReducer from "./audio-store/audio.slice";
+import chatReducer from "./chat/chat.slice";
 
 const appDataStore = configureStore({
   reducer: {

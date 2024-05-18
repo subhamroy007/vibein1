@@ -185,7 +185,7 @@ export type AudioWithUri = {
 } & AudioWithTitle;
 
 export type AccountField =
-  | "fullname"
+  | "name"
   | "bio"
   | "no-of-posts"
   | "no-of-tagged-posts"
@@ -209,10 +209,10 @@ export type AccountField =
 export type AccountParams = {
   //required properties
   id: string;
-  username: string;
+  userId: string;
   profilePictureUri: string;
   //optional properties
-  fullname?: string;
+  name?: string;
   bio?: string;
   noOfPosts?: number;
   noOfTaggedPosts?: number;
@@ -264,12 +264,6 @@ export type SearchParams =
 
 export type ItemKey = {
   key: string;
-};
-
-export type SendSectionItemIdentifier = {
-  type: "group" | "one-to-one";
-  id: string;
-  name: string;
 };
 
 export type PostRelatedNotificationParams = {
@@ -335,7 +329,7 @@ export type AudioParams = {
   title?: string;
   artists?: string;
   isOriginal: boolean;
-  author?: { username: string; profilePictureUri: string };
+  author?: { userId: string; profilePictureUri: string };
   noOfMoments: number;
   noOfPhotos: number;
   isSaved: boolean;
@@ -343,3 +337,24 @@ export type AudioParams = {
   audioUri: string;
   bestSection: [number, number];
 };
+
+export type AccountShortInfo = {
+  profilePictureUri: string;
+  userId: string;
+};
+
+export type MessagePhotoMediaAttachmentParams = {
+  uri: string;
+  width: number;
+  height: number;
+  placeholder: string;
+};
+
+export type MessageVideoMediaAttachmentParams = {
+  posterUri: string;
+  duration: number;
+} & MessagePhotoMediaAttachmentParams;
+
+export type MessageMediaAttachmentParams =
+  | ({ type: "photo" } & MessagePhotoMediaAttachmentParams)
+  | ({ type: "video" } & MessageVideoMediaAttachmentParams);

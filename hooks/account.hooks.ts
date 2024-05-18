@@ -32,59 +32,59 @@ export function useAccountAction(account?: AccountSelectorParams) {
   const dispatch = useAppDispatch();
 
   const accpetFollowRequest = useCallback(() => {
-    if (account?.username) {
+    if (account?.userId) {
       dispatch(
         setPendingRequestStatus({
-          userId: account.username,
+          userId: account.userId,
           value: true,
         })
       );
     }
-  }, [account?.username]);
+  }, [account?.userId]);
 
   const rejectFollowRequest = useCallback(() => {
-    if (account?.username) {
+    if (account?.userId) {
       dispatch(
         setPendingRequestStatus({
-          userId: account.username,
+          userId: account.userId,
           value: false,
         })
       );
     }
-  }, [account?.username]);
+  }, [account?.userId]);
 
   const changeFollowRequestStatus = useCallback(() => {
-    if (account?.username && account.isRequestedToFollow !== undefined) {
+    if (account?.userId && account.isRequestedToFollow !== undefined) {
       dispatch(
         setFollowRequestStatus({
-          userId: account.username,
+          userId: account.userId,
           value: !account.isRequestedToFollow,
         })
       );
     }
-  }, [account?.username, account?.isRequestedToFollow]);
+  }, [account?.userId, account?.isRequestedToFollow]);
 
   const changeFollowingStatus = useCallback(() => {
-    if (account?.username && account.isFollowed !== undefined) {
+    if (account?.userId && account.isFollowed !== undefined) {
       dispatch(
         setFollowingStatus({
-          userId: account.username,
+          userId: account.userId,
           value: !account.isFollowed,
         })
       );
     }
-  }, [account?.username, account?.isFollowed]);
+  }, [account?.userId, account?.isFollowed]);
 
   const changeBlockStatus = useCallback(() => {
-    if (account?.username && account.isFollowed !== undefined) {
+    if (account?.userId && account.isFollowed !== undefined) {
       dispatch(
         setBlockStatus({
-          userId: account.username,
+          userId: account.userId,
           value: !account.isBlocked,
         })
       );
     }
-  }, [account?.username, account?.isBlocked]);
+  }, [account?.userId, account?.isBlocked]);
 
   return {
     changeBlockStatus,

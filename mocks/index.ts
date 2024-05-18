@@ -17,5 +17,7 @@ export const getDate = () => {
     getRandom(0, 23),
     getRandom(0, 59),
     getRandom(0, 59)
-  ).toUTCString();
+  ).getTime();
 };
+
+export const DAY_GAP_MS = 24 * 60 * 60 * 1000;

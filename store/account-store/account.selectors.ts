@@ -1,40 +1,38 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
-import {
-  AccountField,
-  AccountParams,
-  ItemKey,
-} from "../../types/utility.types";
+import { AccountField } from "../../types/utility.types";
 import { selectAccountById } from "./account.adapter";
 import {
-  AccountSectionSelectorParams,
   AccountSelectorParams,
   MemorySectionSelectorParams,
-  PaginatedDataFetchSelectorParams,
 } from "../../types/selector.types";
+import { selectClientAccountParams } from "../client/client.selector";
 
 export const selectAccountParams = createSelector(
   [
-    (state: RootState) => state.account_store,
-    (state: RootState, username: string) => username,
-    (state: RootState, username: string, includeFields?: AccountField[]) =>
+    (state: RootState) => state,
+    (state: RootState, userId: string) => userId,
+    (state: RootState, userId: string, includeFields?: AccountField[]) =>
       includeFields,
   ],
-  (state, username, includeFields): AccountSelectorParams | undefined => {
-    const account = selectAccountById(state.accounts, username);
+  (state, userId, includeFields): AccountSelectorParams | undefined => {
+    const account = selectAccountById(state.account_store.accounts, userId);
 
-    if (!account) {
+    const client = selectClientAccountParams(state);
+
+    if (!account || !client) {
       return undefined;
     }
 
     const output = {} as AccountSelectorParams;
 
     output.id = account.id;
-    output.username = account.username;
+    output.userId = account.userId;
     output.profilePictureUri = account.profilePictureUri;
+    output.isClient = client.id === account.id;
 
-    if (!includeFields || includeFields.includes("fullname")) {
-      output.fullname = account.fullname;
+    if (!includeFields || includeFields.includes("name")) {
+      output.name = account.name;
     }
 
     if (
@@ -133,9 +131,9 @@ export const selectAccountMemorySection = createSelector(
     return {
       account: {
         id: account.id,
-        username: account.username,
+        userId: account.userId,
         profilePictureUri: account.profilePictureUri,
-        fullname: account.fullname,
+        name: account.name,
       },
       memorySection: account.memorySection,
     };

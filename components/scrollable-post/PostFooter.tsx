@@ -1,14 +1,22 @@
 import { StyleSheet, View } from "react-native";
 import { AccountParams } from "../../types/utility.types";
 import { layoutStyle, marginStyle, paddingStyle } from "../../styles";
-import { SIZE_24, SIZE_30, SIZE_36, SIZE_48 } from "../../constants";
+import {
+  SIZE_20,
+  SIZE_22,
+  SIZE_24,
+  SIZE_30,
+  SIZE_36,
+  SIZE_48,
+} from "../../constants";
 import Avatar from "../Avatar";
 import Text from "../utility-components/text/Text";
 import PressableIcon from "../utility-components/button/PressableIcon";
 import OutlinedAvatar from "../utility-components/OutlinedAvatar";
+import { AccountSelectorParams } from "../../types/selector.types";
 
 export type PostFooterProps = {
-  author: AccountParams;
+  author: AccountSelectorParams;
   onMoreIconPress: () => void;
 };
 
@@ -21,12 +29,10 @@ const PostFooter = ({ author, onMoreIconPress }: PostFooterProps) => {
         outlineWidth={5}
         gapWidth={3}
       />
-      <Text weight="semi-bold" style={marginStyle.margin_left_9}>
-        {author.username}
-      </Text>
+      <Text style={marginStyle.margin_left_9}>{author.userId}</Text>
       <PressableIcon
         name="more-vert"
-        size={SIZE_24}
+        size={SIZE_22}
         style={marginStyle.margin_left_auto}
         hitSlop={{ horizontal: SIZE_24, vertical: SIZE_24 }}
         onPress={onMoreIconPress}

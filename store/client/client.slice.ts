@@ -1,5 +1,4 @@
 import {
-  getInboxChatsThunk,
   fetchExploreFeed,
   fetchMomentsFeed,
   fetchPhotosFeed,
@@ -16,10 +15,8 @@ import {
 } from "./client.thunk";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
-  ChatItemIdentifierParams,
   ClientStoreParams,
   MemoryAccountStoreParams,
-  PostFeedItemIdentfierParams,
   PostItemIdentifier,
 } from "../../types/store.types";
 import {
@@ -28,8 +25,9 @@ import {
   OutDatedResponseParams2,
 } from "../../types/response.types";
 import { SEARCH_HISTORY } from "../../mocks/search";
-import { ItemKey } from "../../types/utility.types";
+import { AccountParams, ItemKey } from "../../types/utility.types";
 import { SUGGESTED_ACCOUNTS } from "../../constants";
+import { fetchInboxChats } from "../chat/chat.thunk";
 
 const initialState: ClientStoreParams = {
   isDarkScreenFocused: false,
@@ -49,7 +47,7 @@ const initialState: ClientStoreParams = {
   },
   suggestedAccounts: SUGGESTED_ACCOUNTS,
   theme: "system",
-  notification: { msg: "", dispatchedAt: -1 },
+  notification: null,
   explore: {
     feed: {
       data: null,
@@ -91,11 +89,7 @@ const initialState: ClientStoreParams = {
       failedToRefresh: false,
     },
   },
-  inbox: {
-    isLoading: false,
-    data: null,
-    error: null,
-  },
+  inbox: null,
   searchSection: {
     quickSearch: { error: null, data: {}, isLoading: false },
     searchHistory: SEARCH_HISTORY,
@@ -147,13 +141,7 @@ const clientSlice = createSlice({
         seed: payload,
       };
     },
-    initInbox: (state, { payload }: PayloadAction<ChatResponseParams[]>) => {
-      state.inbox.data = {
-        items: payload.map<ItemKey>((item) => ({ key: item.id })),
-        endCursor: "",
-        hasEndReached: true,
-      };
-    },
+
     initFullSearch(state, action: PayloadAction<string>) {
       state.searchSection.fullSearch = {
         searchPhase: action.payload,
@@ -169,7 +157,7 @@ const clientSlice = createSlice({
     resetFullSearch(state) {
       state.searchSection.fullSearch = null;
     },
-    initClientInfo(state, { payload }: PayloadAction<AccountResponseParams>) {
+    initClientInfo(state, { payload }: PayloadAction<AccountParams>) {
       state.loggedInAccount = {
         ...payload,
         noOfUnseenNotifications: 0,
@@ -177,6 +165,19 @@ const clientSlice = createSlice({
     },
     changeDarkScreenFocused(state, action: PayloadAction<boolean>) {
       state.isDarkScreenFocused = action.payload;
+    },
+    setNotificationText(
+      state,
+      { payload: { message } }: PayloadAction<{ message: string | null }>
+    ) {
+      if (message) {
+        state.notification = {
+          dispatchedAt: Date.now(),
+          msg: message,
+        };
+      } else {
+        state.notification = null;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -309,7 +310,7 @@ const clientSlice = createSlice({
           memoryAccounts.isPageLoading = false;
         }
         const newItems = items.map<MemoryAccountStoreParams>((item) => ({
-          key: item.account.username,
+          key: item.account.userId,
           poster: item.poster,
         }));
         if (refresh || !memoryAccounts.data) {
@@ -843,6 +844,15 @@ const clientSlice = createSlice({
         state.sendSectionSearchResult.data[searchPhase] = payload.accounts;
       }
     );
+    builder.addCase(
+      fetchInboxChats.fulfilled,
+      (state, { payload: { chats } }) => {
+        state.inbox = {
+          noOfMessageRequests: 0,
+          chats: chats.map((chat) => ({ key: chat.id })),
+        };
+      }
+    );
   },
 });
 
@@ -854,7 +864,6 @@ export const {
   actions: {
     initHomeFeed,
     initClientInfo,
-    initInbox,
     changeDarkScreenFocused,
     setMediaMuted,
     initPostSuggestionRoute,
@@ -863,5 +872,6 @@ export const {
     toggleMediaMuted,
     resetAccountAndHashtagSearchSection,
     resetSendSectionSearchResult,
+    setNotificationText,
   },
 } = clientSlice;

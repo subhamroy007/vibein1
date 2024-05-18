@@ -9,8 +9,8 @@ import { AccountSearchParams } from "../../types/utility.types";
 
 const AccountSearchItem = ({
   category,
-  username,
-  fullname,
+  userId,
+  name,
   profilePictureUri,
   noOfFollowers,
 }: AccountSearchParams) => {
@@ -27,7 +27,7 @@ const AccountSearchItem = ({
         <Avatar url={profilePictureUri} size={SIZE_54} />
         <View style={marginStyle.margin_left_9}>
           <Text weight="semi-bold" size={SIZE_14}>
-            {username}
+            {userId}
           </Text>
           <Text
             weight="semi-bold"
@@ -35,7 +35,7 @@ const AccountSearchItem = ({
             color="grey"
             style={{ marginTop: SIZE_1 }}
           >
-            {fullname}
+            {name}
           </Text>
           <Text
             size={SIZE_12}

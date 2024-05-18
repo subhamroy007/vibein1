@@ -1,20 +1,18 @@
 import {
+  CommentItemIdentifier,
   CommentListItemIdentifier,
   MemorySectionParams,
   PageData,
   ReplySectionStoreParams,
 } from "./store.types";
-import {
-  AccountParams,
-  ItemKey,
-  SendSectionItemIdentifier,
-} from "./utility.types";
+import { AccountParams, ItemKey, ThunkError } from "./utility.types";
 
 export type AccountSelectorParams = {
   id: string;
-  username: string;
+  userId: string;
   profilePictureUri: string;
-  fullname?: string;
+  isClient: boolean;
+  name?: string;
   bio?: string;
   noOfPosts?: number;
   noOfTaggedPosts?: number;
@@ -57,16 +55,13 @@ export type CommentSelectorParams = {
   postId: string;
   repliedTo?: string;
   text: string;
-  author: AccountParams;
+  author: AccountSelectorParams;
+  isClientPostAuthor: boolean;
   createdAt: string;
   noOfLikes: number;
   isLiked: boolean;
   pinned: boolean;
-  noOfUnloadedReplies: number;
-  isAuthor: boolean;
-  isPostAuthor: boolean;
-  isReplyHidden: boolean;
-  isReplyLoading: boolean;
+  noOfHiddenReplies: number; //this number is a combination of loaded and unloaded replies
   hasLoadedReply: boolean;
 };
 
@@ -75,42 +70,52 @@ export type CommentPlaceholderSelectorParams = {
   text: string;
   postId: string;
   repliedTo?: string;
-  error: any | null;
+  error: ThunkError | null;
   isUploading: boolean;
-  noOfUnloadedReplies: number;
-  isReplyLoading: boolean;
+  noOfHiddenReplies: number; //this number is a combination of loaded and unloaded replies
   author: AccountParams;
 };
 
 export type LikeSectionSelectorParams = {
-  isError: boolean;
-  isLoading: boolean;
-  data: {
-    allLikes: PageData<ItemKey>;
-    filteredAccounts?: ItemKey[];
-    engagementSummary: {
-      noOfLikes: number;
-      noOfViews: number;
-    };
-  } | null;
+  createdAt: number;
+  expiresAt: number;
+  allLikes: PageData<ItemKey>;
+  engagementSummary: { noOfLikes: number; noOfViews: number };
 };
 
 export type CommentSectionSelectorParams = {
-  isLoading: boolean;
-  isError: boolean;
-  comments: CommentListItemIdentifier[];
+  createdAt: number;
+} & PageDataSelectorParams<CommentItemIdentifier>;
+
+export type OneToOneChatSelectorParams = {
+  type: "one-to-one";
+  id: string;
+  userId: string;
+  name: string;
+  profilePictureUri: string;
 };
 
-export type SendSectionItemSelectorParams = {
-  secondaryText: string;
-  pictureUri: string | [string, string];
-} & SendSectionItemIdentifier;
+export type GroupChatSelectorParams = {
+  type: "group";
+  id: string;
+  name: string;
+  members: {
+    name: string;
+    profilePictureUri: string;
+  }[];
+};
+
+export type ChatItemIdentifierParams = {
+  type: "group" | "one-to-one";
+  id: string;
+};
+
+export type ChatItemSelectorParams =
+  | OneToOneChatSelectorParams
+  | GroupChatSelectorParams;
 
 export type SendSectionSelectorParams = {
-  isLoading: boolean;
-  isError: boolean;
-  hasSearchResult: boolean;
-  items: SendSectionItemSelectorParams[];
+  inboxAndSuggested: ChatItemSelectorParams[];
 };
 
 export type ReplySectionSelectorParams = {
@@ -124,8 +129,8 @@ export type GridPostGroupParams = {
 
 export type InboxDirectChatInfoParams = {
   id: string;
-  username: string;
-  fullname: string;
+  userId: string;
+  name: string;
   profilePictureUri: string;
   canSendMessage: boolean;
 };

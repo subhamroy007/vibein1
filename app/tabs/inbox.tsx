@@ -1,152 +1,36 @@
-import { View } from "react-native";
-import AppScreen from "../../components/AppScreen";
 import Header from "../../components/Header";
-import { useState } from "react";
-import Animated, {
-  Extrapolate,
-  interpolate,
-  scrollTo,
-  useAnimatedRef,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import { SIZE_30, SIZE_70 } from "../../constants";
 import { layoutStyle } from "../../styles";
-import Text from "../../components/utility-components/text/Text";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
+import { selectInbox } from "../../store/client/client.selector";
+import { FlatList } from "react-native";
+import ChatListItem from "../../components/chat-section/ChatListItem";
+import { useEffect } from "react";
+import { fetchInboxChats } from "../../store/chat/chat.thunk";
 
 export default function Inbox() {
-  const [data, _] = useState([
-    "red",
-    "green",
-    "blue",
-    "pink",
-    "orange",
-    "yellow",
-    "purple",
-    "violet",
-    "grey",
-    "black",
-    "yellow",
-    "pink",
-    "red",
-    "purple",
-  ]);
+  const data = useAppSelector(selectInbox);
 
-  const scrollOffset = useSharedValue(400);
+  const dispatch = useAppDispatch();
 
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const translationY = useSharedValue(400);
-  const dragging = useSharedValue(false);
-
-  const onScroll = useAnimatedScrollHandler(
-    {
-      onScroll(event) {
-        scrollOffset.value = event.contentOffset.y;
-      },
-      onBeginDrag(event) {
-        dragging.value = true;
-      },
-      onEndDrag(event, context) {
-        dragging.value = false;
-      },
-    },
-    []
-  );
-
-  useDerivedValue(() => {
-    if (dragging.value) {
-      translationY.value = interpolate(
-        scrollOffset.value,
-        [0, 400],
-        [0, 400],
-        Extrapolate.CLAMP
-      );
-    } else {
-      if (translationY.value < 400) {
-        translationY.value = withTiming(400, { duration: 400 });
-        scrollTo(scrollRef, 0, translationY.value, false);
-      }
+  useEffect(() => {
+    if (!data) {
+      dispatch(fetchInboxChats());
     }
-  }, []);
-
-  useDerivedValue(() => {
-    if (
-      !dragging.value &&
-      scrollOffset.value < 400 &&
-      translationY.value === 400
-    ) {
-      scrollTo(scrollRef, 0, 400, false);
-    }
-  }, []);
-
-  const itemContainerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: interpolate(
-            scrollOffset.value,
-            [0, 400],
-            [-400, 0],
-            Extrapolate.CLAMP
-          ),
-        },
-      ],
-      paddingTop: 400,
-    };
-  }, []);
-
-  const listStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: interpolate(
-            translationY.value,
-            [0, 400],
-            [200, 0],
-            Extrapolate.CLAMP
-          ),
-        },
-      ],
-      backgroundColor: "white",
-    };
-  }, []);
+  }, [data]);
 
   return (
-    <AppScreen>
+    <SafeAreaView style={layoutStyle.flex_1}>
       <Header hideBack title="Messages" />
-
-      <Animated.ScrollView
-        ref={scrollRef}
-        overScrollMode="never"
-        contentOffset={{ x: 0, y: 400 }}
-        onScroll={onScroll}
-        // onMomentumScrollEnd={() => {
-        //   dragging.value = false;
-        // }}
-        style={listStyle}
-        scrollEventThrottle={16}
-      >
-        <Animated.View style={itemContainerAnimatedStyle}>
-          {data.map((item, index) => {
-            return (
-              <View
-                style={[
-                  { height: SIZE_70, backgroundColor: item },
-                  layoutStyle.content_center,
-                ]}
-                key={index}
-              >
-                <Text size={SIZE_30} color="white">
-                  {item}
-                </Text>
-              </View>
-            );
-          })}
-        </Animated.View>
-      </Animated.ScrollView>
-    </AppScreen>
+      <FlatList
+        style={layoutStyle.flex_1}
+        data={data?.chats}
+        renderItem={({ item }) => {
+          return <ChatListItem chatId={item.key} />;
+        }}
+        overScrollMode={"never"}
+        showsVerticalScrollIndicator={false}
+      />
+    </SafeAreaView>
   );
 }

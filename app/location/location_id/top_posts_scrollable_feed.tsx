@@ -8,7 +8,10 @@ import { selectLocationTopPosts } from "../../../store/location/location.selecto
 import { fetchLocationTopPosts } from "../../../store/location/location.thunk";
 
 export default function AllPostScrollableFeed() {
-  const { location_id } = useGlobalSearchParams<{ location_id: string }>();
+  const { location_id, index } = useGlobalSearchParams<{
+    location_id: string;
+    index: string;
+  }>();
 
   const router = useRouter();
 
@@ -54,6 +57,7 @@ export default function AllPostScrollableFeed() {
         isError={isError}
         isLoading={isLoading}
         onPress={onPostPress}
+        startIndex={parseInt(index!)}
       />
     </StackContainer>
   );

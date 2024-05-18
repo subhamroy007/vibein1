@@ -23,7 +23,10 @@ import {
 import { useFocusEffect } from "expo-router";
 import { selectDarkScreenFocused } from "../store/client/client.selector";
 import { RootState } from "../store";
-import { changeDarkScreenFocused } from "../store/client/client.slice";
+import {
+  changeDarkScreenFocused,
+  setNotificationText,
+} from "../store/client/client.slice";
 import { COLOR_1, COLOR_4, LINE_WIDTH, SIZE_27, SIZE_36 } from "../constants";
 
 import { layoutStyle } from "../styles";
@@ -575,116 +578,12 @@ export function useAutoFetch(
   }, [focused, isRouteFocused, fetch, data]);
 }
 
-export function usePortalAnimatedGesture(height: number) {
-  const portalRef = useRef<SwipeUpPortalRefParams>();
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+export function usePopupNotification() {
+  const dispatch = useAppDispatch();
 
-  const scrollOffset = useSharedValue(height);
-  const portalPosition = useSharedValue(height);
-  const dragging = useSharedValue(false);
-  const scrollPositionReseting = useSharedValue(false);
-  const portalReleasing = useSharedValue(false);
+  const showNotofication = useCallback((message: string) => {
+    dispatch(setNotificationText({ message }));
+  }, []);
 
-  const containerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: interpolate(
-            scrollOffset.value,
-            [0, height],
-            [-height, 0],
-            Extrapolate.CLAMP
-          ),
-        },
-      ],
-    };
-  }, [height]);
-  const someValue = PixelRatio.roundToNearestPixel(height * 0.7);
-
-  useDerivedValue(() => {
-    if (scrollOffset.value < height) {
-      if (dragging.value) {
-        portalRef.current?.move(
-          interpolate(
-            scrollOffset.value,
-            [0, height],
-            [someValue, 0],
-            Extrapolate.CLAMP
-          )
-        );
-      } else {
-        if (portalPosition.value > 0) {
-          if (!portalReleasing.value) {
-            portalReleasing.value = true;
-            console.log("portal rleasing");
-            scrollTo(scrollRef, 0, height, false);
-            portalRef.current?.release(0);
-          }
-          // scrollTo(
-          //   scrollRef,
-          //   0,
-          //   Math.round(
-          //     interpolate(
-          //       portalPosition.value,
-          //       [0, someValue],
-          //       [height, 0],
-          //       Extrapolate.CLAMP
-          //     )
-          //   ),
-          //   false
-          // );
-        } else {
-          if (!scrollPositionReseting.value) {
-            console.log("reseting scroll position ");
-            scrollPositionReseting.value = true;
-            scrollTo(scrollRef, 0, height, false);
-            console.log("scroll position reset ");
-            scrollPositionReseting.value = false;
-          }
-        }
-      }
-    }
-    if (portalPosition.value === 0 && portalReleasing.value) {
-      console.log("portal released");
-      portalReleasing.value = false;
-    }
-  }, [height, someValue]);
-
-  // useDerivedValue(() => {
-  //   if (
-  //     !dragging.value &&
-  //     scrollOffset.value < height &&
-  //     // portalPosition.value === 0 &&
-  //     !scrollPositionReseting.value
-  //   ) {
-  //     console.log("reseting scroll position ");
-  //     scrollPositionReseting.value = true;
-  //     scrollTo(scrollRef, 0, height, false);
-  //     console.log("scroll position reset ");
-  //     scrollPositionReseting.value = false;
-  //   }
-  // }, [height]);
-
-  const onScroll = useAnimatedScrollHandler(
-    {
-      onScroll(event) {
-        scrollOffset.value = event.contentOffset.y;
-      },
-      onBeginDrag() {
-        dragging.value = true;
-      },
-      onEndDrag() {
-        dragging.value = false;
-      },
-    },
-    [height]
-  );
-
-  return {
-    containerAnimatedStyle,
-    portalRef,
-    scrollRef,
-    onScroll,
-    portalPosition,
-  };
+  return showNotofication;
 }

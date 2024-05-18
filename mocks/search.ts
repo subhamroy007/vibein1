@@ -35,7 +35,7 @@ export function generateHashtags(count: number): HashTagSearchParams[] {
 export function generateAccountSearch(): AccountSearchParams {
   return {
     category: "others",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   };
 }
 
@@ -67,17 +67,17 @@ export const SEARCH_HISTORY: SearchParams[] = [
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   { type: "hashtag", name: "sareewomens", noOfPosts: 435784 },
   { type: "text", text: "falak tak chal" },
@@ -88,52 +88,52 @@ export const SEARCH_HISTORY: SearchParams[] = [
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   { type: "hashtag", name: "NO1", noOfPosts: 1946735 },
   { type: "hashtag", name: "TeensonBkini", noOfPosts: 93 },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   { type: "text", text: "bhabi ji ghar par ha" },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   { type: "text", text: "bangla memes" },
   { type: "text", text: "new york posts" },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   {
     type: "account",
     category: "",
-    ...generateAccount(["fullname", "no-of-followers"]),
+    ...generateAccount(["name", "no-of-followers"]),
   },
   { type: "text", text: "funny memes" },
 ];

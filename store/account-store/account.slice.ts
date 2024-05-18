@@ -67,6 +67,7 @@ import {
   fetchAudioPhotoPosts,
   fetchAudioRoute,
 } from "../audio-store/audio.thunk";
+import { fetchInboxChats } from "../chat/chat.thunk";
 
 const profiles: Dictionary<AccountProfileSectionParams> = {};
 
@@ -541,7 +542,7 @@ const accountSlice = createSlice({
         const relatedAccounts = state.profiles[userId]?.relatedAccounts;
         if (!relatedAccounts) return;
         const newItems = payload.items.map<ItemKey>((account) => ({
-          key: account.username,
+          key: account.userId,
         }));
         if (!relatedAccounts.followings) {
           relatedAccounts.followings = {
@@ -572,7 +573,7 @@ const accountSlice = createSlice({
         const relatedAccounts = state.profiles[userId]?.relatedAccounts;
         if (!relatedAccounts) return;
         const newItems = payload.items.map<ItemKey>((account) => ({
-          key: account.username,
+          key: account.userId,
         }));
         if (!relatedAccounts.followers) {
           relatedAccounts.followers = {
@@ -606,7 +607,7 @@ const accountSlice = createSlice({
         const relatedAccounts = state.profiles[userId]?.relatedAccounts;
         if (!relatedAccounts) return;
         const newItems = payload.items.map<ItemKey>((account) => ({
-          key: account.username,
+          key: account.userId,
         }));
 
         if (!relatedAccounts.suggested) {
@@ -646,10 +647,34 @@ const accountSlice = createSlice({
           state.profiles[userId]?.relatedAccounts.followers?.searchedAccounts;
         if (searchedFollowers) {
           searchedFollowers[searchedPhase] = payload.accounts.map<ItemKey>(
-            (account) => ({ key: account.username })
+            (account) => ({ key: account.userId })
           );
         }
         upsertManyAccounts(state.accounts, payload.accounts);
+      }
+    );
+    builder.addCase(
+      fetchInboxChats.fulfilled,
+      (state, { payload: { chats } }) => {
+        const accounts: AccountParams[] = [];
+
+        chats.forEach((chat) => {
+          if (chat.recentMessages) {
+            const authors = chat.recentMessages.items.map(
+              (item) => item.author
+            );
+            accounts.push(...authors);
+          }
+          if (chat.type === "one-to-one") {
+            accounts.push(chat.receipient.account);
+          } else {
+            accounts.push(
+              ...chat.receipients.map((receipient) => receipient.account)
+            );
+          }
+        });
+
+        upsertManyAccounts(state.accounts, accounts);
       }
     );
   },

@@ -78,6 +78,8 @@ export const SIZE_84 = sizeRelativeToWidth(23.33);
 
 export const SIZE_90 = sizeRelativeToWidth(25);
 
+export const SIZE_100 = sizeRelativeToWidth(100 / 3.6);
+
 export const SIZE_120 = sizeRelativeToWidth(100 / 3);
 
 export const HEIGHT_SCALE_1 = sizeRelativeToHeight(60);
@@ -165,6 +167,6 @@ export const COMMENT_REPORT_REASONS = [
   "Spam or misleading",
 ];
 
-export const CLIENT_ACCOUNT = generateAccount();
+export const CLIENT_ACCOUNT = generateAccount(["name"]);
 
-export const SUGGESTED_ACCOUNTS = generateAccounts(40, ["fullname"]);
+export const SUGGESTED_ACCOUNTS = generateAccounts(40, ["name"]);

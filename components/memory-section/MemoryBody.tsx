@@ -303,7 +303,7 @@ export default function MemoryBody({
           <View style={[layoutStyle.flex_1, marginStyle.margin_horizontal_12]}>
             <View style={layoutStyle.flex_direction_row}>
               <Text weight="semi-bold" color={COLOR_1}>
-                {account.username}
+                {account.userId}
               </Text>
               <Text
                 weight="medium"

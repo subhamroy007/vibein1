@@ -30,7 +30,7 @@ const ChatItem = ({ chatId }: { chatId: string }) => {
 
   const pressCallback = useCallback(() => {
     router.push({
-      params: { chatId, username: chatParams?.receipient.username },
+      params: { chatId, userId: chatParams?.receipient.userId },
       pathname: "/chat_window",
     });
   }, [router]);
@@ -47,7 +47,7 @@ const ChatItem = ({ chatId }: { chatId: string }) => {
       <View style={metadata_container_style}>
         <View style={receipient_container_style}>
           <AppText weight="bold" size={SIZE_15} style={styles.receipient_text}>
-            {receipient.fullname}
+            {receipient.name}
           </AppText>
           <AppText weight="semi-bold" size={SIZE_12} color="grey">
             {getLocalTimeStringFromUTC(
@@ -60,7 +60,7 @@ const ChatItem = ({ chatId }: { chatId: string }) => {
             {lastMessage
               ? (lastMessage.seenByReceipient ? "seen: " : "sent: ") +
                 lastMessage.text
-              : receipient.username}
+              : receipient.userId}
           </AppText>
           {noOfUnseenMessages > 0 ? (
             <NotificationBanner count={noOfUnseenMessages} />

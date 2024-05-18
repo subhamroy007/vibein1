@@ -3,6 +3,22 @@ import { AsyncThunkConfig } from "./types/utility.types";
 import { MessageResponseParams } from "./types/response.types";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as FileSystem from "expo-file-system";
+import { DAY_GAP_MS } from "./mocks";
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "Decemeber",
+];
 
 export function deepEqual(a: any, b: any) {
   if (a === b) {
@@ -149,15 +165,63 @@ export function groupMessagesByDate(messages: MessageResponseParams[]) {
   return sections;
 }
 
-export function formatTime24Hour(milliseconds: number): string {
+export function formatTime24Hour(milliseconds: number) {
   const date = new Date(milliseconds);
+
   const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
 
-  // Ensure 24-hour format for hours:
-  const formattedHours = hours % 24; // Handle hours greater than 23
+  const mins = date.getMinutes();
 
-  return `${formattedHours.toString().padStart(2, "0")}:${minutes}`;
+  return `${hours > 9 ? hours : "0" + hours}:${mins > 9 ? mins : "0" + mins}`;
+}
+
+export function formatDateTime(milliseconds: number, format: 1 | 2) {
+  const date = new Date(milliseconds);
+
+  const now = new Date();
+
+  const dateYear = date.getFullYear();
+
+  const nowYear = date.getFullYear();
+
+  const dateMonth = date.getMonth();
+
+  const nowMonth = date.getMonth();
+
+  const dateDay = date.getDate();
+
+  const nowDay = date.getDate();
+
+  const formattedYear = dateYear % 100;
+
+  let formattedString = "";
+  if (format === 1) {
+    formattedString = `${dateDay > 9 ? dateDay : "0" + dateDay}/${
+      dateMonth > 9 ? dateMonth : "0" + dateMonth
+    }/${formattedYear > 9 ? formattedYear : "0" + formattedYear}`;
+  } else {
+    formattedString = `${months[dateMonth]} ${dateDay + 1}${
+      nowYear !== dateYear ? " " + dateYear : ""
+    }`;
+  }
+
+  const timeDifference = now.getTime() - date.getTime();
+
+  if (timeDifference < DAY_GAP_MS) {
+    if (dateDay === nowDay) {
+      return formatTime24Hour(milliseconds);
+    } else {
+      return "Yestarday";
+    }
+  } else if (timeDifference < 2 * DAY_GAP_MS) {
+    if (dateMonth === nowMonth) {
+      return nowDay - dateDay > 1 ? formattedString : "Yestarday";
+    } else {
+      return formattedString;
+    }
+  } else {
+    return formattedString;
+  }
 }
 
 export function getLocalTimeStringFromUTC(utcDateString: string): string {

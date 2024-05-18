@@ -1,12 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "..";
+import { selectPostById } from "./post.adapter";
 import {
-  selectCommentById,
-  selectCommentPlaceholderById,
-  selectPostById,
-} from "./post.adapter";
-import {
-  AccountParams,
   PhotoWithHash,
   PostGeneralParams,
   PostVideoParams,
@@ -16,10 +11,11 @@ import {
 } from "../../types/utility.types";
 import { selectAccountParams } from "../account-store/account.selectors";
 import {
-  CommentListItemIdentifier,
+  CommentItemIdentifier,
   PostPhotoAdapterParams,
 } from "../../types/store.types";
 import {
+  AccountSelectorParams,
   CommentPlaceholderSelectorParams,
   CommentSectionSelectorParams,
   CommentSelectorParams,
@@ -29,7 +25,7 @@ import { selectClientAccountParams } from "../client/client.selector";
 
 export type PostSelectorParams = PostGeneralParams<
   {
-    author: AccountParams;
+    author: AccountSelectorParams;
   } & (
     | {
         type: "photo-post";
@@ -47,7 +43,7 @@ export type PostSelectorParams = PostGeneralParams<
 
 export type PostPreviewSelectorParams = {
   id: string;
-  author: AccountParams;
+  author: AccountSelectorParams;
   isPinned: boolean;
   noOfViews: number;
 } & (
@@ -107,214 +103,230 @@ export const selectPost = createSelector(
   }
 );
 
-export const selectCommentParams = createSelector(
-  [(state: RootState) => state, (state: RootState, id: string) => id],
-  (state, id): CommentSelectorParams | undefined => {
-    const comment = selectCommentById(state.post_store.comments, id);
-
-    if (!comment) return undefined;
-
-    const author = selectAccountParams(state, comment.author);
-
-    if (!author) return undefined;
-
-    let hasLoadedReply = false;
-    let isReplyHidden = true;
-    let isReplyLoading = false;
-    let noOfUnloadedReplies = 0;
-
-    if (comment.repliedTo) {
-      const topLevelComment = selectCommentById(
-        state.post_store.comments,
-        comment.repliedTo
-      );
-      if (topLevelComment && topLevelComment.replySection) {
-        isReplyHidden = topLevelComment.isReplyHidden;
-        const replySection = topLevelComment.replySection;
-        hasLoadedReply =
-          replySection.uploaded.length > 0 ||
-          (replySection.fetched.data !== null &&
-            replySection.fetched.data.items.length > 0);
-
-        isReplyLoading = replySection.fetched.isLoading;
-        noOfUnloadedReplies =
-          topLevelComment.noOfReplies -
-          replySection.uploaded.length -
-          (replySection.fetched.data
-            ? replySection.fetched.data.items.length
-            : 0);
-      }
-    } else {
-      isReplyHidden = comment.isReplyHidden;
-      noOfUnloadedReplies = comment.noOfReplies;
-      const replySection = comment.replySection;
-      if (replySection) {
-        hasLoadedReply =
-          replySection.uploaded.length > 0 ||
-          (replySection.fetched.data !== null &&
-            replySection.fetched.data.items.length > 0);
-
-        isReplyLoading = replySection.fetched.isLoading;
-        noOfUnloadedReplies =
-          comment.noOfReplies -
-          replySection.uploaded.length -
-          (replySection.fetched.data
-            ? replySection.fetched.data.items.length
-            : 0);
-      }
-    }
+export const selectLikeSection = createSelector(
+  [(state: RootState) => state, (_: RootState, postId: string) => postId],
+  (state, postId): LikeSectionSelectorParams | undefined | null => {
+    const targetPost = state.post_store.posts.entities[postId];
+    if (!targetPost) return undefined;
+    const likeSection = targetPost.likeSection;
+    if (!likeSection) return null;
 
     return {
-      ...comment,
-      author,
-      isAuthor: Math.random() > 0.6,
-      isPostAuthor: Math.random() > 0.6,
-      isReplyHidden,
-      isReplyLoading,
-      noOfUnloadedReplies,
-      hasLoadedReply,
-    };
-  }
-);
-
-export const selectCommentPlaceholder = createSelector(
-  [(state: RootState) => state, (state: RootState, id: string) => id],
-  (state, id): CommentPlaceholderSelectorParams | undefined => {
-    const placeholder = selectCommentPlaceholderById(
-      state.post_store.comment_placeholders,
-      id
-    );
-
-    if (!placeholder) return undefined;
-
-    const client = selectClientAccountParams(state);
-
-    if (!client) return undefined;
-
-    let noOfUnloadedReplies = 0;
-    let isReplyLoading = false;
-    if (placeholder.repliedTo) {
-      const topLevelComment = selectCommentById(
-        state.post_store.comments,
-        placeholder.repliedTo
-      );
-      if (topLevelComment && topLevelComment.replySection) {
-        const replySection = topLevelComment.replySection;
-        isReplyLoading = replySection.fetched.isLoading;
-        noOfUnloadedReplies =
-          topLevelComment.noOfReplies -
-          replySection.uploaded.length -
-          (replySection.fetched.data
-            ? replySection.fetched.data.items.length
-            : 0);
-      }
-    }
-
-    return {
-      ...placeholder,
-      author: client,
-      noOfUnloadedReplies,
-      isReplyLoading,
+      ...likeSection,
+      engagementSummary: targetPost.engagementSummary,
     };
   }
 );
 
 export const selectCommentSection = createSelector(
-  [(state: RootState) => state, (state: RootState, postId: string) => postId],
-  (state, postId): CommentSectionSelectorParams | undefined => {
-    const commentSection =
-      state.post_store.posts.entities[postId]?.commentSection;
-    if (!commentSection) return undefined;
+  [
+    (state: RootState) => state,
+    (state: RootState, postId: string) => postId,
+    (state: RootState, postId: string, unHiddenReplyComments: string[]) =>
+      unHiddenReplyComments,
+  ],
+  (
+    state,
+    postId,
+    unHiddenReplyComments
+  ): CommentSectionSelectorParams | null => {
+    const targetPost = state.post_store.posts.entities[postId];
+    if (!targetPost || !targetPost.commentSection) return null;
 
-    const items: CommentListItemIdentifier[] = [];
+    const items: CommentItemIdentifier[] = [];
 
-    commentSection.pending.forEach((item) => {
-      items.push({ type: "placeholder", key: item.key, isLastReply: false });
-    });
-    commentSection.uploaded.forEach((item) => {
-      items.push({ type: "comment", key: item.key, isLastReply: false });
-    });
-    commentSection.fetched.data?.items.forEach((item) => {
-      items.push({ type: "comment", key: item.key, isLastReply: false });
-      const targetComment = selectCommentById(
-        state.post_store.comments,
-        item.key
-      );
-      if (
-        targetComment &&
-        !targetComment.isReplyHidden &&
-        targetComment.replySection
-      ) {
-        const replySection = targetComment.replySection;
-        replySection.pending.forEach((replyItem, index) => {
-          const isLastReply =
-            index === replySection.pending.length - 1 &&
-            replySection.uploaded.length === 0 &&
-            (replySection.fetched.data === null ||
-              replySection.fetched.data.items.length === 0);
-          items.push({ type: "placeholder", key: replyItem.key, isLastReply });
-        });
-        replySection.uploaded.forEach((replyItem, index) => {
-          const isLastReply =
-            index === replySection.uploaded.length - 1 &&
-            (replySection.fetched.data === null ||
-              replySection.fetched.data.items.length === 0);
-          items.push({ type: "comment", key: replyItem.key, isLastReply });
-        });
-        replySection.fetched.data?.items.forEach((replyItem, index) => {
-          const isLastReply = replySection.fetched.data
-            ? replySection.fetched.data.items.length - 1 === index
-            : false;
-          items.push({ type: "comment", key: replyItem.key, isLastReply });
-        });
+    const pendingItems =
+      targetPost.commentSection.pending.map<CommentItemIdentifier>((item) => ({
+        isPlaceHolder: true,
+        isFirstLoadedReply: false,
+        isLastReplyItem: false,
+        key: item.key,
+      }));
+
+    const uploadedItems =
+      targetPost.commentSection.uploaded.map<CommentItemIdentifier>((item) => ({
+        isPlaceHolder: false,
+        isFirstLoadedReply: false,
+        isLastReplyItem: false,
+        key: item.key,
+      }));
+
+    items.push(...pendingItems, ...uploadedItems);
+
+    targetPost.commentSection.fetched.items.forEach((fetchedItem) => {
+      items.push({
+        isPlaceHolder: false,
+        isFirstLoadedReply: false,
+        isLastReplyItem: false,
+        key: fetchedItem.key,
+      });
+      const isReplyHidden = !unHiddenReplyComments.includes(fetchedItem.key);
+      if (!isReplyHidden) {
+        const targetComment =
+          state.post_store.comments.entities[fetchedItem.key];
+        if (!targetComment || !targetComment.replySection) return null;
+
+        const noOfFetchedReplies =
+          targetComment.replySection.fetched.items.length;
+        const firstFetchedReplyId =
+          targetComment.replySection.fetched.items[0].key;
+        const fetchedReplies =
+          targetComment.replySection.fetched.items.map<CommentItemIdentifier>(
+            (item, index) => ({
+              isPlaceHolder: false,
+              isFirstLoadedReply: item.key === firstFetchedReplyId,
+              isLastReplyItem: index === noOfFetchedReplies - 1,
+              key: item.key,
+            })
+          );
+
+        const noOfUploadedReplies = targetComment.replySection.uploaded.length;
+        const uploadedReplies =
+          targetComment.replySection.uploaded.map<CommentItemIdentifier>(
+            (item, index) => ({
+              isPlaceHolder: false,
+              isFirstLoadedReply: false,
+              isLastReplyItem:
+                !noOfFetchedReplies && index === noOfUploadedReplies - 1,
+              key: item.key,
+            })
+          );
+
+        const noOfPendingReplies = targetComment.replySection.pending.length;
+        const pendingReplies =
+          targetComment.replySection.pending.map<CommentItemIdentifier>(
+            (item, index) => ({
+              isPlaceHolder: true,
+              isFirstLoadedReply: false,
+              isLastReplyItem:
+                !noOfFetchedReplies &&
+                !noOfUploadedReplies &&
+                index === noOfPendingReplies - 1,
+              key: item.key,
+            })
+          );
+
+        items.push(...pendingReplies, ...uploadedReplies, ...fetchedReplies);
       }
     });
 
     return {
-      isError: commentSection.fetched.error || false,
-      isLoading: commentSection.fetched.isLoading,
-      comments: items,
+      items,
+      hasEndReached: targetPost.commentSection.fetched.hasEndReached,
+      createdAt: targetPost.commentSection.createdAt,
     };
   }
 );
 
-export const selectLikeSection = createSelector(
-  [
-    (state: RootState) => state,
-    (state: RootState, postId: string) => postId,
-    (state: RootState, postId: string, searchPhase: string | null) =>
-      searchPhase,
-  ],
-  (state, postId, searchPhase): LikeSectionSelectorParams | undefined => {
-    const targetPost = state.post_store.posts.entities[postId];
+export const selectComment = createSelector(
+  [(state: RootState) => state, (_: RootState, commentId: string) => commentId],
+  (state, commentId): CommentSelectorParams | undefined => {
+    const targetComment = state.post_store.comments.entities[commentId];
+
+    if (!targetComment) return undefined;
+
+    const targetPost = selectPost(state, targetComment.postId);
+
     if (!targetPost) return undefined;
-    const likeSection = targetPost.likeSection;
-    if (!likeSection) return undefined;
 
-    const searchedAccounts = searchPhase
-      ? likeSection.searchedLikes.data[searchPhase]
-      : undefined;
+    const targetCommentAuthor = selectAccountParams(
+      state,
+      targetComment.author,
+      []
+    );
+    if (!targetCommentAuthor) return undefined;
 
-    const isLoading = searchPhase
-      ? likeSection.searchedLikes.isLoading
-      : likeSection.allLikes.isLoading;
-    const isError = searchPhase
-      ? likeSection.searchedLikes.error || false
-      : likeSection.allLikes.error || false;
+    if (!targetComment.repliedTo) {
+      return {
+        author: targetCommentAuthor,
+        createdAt: targetComment.createdAt,
+        id: targetComment.id,
+        isClientPostAuthor: targetPost.author.isClient,
+        isLiked: targetComment.isLiked,
+        hasLoadedReply: targetComment.replySection ? true : false,
+        noOfHiddenReplies: targetComment.noOfReplies,
+        noOfLikes: targetComment.noOfLikes,
+        pinned: targetComment.pinned,
+        postId: targetComment.postId,
+        text: targetComment.text,
+        repliedTo: undefined,
+      };
+    }
+    const topLevelComment =
+      state.post_store.comments.entities[targetComment.repliedTo];
+
+    const commentSection =
+      state.post_store.posts.entities[targetComment.postId]?.commentSection;
+
+    if (!topLevelComment || !commentSection || !topLevelComment.replySection)
+      return undefined;
+
+    const noOfHiddenReplies =
+      topLevelComment.noOfReplies -
+      topLevelComment.replySection.fetched.items.length -
+      topLevelComment.replySection.uploaded.length;
 
     return {
-      isLoading,
-      isError,
-      data: likeSection.allLikes.data
-        ? {
-            allLikes: likeSection.allLikes.data,
-            engagementSummary: {
-              noOfLikes: targetPost.engagementSummary.noOfLikes,
-              noOfViews: targetPost.engagementSummary.noOfViews,
-            },
-            filteredAccounts: searchedAccounts,
-          }
-        : null,
+      author: targetCommentAuthor,
+      createdAt: targetComment.createdAt,
+      id: targetComment.id,
+      isClientPostAuthor: targetPost.author.isClient,
+      isLiked: targetComment.isLiked,
+      hasLoadedReply: false,
+      noOfHiddenReplies,
+      noOfLikes: targetComment.noOfLikes,
+      pinned: false,
+      postId: targetComment.postId,
+      text: targetComment.text,
+      repliedTo: targetComment.repliedTo,
+    };
+  }
+);
+
+export const selectCommentPlaceholder = createSelector(
+  [
+    (state: RootState) => state,
+    (state: RootState, placeholderId: string) => placeholderId,
+  ],
+  (state, placeholderId): CommentPlaceholderSelectorParams | undefined => {
+    const targetPlaceHolder =
+      state.post_store.comment_placeholders.entities[placeholderId];
+
+    const client = selectClientAccountParams(state);
+
+    if (!targetPlaceHolder || !client) return undefined;
+
+    if (!targetPlaceHolder.repliedTo) {
+      return {
+        author: client,
+        error: targetPlaceHolder.error,
+        id: targetPlaceHolder.id,
+        isUploading: targetPlaceHolder.isUploading,
+        noOfHiddenReplies: 0,
+        postId: targetPlaceHolder.postId,
+        text: targetPlaceHolder.text,
+        repliedTo: undefined,
+      };
+    }
+
+    const topLevelComment =
+      state.post_store.comments.entities[targetPlaceHolder.repliedTo];
+
+    const commentSection =
+      state.post_store.posts.entities[targetPlaceHolder.postId]?.commentSection;
+
+    if (!topLevelComment || !topLevelComment.replySection || !commentSection)
+      return undefined;
+
+    return {
+      author: client,
+      error: targetPlaceHolder.error,
+      id: targetPlaceHolder.id,
+      isUploading: targetPlaceHolder.isUploading,
+      noOfHiddenReplies: topLevelComment.noOfReplies,
+      postId: targetPlaceHolder.postId,
+      text: targetPlaceHolder.text,
+      repliedTo: targetPlaceHolder.repliedTo,
     };
   }
 );

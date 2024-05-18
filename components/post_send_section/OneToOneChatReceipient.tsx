@@ -15,17 +15,17 @@ import AppText from "../AppText";
 import Icon from "../Icon";
 
 export type OneToOneChatReceipientProps = {
-  username: string;
-  onSelect: (username: string) => void;
+  userId: string;
+  onSelect: (userId: string) => void;
   selected: boolean;
 };
 
 export function OneToOneChatReceipient({
-  username,
+  userId,
   onSelect,
   selected,
 }: OneToOneChatReceipientProps) {
-  const accountParams = useAccountAdapterParams(username, ["fullname"]);
+  const accountParams = useAccountAdapterParams(userId, ["name"]);
 
   if (!accountParams) {
     return null;
@@ -33,8 +33,8 @@ export function OneToOneChatReceipient({
 
   const pressCallback = useCallback(() => {
     console.log("pressed");
-    onSelect(username);
-  }, [onSelect, username]);
+    onSelect(userId);
+  }, [onSelect, userId]);
 
   return (
     <AppTouchableHighlight
@@ -43,9 +43,9 @@ export function OneToOneChatReceipient({
     >
       <Avatar url={accountParams.profilePictureUri} size={SIZE_48} />
       <View style={styles.name_container}>
-        <AppText>{accountParams.username}</AppText>
+        <AppText>{accountParams.userId}</AppText>
         <AppText size={SIZE_11} color={COLOR_2}>
-          {accountParams.fullname}
+          {accountParams.name}
         </AppText>
       </View>
       {!selected ? (

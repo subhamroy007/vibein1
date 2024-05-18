@@ -342,7 +342,7 @@ export const fetchAccountMentions = createAppAsyncThunk<
   AccountSearchResponse,
   { searchPhase: string }
 >("client/account-mentions", async (_, thunkApi) => {
-  const accounts = generateAccounts(30, ["fullname"]);
+  const accounts = generateAccounts(30, ["name"]);
 
   const output: AccountSearchResponse = {
     accounts,
@@ -394,13 +394,13 @@ export const fetchSendSectionAccounts = createAppAsyncThunk<
   AccountSearchResponse,
   { searchPhase: string }
 >("client/send-section-accounts", async (_, thunkApi) => {
-  const accounts = generateAccounts(10, ["fullname"]);
+  const accounts = generateAccounts(10, ["name"]);
 
   const output: AccountSearchResponse = {
     accounts,
   };
   await delay(1400);
-  if (Math.random() > 0.8 || thunkApi.signal.aborted) {
+  if (Math.random() > 0.6 || thunkApi.signal.aborted) {
     return thunkApi.rejectWithValue(
       { errorCode: 1000, message: "something went wrong" },
       {

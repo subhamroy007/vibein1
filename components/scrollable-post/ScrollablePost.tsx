@@ -6,8 +6,9 @@ import PostTemplate from "./PostTemplate";
 import { useRouter } from "expo-router";
 import { Portal } from "@gorhom/portal";
 import PostLikeSection from "../portals/PostLikeSection";
-import SendSection from "../portals/SendSection";
 import MomentVideoPlayer from "./MomentVideoPlayer";
+import SendSection from "../portals/SendSection";
+import PostCommentSecion from "../portals/PostCommentSection";
 
 export type ScrollablePostProps = {
   id: string;
@@ -15,6 +16,7 @@ export type ScrollablePostProps = {
   focused: boolean;
   onPress: (id: string, index: number) => void;
   index: number;
+  shouldSetScrollPosition: boolean;
 };
 
 const ScrollablePost = ({
@@ -23,12 +25,15 @@ const ScrollablePost = ({
   focused,
   onPress,
   index,
+  shouldSetScrollPosition,
 }: ScrollablePostProps) => {
   const post = useAppSelector((state) => selectPost(state, id));
 
   const [likes, setLikes] = useState(false);
 
   const [send, setSend] = useState(false);
+
+  const [comment, setComment] = useState(false);
 
   const toggleLikes = useCallback(() => {
     setLikes((value) => !value);
@@ -38,14 +43,11 @@ const ScrollablePost = ({
     setSend((value) => !value);
   }, []);
 
-  const router = useRouter();
+  const toggleComment = useCallback(() => {
+    setComment((value) => !value);
+  }, []);
 
-  const onCommentPress = useCallback(() => {
-    router.push({
-      params: { postId: id },
-      pathname: "/comment_route",
-    });
-  }, [id]);
+  const router = useRouter();
 
   const onTap = useCallback(() => {
     onPress(id, index);
@@ -96,19 +98,24 @@ const ScrollablePost = ({
       caption={caption}
       sound={usedAudio ? "toggle" : undefined}
       liftCaption={true}
-      onCommentPress={onCommentPress}
+      onCommentPress={toggleComment}
     >
       {content}
       {likes && (
         <Portal>
-          <PostLikeSection id={id} onDismiss={toggleLikes} />
+          <PostLikeSection id={id} onClose={toggleLikes} />
         </Portal>
       )}
-      {/* {send && (
+      {send && (
         <Portal>
-          <SendSection onDismiss={toggleSend} />
+          <SendSection onDismiss={toggleSend} onSend={() => {}} />
         </Portal>
-      )} */}
+      )}
+      {comment && (
+        <Portal>
+          <PostCommentSecion onClose={toggleComment} postId={id} />
+        </Portal>
+      )}
     </PostTemplate>
   );
 };

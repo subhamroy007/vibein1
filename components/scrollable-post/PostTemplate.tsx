@@ -1,16 +1,17 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { AccountParams, AudioWithTitle } from "../../types/utility.types";
-import { View } from "react-native";
+import { LayoutChangeEvent, View } from "react-native";
 import ContentContainer from "./ContentContainer";
 import PostFooter from "./PostFooter";
 import PostInteractionSection from "./PostInteractionSection";
 import PostMetadataSection from "./PostMetadataSection";
+import { AccountSelectorParams } from "../../types/selector.types";
 
 export type PostTemplate = {
   onLike: () => void;
   onMoreIconPress: () => void;
   onTap: () => void;
-  author: AccountParams;
+  author: AccountSelectorParams;
   children: ReactNode;
   caption?: string;
   sound?: "nosound" | "unavailbale" | "toggle";

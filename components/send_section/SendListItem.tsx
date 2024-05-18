@@ -13,24 +13,51 @@ import Avatar from "../Avatar";
 import { View } from "react-native";
 import Text from "../utility-components/text/Text";
 import Icon from "../utility-components/icon/Icon";
-import { SendSectionItemSelectorParams } from "../../types/selector.types";
-import { SendSectionItemIdentifier } from "../../types/utility.types";
+import { ChatItemSelectorParams } from "../../types/selector.types";
 
 export type SendListItemProps = {
   selected: boolean;
-  onPress: (item: SendSectionItemIdentifier, select: boolean) => void;
-} & SendSectionItemSelectorParams;
+  searched: boolean;
+  onPress: (
+    item: ChatItemSelectorParams,
+    select: boolean,
+    searched: boolean
+  ) => void;
+  item: ChatItemSelectorParams;
+};
 
 export default function SendListItem({
   onPress,
-  pictureUri,
-  secondaryText,
+  item,
+  searched,
   selected,
-  ...item
 }: SendListItemProps) {
   const pressCallback = useCallback(() => {
-    onPress(item, !selected);
-  }, [item, onPress, selected]);
+    onPress(item, !selected, searched);
+  }, [item, onPress, selected, searched]);
+
+  let avatarItem = null;
+  let secondaryText = null;
+  if (item.type === "one-to-one") {
+    avatarItem = <Avatar size={SIZE_48} url={item.profilePictureUri} />;
+    secondaryText = item.userId;
+  } else {
+    avatarItem = (
+      <View style={{ width: SIZE_48, aspectRatio: 1 }}>
+        <Avatar
+          size={SIZE_30}
+          url={item.members[0].profilePictureUri}
+          style={[layoutStyle.position_absolute, { top: 3, right: 3 }]}
+        />
+        <Avatar
+          size={SIZE_30}
+          url={item.members[1].profilePictureUri}
+          style={[layoutStyle.position_absolute, { bottom: 3, left: 3 }]}
+        />
+      </View>
+    );
+    secondaryText = item.members.length + " members";
+  }
 
   return (
     <Pressable
@@ -43,27 +70,10 @@ export default function SendListItem({
         { height: SIZE_70 },
       ]}
     >
-      {typeof pictureUri === "string" ? (
-        <Avatar size={SIZE_48} url={pictureUri} />
-      ) : (
-        <View style={{ width: SIZE_48, aspectRatio: 1 }}>
-          <Avatar
-            size={SIZE_30}
-            url={pictureUri[0]}
-            style={[layoutStyle.position_absolute, { top: 3, right: 3 }]}
-          />
-          <Avatar
-            size={SIZE_30}
-            url={pictureUri[1]}
-            style={[layoutStyle.position_absolute, { bottom: 3, left: 3 }]}
-          />
-        </View>
-      )}
+      {avatarItem}
       <View style={[layoutStyle.flex_1, marginStyle.margin_horizontal_12]}>
-        <Text weight="semi-bold">{item.name}</Text>
-        <Text weight="semi-bold" color="grey">
-          {secondaryText}
-        </Text>
+        <Text>{item.name}</Text>
+        <Text color="grey">{secondaryText}</Text>
       </View>
       <Icon
         size={SIZE_24}

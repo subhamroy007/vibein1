@@ -1,23 +1,11 @@
-import {
-  SIZE_15,
-  SIZE_24,
-  SIZE_45,
-  SIZE_48,
-  windowHeight,
-} from "../../constants";
-import {
-  backgroundStyle,
-  layoutStyle,
-  marginStyle,
-  paddingStyle,
-} from "../../styles";
+import { useWindowDimensions } from "react-native";
+import { SIZE_15, SIZE_24, SIZE_48 } from "../../constants";
+import { layoutStyle, marginStyle, paddingStyle } from "../../styles";
 import { IconName } from "../../types/component.types";
 import Pressable from "../utility-components/button/Pressable";
 import Icon from "../utility-components/icon/Icon";
 import Text from "../utility-components/text/Text";
-import SwipeUpPortal from "./SwipeUpPortal";
-import Animated from "react-native-reanimated";
-import { usePortalAnimatedGesture } from "../../hooks/utility.hooks";
+import NewPortal from "./NewPortal";
 
 export type PortalOptionParams = {
   icon: IconName;
@@ -28,75 +16,44 @@ export type PortalOptionParams = {
 
 export type OptionsPortalProps = {
   options: PortalOptionParams[];
-  onDismiss: () => void;
+  onClose: () => void;
 };
 
 export default function OptionsPortal({
-  onDismiss,
+  onClose,
   options,
 }: OptionsPortalProps) {
-  const height = Math.min(windowHeight, options.length * SIZE_48 + SIZE_45);
+  const { height } = useWindowDimensions();
 
-  const {
-    containerAnimatedStyle,
-    onScroll,
-    portalRef,
-    scrollRef,
-    portalPosition,
-  } = usePortalAnimatedGesture(height);
+  const contentHeight = Math.min(height, (options.length + 1) * SIZE_48);
 
   return (
-    <SwipeUpPortal
-      ref={(refer) => {
-        if (refer) {
-          portalRef.current = refer;
-        }
-      }}
-      onClose={onDismiss}
-      title="options"
-      containerHeight={height}
-      position={portalPosition}
-    >
-      <Animated.ScrollView
-        ref={scrollRef}
-        onScroll={onScroll}
-        overScrollMode="never"
-        contentContainerStyle={{ paddingTop: height }}
-        showsVerticalScrollIndicator={false}
-        contentOffset={{ x: 0, y: height }}
-        style={backgroundStyle.background_dove_grey}
-        scrollEventThrottle={16}
-      >
-        <Animated.View style={containerAnimatedStyle}>
-          {options.map((option, index) => {
-            return (
-              <Pressable
-                key={index}
-                useUnderlay
-                onPress={() => {
-                  portalRef.current?.close(option.callback);
-                }}
-                style={[
-                  layoutStyle.align_item_center,
-                  layoutStyle.flex_direction_row,
-                  paddingStyle.padding_horizontal_12,
-                  { height: SIZE_48 },
-                  backgroundStyle.background_color_1,
-                ]}
-              >
-                <Icon name={option.icon} color={option.color} size={SIZE_24} />
-                <Text
-                  color={option.color}
-                  style={marginStyle.margin_left_12}
-                  size={SIZE_15}
-                >
-                  {option.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </Animated.View>
-      </Animated.ScrollView>
-    </SwipeUpPortal>
+    <NewPortal onClose={onClose} title="options" contentHeight={contentHeight}>
+      {options.map((option, index) => (
+        <Pressable
+          useUnderlay
+          style={[
+            paddingStyle.padding_horizontal_12,
+            layoutStyle.align_item_center,
+            layoutStyle.flex_direction_row,
+            {
+              height: SIZE_48,
+            },
+          ]}
+          onPress={option.callback}
+          key={index}
+        >
+          <Icon name={option.icon} color={option.color} size={SIZE_24} />
+          <Text
+            color={option.color}
+            style={marginStyle.margin_left_9}
+            weight="light_medium"
+            size={SIZE_15}
+          >
+            {option.label}
+          </Text>
+        </Pressable>
+      ))}
+    </NewPortal>
   );
 }

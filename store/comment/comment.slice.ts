@@ -16,7 +16,7 @@ import { fetchReplies } from "./comment.thunks";
 function tranformToCommentAdapterParams(comment: Comment2): Comment1 {
   return {
     ...comment,
-    createdBy: comment.createdBy.username,
+    createdBy: comment.createdBy.userId,
     replies: comment.replies ? comment.replies.map((reply) => reply.id) : [],
     replySectionThunkInfo: {
       lastRequestError: null,

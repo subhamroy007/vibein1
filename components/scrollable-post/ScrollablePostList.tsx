@@ -4,14 +4,14 @@ import {
   ViewToken,
   ViewabilityConfig,
 } from "react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLayout } from "@react-native-community/hooks";
 import { ScrollablePostListProps } from "../../types/component.types";
-import Animated from "react-native-reanimated";
+import Animated, { scrollTo, useAnimatedRef } from "react-native-reanimated";
 import { ItemKey } from "../../types/utility.types";
 import ScrollablePost from "./ScrollablePost";
 import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
-import { LAYOUT_ANIMATION_400 } from "../../constants";
+import { LAYOUT_ANIMATION_400, windowWidth } from "../../constants";
 
 const viewabilityConfig: ViewabilityConfig = {
   minimumViewTime: 150,
@@ -27,10 +27,26 @@ const ScrollablePostList = ({
   onRefresh,
   refreshing,
   onPress,
+  startIndex,
 }: ScrollablePostListProps) => {
   const [focusedPostIndex, setFocusedPostIndex] = useState(0);
 
-  const { height, onLayout } = useLayout();
+  const listRef = useAnimatedRef<Animated.FlatList<ItemKey>>();
+
+  // useEffect(() => {
+  //   const callback = () => {
+  //     "worklet";
+  //     if (startIndex) {
+  //       // (listRef.current as any).scrollToOffset({
+  //       //   offset: (startIndex * windowWidth * 19) / 9,
+  //       //   animated: false,
+  //       // });
+  //       console.log((startIndex * windowWidth * 19) / 9);
+  //       scrollTo(listRef, 0, (startIndex * windowWidth * 19) / 9, false);
+  //     }
+  //   };
+  //   callback();
+  // }, [startIndex, data]);
 
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<ItemKey>) => {
@@ -38,15 +54,17 @@ const ScrollablePostList = ({
       const focused = index === focusedPostIndex;
       return (
         <ScrollablePost
+          // changeListScrollPosition={changeListScrollPosition}
           id={item.key}
           focused={focused}
           preload={preload}
           onPress={onPress}
           index={index}
+          shouldSetScrollPosition={false}
         />
       );
     },
-    [focusedPostIndex, onPress]
+    [focusedPostIndex, onPress, startIndex]
   );
 
   const viewableItemsChangedCallback = useCallback(
@@ -79,9 +97,10 @@ const ScrollablePostList = ({
 
   return (
     <Animated.FlatList
+      ref={listRef}
+      decelerationRate={0.999}
       data={data}
       renderItem={renderItem}
-      onLayout={onLayout}
       ListEmptyComponent={
         onEndReach ? (
           <DefaultPlaceholder
@@ -113,6 +132,11 @@ const ScrollablePostList = ({
       onViewableItemsChanged={viewableItemsChangedCallback}
       removeClippedSubviews={false}
       itemLayoutAnimation={LAYOUT_ANIMATION_400}
+      contentOffset={
+        startIndex
+          ? { x: 0, y: (startIndex * windowWidth * 19) / 9 }
+          : undefined
+      }
     />
   );
 };

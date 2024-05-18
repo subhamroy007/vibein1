@@ -8,7 +8,7 @@ import Text from "../utility-components/text/Text";
 
 export type AccountMentionListItemProps = {
   account: AccountParams;
-  onSelect: (username: string) => void;
+  onSelect: (userId: string) => void;
 };
 
 export default function AccountMentionListItem({
@@ -18,7 +18,7 @@ export default function AccountMentionListItem({
   return (
     <Pressable
       useUnderlay
-      onPress={() => onSelect(account.username)}
+      onPress={() => onSelect(account.userId)}
       style={[
         { height: SIZE_45 },
         layoutStyle.align_item_center,
@@ -28,9 +28,9 @@ export default function AccountMentionListItem({
     >
       <Avatar url={account.profilePictureUri} />
       <View style={marginStyle.margin_left_9}>
-        <Text weight="semi-bold">{account.username}</Text>
+        <Text weight="semi-bold">{account.userId}</Text>
         <Text weight="semi-bold" color="grey">
-          {account.fullname}
+          {account.name}
         </Text>
       </View>
     </Pressable>

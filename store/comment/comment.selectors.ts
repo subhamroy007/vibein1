@@ -13,7 +13,7 @@ export const selectCommentParams = createSelector(
       return undefined;
     }
 
-    const author = selectAccountParams(state, comment.createdBy, ["fullname"]);
+    const author = selectAccountParams(state, comment.createdBy, ["name"]);
 
     if (!author) {
       return undefined;

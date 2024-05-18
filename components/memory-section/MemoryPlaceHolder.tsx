@@ -54,7 +54,7 @@ export default function MemoryPlaceHolder({
           color={COLOR_1}
           style={marginStyle.margin_left_12}
         >
-          {account.username}
+          {account.userId}
         </Text>
       </View>
       <View

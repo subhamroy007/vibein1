@@ -253,6 +253,9 @@ export const paddingStyle = StyleSheet.create({
   padding_horizontal_12: {
     paddingHorizontal: SIZE_12,
   },
+  padding_horizontal_3: {
+    paddingHorizontal: SIZE_3,
+  },
   padding_left_12: {
     paddingLeft: SIZE_12,
   },

@@ -46,6 +46,9 @@ export default class Text extends PureComponent<TextProps> {
       case "light":
         text_style.push(styles.light);
         break;
+      case "light_medium":
+        text_style.push(styles.light_medium);
+        break;
       case "medium":
       default:
         text_style.push(styles.medium);
@@ -66,22 +69,31 @@ export default class Text extends PureComponent<TextProps> {
 
 const styles = StyleSheet.create({
   bold: {
-    fontFamily: "bold",
+    // fontFamily: "bold",
+    fontWeight: "800",
+  },
+  light_medium: {
+    fontWeight: "500",
   },
   medium: {
-    fontFamily: "medium",
+    // fontFamily: "medium",
+    fontWeight: "600",
   },
   regular: {
-    fontFamily: "regular",
+    // fontFamily: "regular",
+    fontWeight: "400",
   },
   extra_bold: {
-    fontFamily: "extra_bold",
+    // fontFamily: "extra_bold",
+    fontWeight: "900",
   },
   semi_bold: {
-    fontFamily: "semi_bold",
+    // fontFamily: "semi_bold",
+    fontWeight: "700",
   },
   light: {
-    fontFamily: "light",
+    // fontFamily: "light",
+    fontWeight: "300",
   },
 });
 

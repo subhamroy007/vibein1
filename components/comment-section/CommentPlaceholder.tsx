@@ -63,7 +63,7 @@ export default function CommentPlaceHolder({ id }: { id: string }) {
         size={repliedTo ? SIZE_30 : SIZE_36}
       />
       <View style={[layoutStyle.flex_1, marginStyle.margin_horizontal_12]}>
-        <Text weight="bold">{author.username}</Text>
+        <Text weight="bold">{author.userId}</Text>
         <MultilineText text={text} style={marginStyle.margin_top_3} />
         <Text
           weight="semi-bold"

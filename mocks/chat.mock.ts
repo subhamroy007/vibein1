@@ -1,17 +1,14 @@
-import { nanoid } from "@reduxjs/toolkit";
-import { getRandom } from ".";
 import {
-  AccountResponseParams,
-  ChatResponseParams,
+  GroupChatResponseParams,
+  GroupChatResponseReceipientParams,
   MessageResponseParams,
-} from "../types/response.types";
-import { MessageMediaAttachmentParams } from "../types/store.types";
-import {
-  getPostMomentVideoThumbnailUrl,
-  getPostMomentVideoUrl,
-  getPostPhotoUrl,
-} from "./data";
-import { generateAccountObject } from "./accounts";
+  OneToOneChatResponseParams,
+} from "./../types/response.types";
+import { nanoid } from "@reduxjs/toolkit";
+import { AccountParams } from "../types/utility.types";
+import { CLIENT_ACCOUNT } from "../constants";
+import { DAY_GAP_MS, getDate, getRandom } from ".";
+import { generateAccount, generateAccounts } from "./accounts";
 
 const MSG_TEXTS = [
   "jeet jayega",
@@ -38,232 +35,182 @@ const MSG_TEXTS = [
   "https://www.instagram.com/reel/C00laGNrf75/?igsh=MW9qdHE5b2lrN255aQ==\nI am laughing forever 😂😂😂🤣",
 ];
 
+const GROUP_NAMES = [
+  "backbencher",
+  "Dream-11 dscussions",
+  "Latest MOview Download LINKS",
+  "coding community",
+  "Top study meterial",
+  "robotics group",
+  "Ipl fan page",
+  "mumbai indians fanpage",
+  "rcb fan page",
+  "chennei super kings (CSK) fan page",
+  "kkr fanpage",
+];
+
 const reaction_emojis = ["😀", "🤯", "😍", "🥶", "🥵", "😭"];
 
-export const generateMessageMediaAttachments = (noOfFiles: number) => {
-  const attachments: MessageMediaAttachmentParams[] = [];
-
-  for (let i = 0; i < noOfFiles; i++) {
-    const isPhoto = Math.random() < 0.7;
-    const mediaIndex = getRandom(20, 1);
-    if (isPhoto) {
-      attachments.push({
-        type: "photo",
-        url: getPostPhotoUrl(mediaIndex),
-        width: 1080,
-        height: 1920,
-      });
-    } else {
-      attachments.push({
-        type: "video",
-        url: getPostMomentVideoUrl(mediaIndex),
-        duration: 40,
-        width: 1080,
-        height: 1920,
-        poster: getPostMomentVideoThumbnailUrl(mediaIndex),
-      });
-    }
+export function generateOneToOneChatMessage(
+  receipient: AccountParams,
+  type: 1 | 2 | 3 | 4,
+  timeLimit: number
+): MessageResponseParams {
+  const bound = getRandom(12);
+  const now = Date.now();
+  let uploadedAt = 0;
+  if (bound >= 0 && bound < 4) {
+    uploadedAt = getRandom(now, now - DAY_GAP_MS);
+  } else if (bound >= 4 && bound < 8) {
+    uploadedAt = getRandom(now - DAY_GAP_MS, now - 2 * DAY_GAP_MS);
+  } else {
+    uploadedAt = getRandom(now - 2 * DAY_GAP_MS, timeLimit);
   }
 
-  return attachments;
-};
-
-export const generateMessageObject = (
-  receipients: AccountResponseParams[]
-): MessageResponseParams => {
-  const hasAttachment = Math.random() > 0.6;
-
-  let author =
-    receipients.length === 1
-      ? receipients[0]
-      : receipients[getRandom(receipients.length - 1)];
-
-  const reactions: MessageResponseParams["reactions"] =
-    Math.random() > 0.5
-      ? receipients.length === 1
-        ? [
-            {
-              author: receipients[0],
-              reactionEmoji:
-                reaction_emojis[getRandom(0, reaction_emojis.length - 1)],
-            },
-          ]
-        : receipients
-            .slice(0, getRandom(2, receipients.length))
-            .map((item) => ({
-              author: item,
-              reactionEmoji:
-                reaction_emojis[getRandom(0, reaction_emojis.length - 1)],
-            }))
-      : [];
-
+  const isClientAuthor = (type === 1 || type === 2) && Math.random() > 0.5;
   return {
-    id: nanoid(),
-    reactions,
-    createdAt: new Date().toUTCString(),
-    author,
-    body: {
-      text: !hasAttachment
-        ? MSG_TEXTS[getRandom(MSG_TEXTS.length - 1)]
-        : undefined,
-      attachment: hasAttachment
-        ? {
-            type: "media",
-            media: generateMessageMediaAttachments(
-              Math.random() > 0.5 ? 1 : getRandom(10, 4)
-            ),
-          }
-        : undefined,
-    },
-    seenByReceipient: Math.random() > 0.6,
+    id: nanoid(10),
+    author: isClientAuthor ? CLIENT_ACCOUNT : receipient,
+    reactions: [],
+    seenBy: [],
+    sentTo: isClientAuthor ? receipient.id : CLIENT_ACCOUNT.id,
+    uploadedAt,
+    text: MSG_TEXTS[getRandom(MSG_TEXTS.length - 1)],
   };
-};
+}
 
-export const generateMessageObjects = (
-  noOfMessages: number,
-  receipients: AccountResponseParams[]
-) => {
+export function generateGroupChatMessage(
+  receipients: AccountParams[],
+  groupId: string,
+  isMember: boolean,
+  timeLimit: number
+): MessageResponseParams {
+  const bound = getRandom(12);
+  const now = Date.now();
+  let uploadedAt = 0;
+  if (bound >= 0 && bound < 4) {
+    uploadedAt = getRandom(now, now - DAY_GAP_MS);
+  } else if (bound >= 4 && bound < 8) {
+    uploadedAt = getRandom(now - DAY_GAP_MS, now - 2 * DAY_GAP_MS);
+  } else {
+    uploadedAt = getRandom(now - 2 * DAY_GAP_MS, timeLimit);
+  }
+
+  const isClientAuthor = isMember && Math.random() > 0.5;
+  return {
+    id: nanoid(10),
+    author: isClientAuthor
+      ? CLIENT_ACCOUNT
+      : receipients[getRandom(receipients.length - 1)],
+    reactions: [],
+    seenBy: [],
+    sentTo: groupId,
+    uploadedAt,
+    text: MSG_TEXTS[getRandom(MSG_TEXTS.length - 1)],
+  };
+}
+
+export function generateGroupChatMessages(
+  length: number,
+  groupId: string,
+  receipients: AccountParams[],
+  isMember: boolean,
+  timeLimit: number
+): MessageResponseParams[] {
   const messages: MessageResponseParams[] = [];
 
-  for (let i = 0; i < noOfMessages; i++) {
-    messages.push(generateMessageObject(receipients));
+  for (let i = 0; i < length; i++) {
+    messages.push(
+      generateGroupChatMessage(receipients, groupId, isMember, timeLimit)
+    );
   }
+
   return messages;
-};
+}
 
-export const generateChatObject = (
-  clientAccount: AccountResponseParams,
-  recepientAccount: AccountResponseParams,
-  type: "active" | "inactive" | "pending" | "requested",
-  noOfMessages: number
-): ChatResponseParams => {
-  clientAccount = {
-    ...clientAccount,
-    fullname: clientAccount.username,
-  } as AccountResponseParams;
-  if (type === "inactive") {
-    return {
-      id: recepientAccount.id,
-      muted: false,
-      noOfUnseenMessages: 0,
-      receipient: {
-        account: recepientAccount,
-        isMember: false,
-        isMessageRequestRestricted: Math.random() > 0.6,
-      },
-    };
-  }
-  if (type === "active") {
-    return {
-      id: recepientAccount.id,
-      muted: Math.random() > 0.6,
-      noOfUnseenMessages:
-        Math.random() > 0.5 && noOfMessages ? getRandom(1, noOfMessages) : 0,
-      receipient: {
-        account: recepientAccount,
-        isMember: true,
-        isMessageRequestRestricted: Math.random() > 0.6,
-        lastActiveAt: new Date().toUTCString(),
-      },
-      joinedAt: new Date().toUTCString(),
-      recentMessages: noOfMessages
-        ? {
-            data: generateMessageObjects(noOfMessages, [
-              clientAccount,
-              recepientAccount,
-            ]),
-            hasEndReached: Math.random() > 0.7,
-            endCursor: "",
-            totalCount: 10000,
-          }
-        : undefined,
-    };
+export function generateOneToOneChatMessages(
+  length: number,
+  receipient: AccountParams,
+  type: 1 | 2 | 3 | 4,
+  timeLimit: number
+): MessageResponseParams[] {
+  const messages: MessageResponseParams[] = [];
+
+  for (let i = 0; i < length; i++) {
+    messages.push(generateOneToOneChatMessage(receipient, type, timeLimit));
   }
 
-  if (type === "requested") {
-    return {
-      id: recepientAccount.id,
-      muted: false,
-      noOfUnseenMessages:
-        Math.random() > 0.5 && noOfMessages ? getRandom(1, noOfMessages) : 0,
-      receipient: {
-        account: recepientAccount,
-        isMember: true,
-        isMessageRequestRestricted: false,
-      },
-      recentMessages: noOfMessages
-        ? {
-            data: generateMessageObjects(noOfMessages, [
-              clientAccount,
-              recepientAccount,
-            ]),
-            hasEndReached: Math.random() > 0.7,
-            endCursor: "",
-            totalCount: 10000,
-          }
-        : undefined,
-    };
-  }
+  return messages;
+}
+
+export function generateOneToOneChat(
+  type: 1 | 2 | 3 | 4
+): OneToOneChatResponseParams {
+  const receipientAccount = generateAccount(["name"]);
+
+  let joinedAt =
+    type === 4 ? Date.now() : Date.UTC(2023, getRandom(11), getRandom(27, 1));
 
   return {
-    id: recepientAccount.id,
-    muted: Math.random() > 0.7,
-    noOfUnseenMessages: 0,
+    id: receipientAccount.id,
+    isMember: type === 1 || type === 2,
+    isMuted: (type === 1 || type === 2) && Math.random() > 0.5,
     receipient: {
-      account: recepientAccount,
-      isMember: false,
-      isMessageRequestRestricted: Math.random() > 0.6,
+      account: receipientAccount,
+      isMember: type === 1 || type === 3,
+      lastSeenAt: type === 1 ? getDate() : undefined,
     },
-    joinedAt: new Date().toUTCString(),
-    recentMessages: noOfMessages
-      ? {
-          data: generateMessageObjects(noOfMessages, [
-            clientAccount,
-            recepientAccount,
-          ]),
-          hasEndReached: Math.random() > 0.7,
-          endCursor: "",
-          totalCount: 10000,
-        }
-      : undefined,
+    joinedAt,
+    noOfUnseenMessages:
+      type === 4 || type === 2 || Math.random() > 0.5 ? 0 : getRandom(1, 30),
+    recentMessages:
+      type === 4
+        ? undefined
+        : {
+            endCursor: "",
+            hasEndReached: true,
+            items: generateOneToOneChatMessages(
+              12,
+              receipientAccount,
+              type,
+              joinedAt
+            ),
+          },
   };
-};
+}
 
-export const generateChatObjects = (
-  noOfChats: number,
-  clientAccount: AccountResponseParams,
-  type: "dm" | "mr"
-) => {
-  const chats: ChatResponseParams[] = [];
+export function generateGroupChat(isMember: boolean): GroupChatResponseParams {
+  let joinedAt = Date.UTC(2023, getRandom(11), getRandom(27, 1));
 
-  for (let i = 0; i < noOfChats; i++) {
-    const receipientAccount = generateAccountObject([
-      "fullname",
-      "is-available",
-      "is-blocked",
-    ]);
+  const receipients = generateAccounts(getRandom(10, 3), [
+    "name",
+  ]).map<GroupChatResponseReceipientParams>((account) => ({
+    account,
+    isAdmin: Math.random() > 0.5,
+    isMember: true,
+    joinedAt,
+  }));
+  const groupId = nanoid(10);
 
-    if (type === "mr") {
-      chats.push(
-        generateChatObject(
-          clientAccount,
-          receipientAccount,
-          "requested",
-          getRandom(12, 1)
-        )
-      );
-    } else {
-      const status = Math.random() > 0.6 ? "pending" : "active";
-      chats.push(
-        generateChatObject(
-          clientAccount,
-          receipientAccount,
-          status,
-          status === "pending" ? 1 : Math.random() > 0.7 ? 0 : getRandom(12, 1)
-        )
-      );
-    }
-  }
-
-  return chats;
-};
+  return {
+    id: groupId,
+    isMember,
+    isMuted: isMember && Math.random() > 0.5,
+    name: GROUP_NAMES[getRandom(GROUP_NAMES.length - 1)],
+    receipients: receipients,
+    invitedBy: receipients.filter((item) => item.isAdmin)[0].account.userId,
+    joinedAt: getDate(),
+    noOfUnseenMessages: Math.random() > 0.5 ? 0 : getRandom(1, 30),
+    recentMessages: {
+      endCursor: "",
+      hasEndReached: true,
+      items: generateGroupChatMessages(
+        12,
+        groupId,
+        receipients.map((item) => item.account),
+        isMember,
+        joinedAt
+      ),
+    },
+  };
+}

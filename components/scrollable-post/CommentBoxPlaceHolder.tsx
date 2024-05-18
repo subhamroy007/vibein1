@@ -39,6 +39,5 @@ const root_container_style = [
   borderStyle.border_width_hairline,
   layoutStyle.flex_direction_row,
   layoutStyle.content_center,
-  marginStyle.margin_horizontal_24,
 ];
 export default CommentBoxPlaceHolder;

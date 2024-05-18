@@ -21,6 +21,7 @@ import {
   SIZE_84,
 } from "../../../constants";
 import Text from "../../../components/utility-components/text/Text";
+import { formatNumber } from "../../../utility";
 
 const HashTagPage = () => {
   const { hashtag } = useGlobalSearchParams<{ hashtag: string }>();
@@ -102,12 +103,11 @@ const HashTagPage = () => {
                 #{hashtag}
               </Text>
               <Text
-                weight="semi-bold"
                 color="grey"
-                size={SIZE_16}
+                size={SIZE_15}
                 style={marginStyle.margin_top_6}
               >
-                {data.noOfPosts} posts
+                {formatNumber(data.noOfPosts)} posts
               </Text>
             </View>
           )

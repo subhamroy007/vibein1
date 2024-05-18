@@ -2,12 +2,10 @@ import { getRandom } from "../../mocks";
 import { generateAccounts } from "../../mocks/accounts";
 import { generateComments, generateNewComment } from "../../mocks/posts";
 import {
-  AccountPageResponse,
   AccountSearchResponse,
   CommentPageResponse,
   CommentResponseParams,
   PostLikeAuthor,
-  PostLikeAuthorPageResponse,
   PostLikeSectionResponseParams,
 } from "../../types/response.types";
 import { createAppAsyncThunk, delay } from "../../utility";
@@ -23,8 +21,8 @@ export const fetchComments = createAppAsyncThunk<
     endCursor: comments[0].createdAt,
     hasEndReached: false,
   };
-  await delay(1000);
-  if (Math.random() > 1.7) {
+  await delay(500);
+  if (Math.random() > 1.5) {
     return thunkApi.rejectWithValue(
       { errorCode: 1000, message: "something went wrong" },
       {
@@ -58,15 +56,15 @@ export const fetchReplies = createAppAsyncThunk<
           requestTimestamp: Date.now(),
         }
       );
-    const comments = generateComments(9, targetComment.postId, commentId);
+    const comments = generateComments(6, targetComment.postId, commentId);
 
     const result: CommentPageResponse = {
       items: comments,
       endCursor: comments[0].createdAt,
       hasEndReached: false,
     };
-    await delay(4000);
-    if (Math.random() > 1.7) {
+    await delay(500);
+    if (Math.random() > 0.7) {
       return rejectWithValue(
         { errorCode: 1000, message: "something went wrong" },
         {
@@ -111,7 +109,7 @@ export const fetchLikes = createAppAsyncThunk<
   { postId: string; refresh?: boolean }
 >("post/likes", async ({ postId }, thunkApi) => {
   const accounts = generateAccounts(20, [
-    "fullname",
+    "name",
     "has-followed-client",
     "is-followed",
     "is-requested-to-follow",
@@ -154,7 +152,7 @@ export const fetchFilteredLikes = createAppAsyncThunk<
   { postId: string; searchPhase: string }
 >("post/filtered-likes", async ({ postId, searchPhase }, thunkApi) => {
   const accounts = generateAccounts(20, [
-    "fullname",
+    "name",
     "has-followed-client",
     "is-followed",
     "is-requested-to-follow",
@@ -165,7 +163,7 @@ export const fetchFilteredLikes = createAppAsyncThunk<
   };
 
   await delay(1400);
-  if (Math.random() > 0.7 || thunkApi.signal.aborted) {
+  if (Math.random() > 0.3 || thunkApi.signal.aborted) {
     return thunkApi.rejectWithValue(
       { errorCode: 1000, message: "something went wrong" },
       {

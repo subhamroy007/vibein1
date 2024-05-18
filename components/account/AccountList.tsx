@@ -1,6 +1,7 @@
 import { FlatList } from "react-native";
 import { AccountListProps } from "../../types/component.types";
 import DefaultPlaceholder from "../utility-components/DefaultPlaceholder";
+import Animated from "react-native-reanimated";
 
 export default function AccountList({
   data,
@@ -13,6 +14,9 @@ export default function AccountList({
   style,
   header,
   renderAccount,
+  nestedScrollingEnabled,
+  onScroll,
+  placeholder,
 }: AccountListProps) {
   const showFooter =
     data !== null &&
@@ -28,14 +32,16 @@ export default function AccountList({
     !isLoading;
 
   return (
-    <FlatList
+    <Animated.FlatList
       data={data}
       renderItem={renderAccount}
       style={style}
       overScrollMode="never"
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={
-        onEndReach ? (
+        placeholder ? (
+          placeholder
+        ) : onEndReach ? (
           <DefaultPlaceholder
             isError={isError || false}
             isLoading={isLoading || false}
@@ -57,6 +63,8 @@ export default function AccountList({
       ListHeaderComponent={header}
       keyboardShouldPersistTaps={"always"}
       keyboardDismissMode="none"
+      nestedScrollEnabled={nestedScrollingEnabled}
+      onScroll={onScroll}
     />
   );
 }

@@ -10,12 +10,12 @@ export const fetchHashtagRoute = createAppAsyncThunk<
   HashtagRouteResponseParams,
   { name: string }
 >("hashtag/route", async ({ name }, thunkApi) => {
-  const posts = generatePost(12);
+  const posts = generatePost(6);
 
   const data: HashtagRouteResponseParams = {
     name,
     noOfPosts: getRandom(1000000, 1000),
-    topPosts: { endCursor: "", hasEndReached: false, items: posts },
+    topPosts: { endCursor: "", hasEndReached: true, items: posts },
   };
   await delay(400);
   if (Math.random() > 1.9) {

@@ -7,13 +7,20 @@ import { useCallback, useState } from "react";
 import { View } from "react-native";
 import { layoutStyle, marginStyle, paddingStyle } from "../../../styles";
 import IconCircle from "../../../components/utility-components/icon/IconCircle";
-import { COLOR_2, SIZE_16, SIZE_70, SIZE_72 } from "../../../constants";
+import {
+  COLOR_2,
+  SIZE_15,
+  SIZE_16,
+  SIZE_70,
+  SIZE_72,
+} from "../../../constants";
 import Text from "../../../components/utility-components/text/Text";
 import { selectLocationRouteParams } from "../../../store/location/location.selector";
 import {
   fetchLocationRoute,
   fetchLocationTopPosts,
 } from "../../../store/location/location.thunk";
+import { formatNumber } from "../../../utility";
 
 const LocationPage = () => {
   const { location_id } = useGlobalSearchParams<{ location_id: string }>();
@@ -61,7 +68,7 @@ const LocationPage = () => {
   const onPostPress = useCallback(
     (id: string, index: number) => {
       router.push({
-        params: { location_id },
+        params: { location_id, index },
         pathname: "/location/location_id/top_posts_scrollable_feed",
       });
     },
@@ -95,12 +102,11 @@ const LocationPage = () => {
                 {data.name}
               </Text>
               <Text
-                weight="semi-bold"
                 color="grey"
-                size={SIZE_16}
+                size={SIZE_15}
                 style={marginStyle.margin_top_6}
               >
-                {data.noOfPosts} posts
+                {formatNumber(data.noOfPosts)} posts
               </Text>
             </View>
           )

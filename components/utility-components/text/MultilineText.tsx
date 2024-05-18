@@ -31,7 +31,12 @@ export default class MultilineText extends PureComponent<MultilineTextProps> {
       const matchIndex = text.indexOf(phase, currentOffset);
       if (matchIndex > currentOffset) {
         text_sections.push(
-          <Text key={currentOffset} {...restProps} color={color}>
+          <Text
+            weight="light_medium"
+            key={currentOffset}
+            {...restProps}
+            color={color}
+          >
             {text.substring(currentOffset, matchIndex)}
           </Text>
         );
@@ -39,6 +44,7 @@ export default class MultilineText extends PureComponent<MultilineTextProps> {
       currentOffset = matchIndex + phase.length;
       text_sections.push(
         <Text
+          weight="light_medium"
           key={phase}
           onPress={() => {
             console.log(phase);

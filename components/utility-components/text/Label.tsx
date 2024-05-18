@@ -67,7 +67,6 @@ export default class Label extends PureComponent<LabelProps> {
       <Text
         style={label_style}
         color={calculatedTextColor}
-        weight="semi-bold"
         size={calculatedTextSize}
         {...restProps}
       >

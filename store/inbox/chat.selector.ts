@@ -18,7 +18,7 @@ export const selectMessageParams = createSelector(
     if (!clientAccount) return undefined;
 
     const authorAccount = selectAccountParams(state, targetMessage.author, [
-      "fullname",
+      "name",
     ]);
 
     if (!authorAccount) return undefined;
@@ -49,7 +49,7 @@ export const selectMessageInfo = createSelector(
     if (!clientAccount) return undefined;
 
     const authorAccount = selectAccountParams(state, targetMessage.author, [
-      "fullname",
+      "name",
     ]);
 
     if (!authorAccount) return undefined;
@@ -87,8 +87,8 @@ export const selectChatItem = createSelector(
 
     const receipientAccount = selectAccountParams(
       state,
-      targetChatAdapterParams.receipient.username,
-      ["fullname"]
+      targetChatAdapterParams.receipient.userId,
+      ["name"]
     );
 
     if (!receipientAccount) return undefined;
@@ -118,8 +118,8 @@ export const selectChat = createSelector(
 
     const receipientAccount = selectAccountParams(
       state,
-      targetChatAdapterParams.receipient.username,
-      ["fullname"]
+      targetChatAdapterParams.receipient.userId,
+      ["name"]
     );
 
     if (!receipientAccount) return undefined;

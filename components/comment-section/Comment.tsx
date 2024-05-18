@@ -6,12 +6,9 @@ import {
   paddingStyle,
 } from "../../styles";
 import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
-import { selectCommentParams } from "../../store/post-store/post.selectors";
 import Avatar from "../Avatar";
 import {
   COLOR_6,
-  COMMENT_REPORT_INFO,
-  COMMENT_REPORT_REASONS,
   SIZE_12,
   SIZE_20,
   SIZE_24,
@@ -28,24 +25,34 @@ import {
   deleteComment,
   setCommentLike,
   setCommentPin,
-  swithReplyHiddenState,
 } from "../../store/post-store/post.slice";
 import AdvancedGesture from "../utility-components/AdvancedGesture";
-import ActionsPortal from "../portals/ActionsPortal";
-import { ActionParams } from "../portals/ActionsContainer";
 import Dot from "../utility-components/Dot";
-import AccountBlockPortal from "../portals/AccountBlockPortal";
-import ReportPortal from "../portals/ReportPortal";
 import { fetchReplies } from "../../store/post-store/post.thunks";
+import { selectComment } from "../../store/post-store/post.selectors";
+import { usePopupNotification } from "../../hooks/utility.hooks";
+import { AccountShortInfo } from "../../types/utility.types";
 
 export default function Comment({
   id,
-  isLastReply,
+  isFirstLoadedReply,
+  isLastReplyItem,
+  isReplyHidden,
+  changeReplyHideState,
+  onReply,
 }: {
   id: string;
-  isLastReply: boolean;
+  isFirstLoadedReply: boolean;
+  isLastReplyItem: boolean;
+  isReplyHidden: boolean;
+  changeReplyHideState: (id: string, hide: boolean) => void;
+  onReply: (commentId: string, account: AccountShortInfo) => void;
 }) {
-  const comment = useAppSelector((state) => selectCommentParams(state, id));
+  const showPopup = usePopupNotification();
+
+  const comment = useAppSelector((state) => selectComment(state, id));
+
+  const [isReplyLoading, setReplyLoading] = useState(false);
 
   const [showActionsPortal, setActionsPortal] = useState(false);
 
@@ -85,27 +92,39 @@ export default function Comment({
   const onReport = useCallback((reason: string, description?: string) => {},
   []);
 
-  const onHide = useCallback(() => {
-    dispatch(
-      swithReplyHiddenState(comment?.repliedTo ? comment.repliedTo : id)
-    );
-  }, [id, comment?.repliedTo]);
+  const onHideReply = useCallback(() => {
+    changeReplyHideState(comment?.repliedTo ? comment.repliedTo : id, true);
+  }, [comment?.repliedTo]);
 
   const loadReplies = useCallback(() => {
-    dispatch(
-      fetchReplies({
-        commentId: comment?.repliedTo ? comment.repliedTo : id,
-      })
-    );
-  }, [id, comment?.postId, comment?.repliedTo]);
-
-  const onReplyPress = useCallback(() => {
-    if (!comment?.hasLoadedReply && !comment?.isReplyLoading) {
-      loadReplies();
+    if (comment?.hasLoadedReply) {
+      changeReplyHideState(comment?.repliedTo ? comment.repliedTo : id, false);
     } else {
-      onHide();
+      setReplyLoading(true);
+      dispatch(
+        fetchReplies({
+          commentId: comment?.repliedTo ? comment.repliedTo : id,
+        })
+      )
+        .unwrap()
+        .then(() => {
+          changeReplyHideState(
+            comment?.repliedTo ? comment.repliedTo : id,
+            false
+          );
+        })
+        .catch(() => {
+          showPopup("failed to fetch replies");
+        })
+        .finally(() => {
+          setReplyLoading(false);
+        });
     }
-  }, [comment?.isReplyLoading, comment?.hasLoadedReply, onHide, loadReplies]);
+  }, [id, comment?.repliedTo, comment?.hasLoadedReply]);
+
+  const replyCallback = useCallback(() => {
+    onReply(comment?.repliedTo ? comment.repliedTo : id, comment!.author);
+  }, [comment?.repliedTo, comment?.author, onReply]);
 
   if (!comment) return null;
 
@@ -116,62 +135,35 @@ export default function Comment({
     noOfLikes,
     pinned,
     text,
-    isReplyHidden,
-    isReplyLoading,
     repliedTo,
-    hasLoadedReply,
-    isAuthor,
-    isPostAuthor,
-    noOfUnloadedReplies,
+    noOfHiddenReplies,
   } = comment;
 
-  const actions: ActionParams[] = [];
-
-  if (isAuthor || isPostAuthor) {
-    actions.push({ text: "delete", color: "red", callback: onDelete });
-  }
-  if (isPostAuthor) {
-    actions.push({ text: pinned ? "unpin" : "pin", callback: onPin });
-  }
-  if (isAuthor) {
-    actions.push({ text: "edit", callback() {} });
-  } else {
-    actions.push({
-      text: "report",
-      color: "red",
-      callback: switchReportPortalState,
-    });
-    actions.push({
-      text: "block account",
-      color: "red",
-      callback: switchAccountBlockPortalState,
-    });
-  }
   let textElement = null;
-  if (!repliedTo && noOfUnloadedReplies && isReplyHidden) {
-    textElement = (
-      <Text
-        onPress={onReplyPress}
-        style={marginStyle.margin_top_3}
-        weight="semi-bold"
-        color="grey"
-      >
-        {isReplyLoading ? "loading..." : `show ${noOfUnloadedReplies} replies`}
+  if (!repliedTo && noOfHiddenReplies && isReplyHidden) {
+    textElement = isReplyLoading ? (
+      <Text style={marginStyle.margin_top_6} color="grey">
+        loading...
+      </Text>
+    ) : (
+      <Text color="grey" onPress={loadReplies} style={marginStyle.margin_top_6}>
+        show {noOfHiddenReplies} replies
       </Text>
     );
-  } else if (isLastReply) {
+  } else if (isLastReplyItem) {
     textElement = (
-      <View style={[layoutStyle.flex_direction_row, marginStyle.margin_top_3]}>
-        <Text weight="semi-bold" color="grey" onPress={loadReplies}>
-          {isReplyLoading
-            ? "loading..."
-            : `show ${noOfUnloadedReplies} more replies`}
-        </Text>
+      <View style={[layoutStyle.flex_direction_row, marginStyle.margin_top_6]}>
+        {isReplyLoading ? (
+          <Text color="grey">loading...</Text>
+        ) : (
+          <Text onPress={loadReplies} color="grey">
+            load {noOfHiddenReplies} more replies
+          </Text>
+        )}
         <Text
-          weight="semi-bold"
           color="grey"
           style={marginStyle.margin_left_12}
-          onPress={onHide}
+          onPress={onHideReply}
         >
           hide
         </Text>
@@ -200,7 +192,7 @@ export default function Comment({
             layoutStyle.align_item_center,
           ]}
         >
-          <Text weight="bold">{author.username}</Text>
+          <Text>{author.userId}</Text>
           {pinned ? (
             <>
               <Dot
@@ -222,20 +214,19 @@ export default function Comment({
             marginStyle.margin_top_6,
           ]}
         >
-          <Text weight="semi-bold" color="grey" size={SIZE_12}>
+          <Text color="grey" size={SIZE_12}>
             {formatTimeDifference(createdAt)}
           </Text>
           <Text
-            weight="semi-bold"
             color="grey"
             size={SIZE_12}
             style={marginStyle.margin_left_12}
+            onPress={replyCallback}
           >
             Reply
           </Text>
           {noOfLikes > 0 ? (
             <Text
-              weight="semi-bold"
               color="grey"
               size={SIZE_12}
               style={marginStyle.margin_left_12}
@@ -254,23 +245,6 @@ export default function Comment({
         hitSlop={SIZE_24}
         onPress={onLikePress}
       />
-      {showActionsPortal && (
-        <ActionsPortal onClose={switchActionsPortalState} actions={actions} />
-      )}
-      {showAccountBlockPortal && (
-        <AccountBlockPortal
-          onDismiss={switchAccountBlockPortalState}
-          username={author.username}
-        />
-      )}
-      {showReportPortal && (
-        <ReportPortal
-          info={COMMENT_REPORT_INFO}
-          reasons={COMMENT_REPORT_REASONS}
-          onSubmit={onReport}
-          onDismiss={switchReportPortalState}
-        />
-      )}
     </AdvancedGesture>
   );
 }

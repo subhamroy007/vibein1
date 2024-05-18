@@ -24,21 +24,19 @@ import { useCallback } from "react";
 
 export type AccountBlockPortalProps = {
   onBlock?: () => void;
-  username: string;
+  userId: string;
 } & SwipeUpPortalProps;
 
 export default function AccountBlockPortal({
   onBlock,
-  username,
+  userId,
   children,
   title,
   ...restProps
 }: AccountBlockPortalProps) {
   const position = useSharedValue(0);
 
-  const account = useAppSelector((state) =>
-    selectAccountParams(state, username)
-  );
+  const account = useAppSelector((state) => selectAccountParams(state, userId));
 
   const animatedButtonContainerStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -position.value }],
@@ -59,10 +57,10 @@ export default function AccountBlockPortal({
         <Avatar size={SIZE_90} url={account.profilePictureUri} />
 
         <Text size={SIZE_20} weight="bold" style={marginStyle.margin_top_6}>
-          {account.username}
+          {account.userId}
         </Text>
         <Text color="grey" style={marginStyle.margin_top_6} numberOfLines={0}>
-          are you sure you want to block {account.username}?
+          are you sure you want to block {account.userId}?
         </Text>
       </View>
       <View style={list_item_style}>

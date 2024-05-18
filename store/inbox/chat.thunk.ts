@@ -17,7 +17,7 @@ export const getChatMessagesThunk = createAppAsyncThunk<
   const clientInfo = thunkApi.getState().client.loggedInAccount!;
   const chatInfo = thunkApi.getState().chat.chats.entities[chatId]!;
   const receipientInfo =
-    thunkApi.getState().account.entities[chatInfo.receipient.username]!;
+    thunkApi.getState().account.entities[chatInfo.receipient.userId]!;
 
   const receipients: AccountResponseParams[] = [];
   if (chatInfo.joinedAt) {
@@ -59,7 +59,7 @@ export const getChatInfoThunk = createAppAsyncThunk<
   const clientInfo = thunkApi.getState().client.loggedInAccount!;
   const chatInfo = thunkApi.getState().chat.chats.entities[chatId]!;
   const receipientInfo =
-    thunkApi.getState().account.entities[chatInfo.receipient.username]!;
+    thunkApi.getState().account.entities[chatInfo.receipient.userId]!;
   const randomNumber = getRandom(100);
   let chatType: "active" | "inactive" | "pending" | "requested" = "inactive";
   if (randomNumber <= 25) {

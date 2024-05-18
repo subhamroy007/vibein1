@@ -115,7 +115,7 @@ export default function PostPreview({
         <View style={styles.header}>
           <Avatar url={author.profilePictureUri} size={SIZE_30} />
           <AppText style={marginStyle.margin_left_6} size={SIZE_12}>
-            {author.username}
+            {author.userId}
           </AppText>
         </View>
         <View style={styles.body}>

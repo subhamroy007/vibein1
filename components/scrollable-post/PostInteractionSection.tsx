@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import { layoutStyle } from "../../styles";
+import { layoutStyle, paddingStyle } from "../../styles";
 import { COLOR_6, SIZE_24, SIZE_27, SIZE_54 } from "../../constants";
 import PressableIcon from "../utility-components/button/PressableIcon";
 import CommentBoxPlaceHolder from "./CommentBoxPlaceHolder";
@@ -45,8 +45,10 @@ const styles = StyleSheet.create({
 
 const root_container_style = [
   styles.root_container,
-  layoutStyle.content_center,
   layoutStyle.flex_direction_row,
+  paddingStyle.padding_horizontal_12,
+  layoutStyle.align_item_center,
+  layoutStyle.justify_content_space_between,
 ];
 
 export default PostInteractionSection;

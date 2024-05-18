@@ -24,10 +24,10 @@ const toMessageAdapterParams = (messages: MessageResponseParams[]) => {
   return messages.map<MessageAdapterParams>((message) => {
     return {
       ...message,
-      author: message.author.username,
+      author: message.author.userId,
       createdAt: message.createdAt,
       reactions: message.reactions.map((reaction) => ({
-        author: reaction.author.username,
+        author: reaction.author.userId,
         reactionEmoji: reaction.reactionEmoji,
       })),
       state: "success",
@@ -58,7 +58,7 @@ const toChatAdapterParams = (chats: ChatResponseParams[]) => {
       receipient: {
         typing: false,
         lastActiveAt: chat.receipient.lastActiveAt,
-        username: chat.receipient.account.username,
+        userId: chat.receipient.account.userId,
         isMember: chat.receipient.isMember,
         isMessageRequestRestricted: chat.receipient.isMessageRequestRestricted,
       },
@@ -101,7 +101,7 @@ const chatSlice = createSlice({
           noOfUnseenMessages: 0,
           receipient: {
             typing: false,
-            username: receipient,
+            userId: receipient,
             isMember: false,
             isMessageRequestRestricted: false,
           },
