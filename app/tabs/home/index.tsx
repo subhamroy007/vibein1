@@ -42,7 +42,7 @@ export default function Home() {
           </Pressable>
         }
       />
-      <MemoryAccountList data={memoryAccounts.data?.items} />
+      {/* <MemoryAccountList data={memoryAccounts.data?.items} /> */}
       {/* <ScrollablePostList
         data={posts.data?.items}
         isLoading={posts.isLoading}

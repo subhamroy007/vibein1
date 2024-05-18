@@ -12,12 +12,14 @@ type MessageTextBubbleProps = {
   text: string;
   isSeen: boolean;
   isClientAuthor: boolean;
+  onPress: () => void;
 };
 
 export default function MessageTextBubble({
   isClientAuthor,
   isSeen,
   text,
+  onPress,
 }: MessageTextBubbleProps) {
   return (
     <Pressable
@@ -36,6 +38,7 @@ export default function MessageTextBubble({
         },
         layoutStyle.content_center,
       ]}
+      onPress={onPress}
     >
       <Text
         color={isClientAuthor ? COLOR_1 : COLOR_4}

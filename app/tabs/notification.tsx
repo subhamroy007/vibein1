@@ -25,7 +25,7 @@ export default function Notification() {
   return (
     <AppScreen>
       <Header title="Notifications" hideBack />
-
+      {/* 
       <Button
         text={"go to hashtag"}
         onPress={() => {
@@ -78,7 +78,7 @@ roybond007 has turned off public mention`,
           );
         }}
         style={marginStyle.margin_top_20}
-      />
+      /> */}
       {/* {visible && (
         <Portal>
           <SwipeUpPortal

@@ -106,13 +106,7 @@ export default function ChatListItem({ chatId }: { chatId: string }) {
       ]}
     >
       {avatarItem}
-      <View
-        style={[
-          layoutStyle.flex_fill,
-          marginStyle.margin_left_9,
-          //   { backgroundColor: "orange" },
-        ]}
-      >
+      <View style={[layoutStyle.flex_fill, marginStyle.margin_left_9]}>
         <View
           style={[
             layoutStyle.flex_direction_row,
@@ -155,13 +149,6 @@ export default function ChatListItem({ chatId }: { chatId: string }) {
             ]}
           >
             {secondaryTextItem}
-
-            <Icon
-              name="check-circle-solid"
-              size={SIZE_15}
-              style={marginStyle.margin_left_6}
-              color={LOGO_BLUE}
-            />
           </View>
           {data.noOfUnseenMessages > 0 ? (
             <CountBubble

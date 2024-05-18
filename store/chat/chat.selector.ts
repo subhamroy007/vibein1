@@ -3,19 +3,16 @@ import { RootState } from "..";
 import { selectAccountParams } from "../account-store/account.selectors";
 import { selectClientAccountParams } from "../client/client.selector";
 import { formatDateTime, formatTime24Hour } from "../../utility";
-import { selectMessageById } from "./chat.adater";
+import { selectChatById, selectMessageById } from "./chat.adater";
 import { AccountSelectorParams } from "../../types/selector.types";
 import { MessageResponseReactionParams } from "../../types/response.types";
 import { getRandom } from "../../mocks";
 import { generateAccount } from "../../mocks/accounts";
+import { MessageItemIdentitfier, PageData } from "../../types/store.types";
 
 export type MessageShortInfo = {
   timestamp: string;
   text: string;
-  seenInfo?: {
-    isSeen: boolean;
-    seenBy: string[];
-  };
 };
 
 export type LastMessageItemSelectorParams =
@@ -217,51 +214,53 @@ export const selectMessageShortInfo = createSelector(
           targetMessage.text;
       }
     }
-    let seenInfo: MessageShortInfo["seenInfo"];
-
-    if (targetMessageAuthor.isClient) {
-      if (targetChat.type === "one-to-one") {
-        seenInfo = {
-          isSeen:
-            targetMessage.seenBy.length > 0 && targetChat.receipient.isMember,
-          seenBy: [],
-        };
-      } else {
-        const eligableMembers = targetChat.receipients.filter(
-          (item) => item.joinedAt < targetMessage.uploadedAt
-        );
-        const seenBy: string[] = [];
-        const allSeens = eligableMembers.filter((item) => {
-          if (item.isMember) {
-            const targetAccount = selectAccountParams(state, item.account);
-            if (targetAccount) {
-              seenBy.push(targetAccount.profilePictureUri);
-            }
-          }
-          return targetMessage.seenBy.includes(item.account);
-        });
-        const isSeen =
-          eligableMembers.length === allSeens.length &&
-          seenBy.length === allSeens.length;
-        seenInfo = {
-          isSeen,
-          seenBy: isSeen ? [] : seenBy,
-        };
-      }
-    }
 
     return {
       text: msgText,
       timestamp: formatDateTime(targetMessage.uploadedAt, 1),
-      seenInfo,
     };
   }
 );
 
+export type OneToOneChatSelectorReceipientParams = {
+  account: AccountSelectorParams;
+  lastSeenAt?: number;
+  isMember: boolean;
+};
+
+export type OneToOneChatSelectorParams = {
+  id: string;
+  joinedAt: number;
+  isMember: boolean;
+  isMuted: boolean;
+  receipient: OneToOneChatSelectorReceipientParams;
+  messages: PageData<MessageItemIdentitfier>;
+  noOfUnseenMessages: number;
+};
+
 export const selectChatDetails = createSelector(
   [(state: RootState) => state, (state: RootState, chatId: string) => chatId],
-  (state, chatId) => {
-    return state.chat.chats.entities[chatId];
+  (state, chatId): OneToOneChatSelectorParams | undefined => {
+    const chat = selectChatById(state.chat.chats, chatId);
+    if (!chat || chat.type === "group") return undefined;
+
+    return {
+      id: chat.id,
+      isMember: chat.isMember,
+      isMuted: chat.isMuted,
+      joinedAt: chat.joinedAt,
+      messages: chat.messages,
+      noOfUnseenMessages: chat.noOfUnseenMessages,
+      receipient: {
+        account: selectAccountParams(state, chat.receipient.account, [
+          "name",
+          "is-blocked",
+          "is-available",
+        ])!,
+        isMember: chat.receipient.isMember,
+        lastSeenAt: chat.receipient.lastSeenAt,
+      },
+    };
   }
 );
 
@@ -270,7 +269,7 @@ type MessageSelectorParams = {
   author: AccountSelectorParams;
   uploadedAt: string;
   text?: string;
-  reactions: MessageResponseReactionParams[];
+  reactions: { emoji: string; account: AccountSelectorParams }[];
 };
 
 export const selectMessage = createSelector(
@@ -287,25 +286,28 @@ export const selectMessage = createSelector(
 
     if (!author) return undefined;
 
-    const reactions: MessageResponseReactionParams[] = [];
+    // const reactions: MessageResponseReactionParams[] = [];
 
-    const emojis = ["😍", "😀", "🤩", "🥳", "😂", "😎"];
+    // const emojis = ["😍", "😀", "🤩", "🥳", "😂", "😎"];
 
-    if (Math.random() > 0.5) {
-      for (let i = 0; i < getRandom(10, 1); i++) {
-        reactions.push({
-          account: generateAccount(["name"]),
-          emoji: emojis[getRandom(emojis.length - 1)],
-        });
-      }
-    }
+    // if (Math.random() > 0.5) {
+    //   for (let i = 0; i < getRandom(10, 1); i++) {
+    //     reactions.push({
+    //       account: generateAccount(["name"]),
+    //       emoji: emojis[getRandom(emojis.length - 1)],
+    //     });
+    //   }
+    // }
 
     return {
       id: targetMessage.id,
       author,
       uploadedAt: formatTime24Hour(targetMessage.uploadedAt),
       text: targetMessage.text,
-      reactions,
+      reactions: targetMessage.reactions.map((item) => ({
+        emoji: item.emoji,
+        account: selectAccountParams(state, item.account)!,
+      })),
     };
   }
 );

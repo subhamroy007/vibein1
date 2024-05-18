@@ -268,6 +268,9 @@ export const paddingStyle = StyleSheet.create({
   padding_horizontal_6: {
     paddingHorizontal: SIZE_6,
   },
+  padding_vertical_24: {
+    paddingVertical: SIZE_24,
+  },
   padding_vertical_18: {
     paddingVertical: SIZE_18,
   },

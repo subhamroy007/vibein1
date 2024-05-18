@@ -24,7 +24,7 @@ import {
 } from "../store/client/client.slice";
 import { LogBox, StatusBar } from "react-native";
 import { useDarkScreenFocused } from "../hooks/utility.hooks";
-import { CLIENT_ACCOUNT, COLOR_1, SIZE_14 } from "../constants";
+import { CLIENT_ACCOUNT, COLOR_1, SIZE_13, SIZE_14 } from "../constants";
 import { selectPopupNotification } from "../store/client/client.selector";
 import { useAppDispatch, useAppSelector } from "../hooks/storeHooks";
 import Animated, {
@@ -120,10 +120,11 @@ const RootLayout = () => {
           ]}
         >
           <Text
-            size={SIZE_14}
+            size={SIZE_13}
             color={COLOR_1}
             numberOfLines={0}
             style={text_style.text_align_center}
+            weight="light_medium"
           >
             {notification.msg}
           </Text>

@@ -51,7 +51,7 @@ const messagePlaceHolderAdapter = createEntityAdapter<MessagePlaceHolderParams>(
 );
 
 export const { selectById: selectMessagePlaceHolderById } =
-  messageAdapter.getSelectors();
+  messagePlaceHolderAdapter.getSelectors();
 export const {
   addMany: addManyMessagePlaceHolders,
   addOne: addOneMessagePlaceHolder,

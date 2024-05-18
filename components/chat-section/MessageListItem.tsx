@@ -1,5 +1,5 @@
-import { View } from "react-native";
-import { useAppSelector } from "../../hooks/storeHooks";
+import { Pressable, StyleSheet, View } from "react-native";
+import { useAppDispatch, useAppSelector } from "../../hooks/storeHooks";
 import { selectMessage } from "../../store/chat/chat.selector";
 import {
   backgroundStyle,
@@ -9,21 +9,53 @@ import {
   paddingStyle,
 } from "../../styles";
 import Text from "../utility-components/text/Text";
-import {
-  SIZE_10,
-  SIZE_12,
-  SIZE_15,
-  SIZE_18,
-  SIZE_24,
-  SIZE_6,
-  SIZE_9,
-} from "../../constants";
+import { SIZE_10, SIZE_12, SIZE_15, SIZE_24, SIZE_6 } from "../../constants";
 import MessageTextBubble from "./MessageTextBubble";
 import Avatar from "../Avatar";
-import { getProfilePictureUrl } from "../../mocks/data";
+import { useCallback, useState } from "react";
+import ReactionBox from "./ReactionBox";
+import ActionsList from "./ActionList";
+import { selectClientAccountParams } from "../../store/client/client.selector";
+import { setMessageReaction } from "../../store/chat/chat.slice";
+import { Portal } from "@gorhom/portal";
+import { usePopupNotification } from "../../hooks/utility.hooks";
+import { setStringAsync as setClipBoardText } from "expo-clipboard";
+import { useBackHandler } from "@react-native-community/hooks";
 
 export default function MessageListItem({ messageId }: { messageId: string }) {
+  const [showActions, setActions] = useState(false);
+
+  const showPopup = usePopupNotification();
+
+  const dispatch = useAppDispatch();
+
   const data = useAppSelector((state) => selectMessage(state, messageId));
+
+  const client = useAppSelector(selectClientAccountParams);
+
+  const changeReaction = useCallback(
+    (emoji: string) => {
+      setActions(false);
+      dispatch(
+        setMessageReaction({ emoji, messageId, userId: client!.userId })
+      );
+    },
+    [client, messageId]
+  );
+
+  const onCopyText = useCallback(async () => {
+    setActions(false);
+    await setClipBoardText(data?.text!);
+    showPopup("Text Copied to Clipboard");
+  }, [data?.text]);
+
+  useBackHandler(() => {
+    if (showActions) {
+      setActions(false);
+      return true;
+    }
+    return false;
+  });
 
   if (!data) return null;
 
@@ -38,6 +70,7 @@ export default function MessageListItem({ messageId }: { messageId: string }) {
         text={data.text}
         isClientAuthor={author.isClient}
         isSeen={false}
+        onPress={() => setActions(true)}
       />
     );
   }
@@ -140,6 +173,41 @@ export default function MessageListItem({ messageId }: { messageId: string }) {
           {uploadedAt}
         </Text>
       </View>
+      {showActions && (
+        <Portal>
+          <Pressable
+            onPress={() => setActions(false)}
+            style={[
+              StyleSheet.absoluteFill,
+              backgroundStyle.background_color_3,
+              layoutStyle.content_center,
+            ]}
+          >
+            <ReactionBox onPress={changeReaction} />
+            <ActionsList
+              actions={[
+                { label: "Copy", onPress: onCopyText, icon: "copy-outline" },
+                {
+                  label: "Reply",
+                  onPress: () => {
+                    setActions(false);
+                    showPopup("No Internet connection");
+                  },
+                  icon: "reply",
+                },
+                {
+                  label: "Send",
+                  onPress: () => {
+                    setActions(false);
+                    showPopup("No Internet connection");
+                  },
+                  icon: "forward",
+                },
+              ]}
+            />
+          </Pressable>
+        </Portal>
+      )}
     </View>
   );
 }

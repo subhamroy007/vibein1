@@ -12,7 +12,8 @@ export const fetchInboxChats = createAppAsyncThunk<{
       chats.push({ type: "one-to-one", ...generateOneToOneChat(1) });
       // chats.push({ type: "group", ...generateGroupChat(true) });
     } else {
-      chats.push({ type: "group", ...generateGroupChat(true) });
+      // chats.push({ type: "group", ...generateGroupChat(true) });
+      chats.push({ type: "one-to-one", ...generateOneToOneChat(1) });
     }
   }
 

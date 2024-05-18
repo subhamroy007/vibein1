@@ -1,6 +1,7 @@
 import { MessageResponseParams } from "./../../types/response.types";
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
+  addOneMessagePlaceHolder,
   getChatAdapterInitialState,
   getMessageAdapterInitialState,
   getMessagePlaceHolderAdapterInitialState,
@@ -119,7 +120,54 @@ const initialState = {
 const chatSlice = createSlice({
   name: "chat",
   initialState,
-  reducers: {},
+  reducers: {
+    setMessageReaction(
+      state,
+      {
+        payload: { emoji, messageId, userId },
+      }: PayloadAction<{ messageId: string; emoji: string; userId: string }>
+    ) {
+      let isUpdated = false;
+      const message = state.messages.entities[messageId];
+      if (!message) return;
+      message.reactions.map((reaction) => {
+        if (reaction.account !== userId) {
+          return reaction;
+        } else {
+          if (reaction.emoji !== emoji) {
+            reaction.emoji = emoji;
+          }
+          isUpdated = true;
+          return reaction;
+        }
+      });
+      if (!isUpdated) {
+        console.log("case 3");
+        message.reactions.push({ account: userId, emoji });
+      }
+    },
+    addMessageDraft(
+      state,
+      {
+        payload: { sentTo, text, id },
+      }: PayloadAction<{ text?: string; sentTo: string; id: string }>
+    ) {
+      addOneMessagePlaceHolder(state.messagePlaceHolders, {
+        createdAt: Date.now(),
+        error: null,
+        id,
+        isSending: false,
+        sentTo,
+        text,
+      });
+      const chat = state.chats.entities[sentTo];
+      if (!chat) return;
+      chat.messages.items = [
+        { isPlaceHolder: true, key: id },
+        ...chat.messages.items,
+      ];
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchInboxChats.fulfilled, (state, { payload }) => {
       const { chatItems, messageItems } = changeToChatAdapterParams(
@@ -134,7 +182,7 @@ const chatSlice = createSlice({
 const chatReducer = chatSlice.reducer;
 
 export const {
-  actions: {},
+  actions: { setMessageReaction, addMessageDraft },
 } = chatSlice;
 
 export default chatReducer;
